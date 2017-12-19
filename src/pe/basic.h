@@ -51,3 +51,5 @@
 
 #include "pe/utility/CreateWorld.h"
 #include "pe/utility/GetBody.h"
+
+#include "pe/world/World.h"
