@@ -158,10 +158,39 @@ namespace fluidizedBed {
 
        CellInterval domainBB = storage->getDomainCellBB();
 
-       //domainBB.xMin() -= cell_idx_c(FieldGhostLayers);
-       //domainBB.xMax() += cell_idx_c(FieldGhostLayers);
-       //domainBB.zMin() -= cell_idx_c(FieldGhostLayers);
-       //domainBB.zMax() += cell_idx_c(FieldGhostLayers);
+        domainBB.xMin() -= cell_idx_c(FieldGhostLayers);
+        domainBB.xMax() += cell_idx_c(FieldGhostLayers);
+
+        if (!xPeriodic_) {
+// LEFT
+            CellInterval left(domainBB.xMin(), domainBB.yMin(), domainBB.zMin(), domainBB.xMin(), domainBB.yMax(), domainBB.zMax());
+            storage->transformGlobalToBlockLocalCellInterval(left, *block);
+            handling->forceBoundary(noSlip, left);
+
+// RIGHT
+            CellInterval right(domainBB.xMax(), domainBB.yMin(), domainBB.zMin(), domainBB.xMax(), domainBB.yMax(), domainBB.zMax());
+            storage->transformGlobalToBlockLocalCellInterval(right, *block);
+            handling->forceBoundary(noSlip, right);
+        }
+
+        domainBB.zMin() -= cell_idx_c(FieldGhostLayers);
+        domainBB.zMax() += cell_idx_c(FieldGhostLayers);
+
+        if (!zPeriodic_) {
+// FRONT
+            CellInterval front(domainBB.xMin(), domainBB.yMin(), domainBB.zMin(), domainBB.xMax(), domainBB.yMax(), domainBB.zMin());
+            storage->transformGlobalToBlockLocalCellInterval(front, *block);
+            handling->forceBoundary(noSlip, front);
+
+// BACK
+            CellInterval back(domainBB.xMin(), domainBB.yMin(), domainBB.zMax(), domainBB.xMax(), domainBB.yMax(), domainBB.zMax());
+            storage->transformGlobalToBlockLocalCellInterval(back, *block);
+            handling->forceBoundary(noSlip, back);
+        }
+
+
+        domainBB.yMin() -= cell_idx_c(FieldGhostLayers);
+        domainBB.yMax() += cell_idx_c(FieldGhostLayers);
 
 // BOTTOM
 
@@ -376,7 +405,7 @@ namespace fluidizedBed {
         const real_t peAccelerator = sim_parameters.getParameter<real_t>("pe_accelerator", real_c(50));
         const bool  fixedBed = sim_parameters.getParameter<bool>("fixed_bed", false);
 
-        const bool  runPreliminaryTimeloop = sim_parameters.getParameter<bool>("run_preliminary_timeloop", false);
+        const bool runPreliminaryTimeloop = sim_parameters.getParameter<bool>("run_preliminary_timeloop", false);
         const real_t eps = sim_parameters.getParameter<real_t>("eps", real_c(0.05));
 
        const bool initializeFromCheckPointFile = sim_parameters.getParameter<bool>("initialize_from_checkpoint", false);
@@ -466,6 +495,11 @@ namespace fluidizedBed {
 
        // MATERIAL PARAMETERS
        auto mat_parameters = env.config()->getBlock("Material");
+
+        const bool useDEM = mat_parameters.getParameter<bool>("use_DEM", true);
+
+        const uint_t HCSITSMaxIterations       = mat_parameters.getParameter<uint_t>("HCSITS_max_iterations", uint_c(10));
+        const real_t HCSITSRelaxationParameter = mat_parameters.getParameter<real_t>("HCSITS_relaxation_parameter", real_c(0.7));
 
        const real_t volumeA = real_c(4.0 / 3.0 * math::PI * radiusA * radiusA * radiusA);
        const real_t volumeB = real_c(4.0 / 3.0 * math::PI * radiusB * radiusB * radiusB);
@@ -873,9 +907,20 @@ namespace fluidizedBed {
              // set up collision response, here DEM solver
              auto fcdID_PE = blocks->addBlockData(pe::fcd::createGenericFCDDataHandling<BodyTypeTuple, pe::fcd::AnalyticCollideFunctor>(), "FCD");
 
-             pe::cr::DEM cr_PE(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID_PE);
+              std::unique_ptr<pe::cr::ICR> cr_PE;
+              if (useDEM)
+              {
+                  cr_PE = std::make_unique<pe::cr::DEM>(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID_PE);
+                  WALBERLA_LOG_INFO_ON_ROOT("Using DEM!");
+              } else {
+                  cr_PE = std::make_unique<pe::cr::HCSITS>(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID_PE);
+                  pe::cr::HCSITS* hcsits_PE = static_cast<pe::cr::HCSITS*>(cr_PE.get());
+                  hcsits_PE->setMaxIterations(HCSITSMaxIterations);
+                  hcsits_PE->setRelaxationParameter(HCSITSRelaxationParameter);
+                  WALBERLA_LOG_INFO_ON_ROOT("Using HCSITS!");
+              }
 
-             cr_PE.setGlobalLinearAcceleration(pe::Vec3(0.0, - (config.gravity), 0.0));
+             cr_PE->setGlobalLinearAcceleration(pe::Vec3(0.0, - (config.gravity), 0.0));
 
              real_t avgVel = real_c(100.0);
              real_t maxVel = real_c(100.0);
@@ -885,7 +930,7 @@ namespace fluidizedBed {
 
              while ((currentSettleVelocity > settleVelocity) || (itPE < 4999)) {
 
-                cr_PE.timestep( peAccelerator / real_c(config.peSubCycles));
+                cr_PE->timestep( peAccelerator / real_c(config.peSubCycles));
                 syncCall_PE();
                 ++itPE;
 
@@ -913,7 +958,7 @@ namespace fluidizedBed {
              }
 
 
-             cr_PE.setGlobalLinearAcceleration(pe::Vec3(0.0, 0.0, 0.0));
+             cr_PE->setGlobalLinearAcceleration(pe::Vec3(0.0, 0.0, 0.0));
              FBfunc::restSphere(blocks, bodyStorageID);
 
              avgVel = FBfunc::getAvgVel(blocks, bodyStorageID, (numberCreatedParticlesA + numberCreatedParticlesB)) * velocityConversion;
@@ -937,7 +982,6 @@ namespace fluidizedBed {
               std::cout << "\nSetup Information\n" << std::endl;
               std::cout << "Physical time step is:                " << config.dt_SI << " s" << std::endl;
               std::cout << "Physical cell size is:                " << config.dx_SI << " m" << std::endl;
-              std::cout << "Number of particles A is:             " << config.nrParticlesA << std::endl;
               std::cout << "Particle Reynoldsnumber(LBM) is:      " << particleReynoldsNumber_LBM << std::endl;
               std::cout << "Froudenumber(LBM) is:                 " << FroudeNumber_LBM << std::endl;
               std::cout << "Minimum Fluidization Re number is:    " << REpmf << std::endl;
@@ -1031,7 +1075,17 @@ namespace fluidizedBed {
 
        // set up collision response, here DEM solver
        auto fcdID = blocks->addBlockData(pe::fcd::createGenericFCDDataHandling<BodyTypeTuple, pe::fcd::AnalyticCollideFunctor>(), "FCD");
-       pe::cr::DEM cr(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID);
+
+        std::unique_ptr<pe::cr::ICR> cr;
+        if (useDEM)
+        {
+            cr = std::make_unique<pe::cr::DEM>(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID);
+        } else {
+            cr = std::make_unique<pe::cr::HCSITS>(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID);
+            pe::cr::HCSITS* hcsits = static_cast<pe::cr::HCSITS*>(cr.get());
+            hcsits->setMaxIterations(HCSITSMaxIterations);
+            hcsits->setRelaxationParameter(HCSITSRelaxationParameter);
+        }
 
        // add flag field
        BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>(blocks, "flag field");
@@ -1040,12 +1094,7 @@ namespace fluidizedBed {
        BlockDataID bodyFieldID = field::addToStorage<BodyField_T>(blocks, "body field", NULL, field::zyxf);
 
        // Object for keeping track of time
-       shared_ptr<lbm::TimeTracker> preTimeTrack = make_shared<lbm::TimeTracker>();
-        shared_ptr<lbm::TimeTracker> timeTrack = make_shared<lbm::TimeTracker>();
-
-        BlockDataID preBoundaryHandlingID = blocks->addStructuredBlockData<BoundaryHandling_T>(
-                MyBoundaryHandling_T(flagFieldID, pdfFieldID, bodyFieldID, xPeriodic, zPeriodic, spotInflow, spotDiameter, real_c(config.xlength)*0.5,
-                                     real_c(config.zlength)*0.5, config.velocity * initialRampingVelocityFactor, real_t(1), real_t(0), preTimeTrack), "pre boundary handling");
+       shared_ptr<lbm::TimeTracker> timeTrack = make_shared<lbm::TimeTracker>();
 
         BlockDataID boundaryHandlingID = blocks->addStructuredBlockData<BoundaryHandling_T>(
              MyBoundaryHandling_T(flagFieldID, pdfFieldID, bodyFieldID, xPeriodic, zPeriodic, spotInflow, spotDiameter, real_c(config.xlength)*0.5,
@@ -1053,10 +1102,10 @@ namespace fluidizedBed {
 
           // map pe bodies into the LBM simulation
           // moving bodies are handled by the momentum exchange method
-          pe_coupling::mapMovingBodies<BoundaryHandling_T>(*blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, FBfunc::MO_Flag);
+          pe_coupling::mapMovingBodies<BoundaryHandling_T>(*blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, FBfunc::MO_Flag, pe_coupling::selectRegularBodies);
 
         // map planes into the LBM simulation -> act as no-slip boundaries
-        pe_coupling::mapBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, FBfunc::NoSlip_Flag, pe_coupling::selectGlobalBodies );
+        //pe_coupling::mapBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, FBfunc::NoSlip_Flag, pe_coupling::selectGlobalBodies );
 
         /////////////////////
         // PRE TIME LOOP   //
@@ -1065,22 +1114,21 @@ namespace fluidizedBed {
         SweepTimeloop timeloopPRE(blocks->getBlockStorage(), 1000000);
 
         // add LBM communication function and boundary handling sweep
-        timeloopPRE.add() << BeforeFunction(commFunction, "LBM Communication") << Sweep(BoundaryHandling_T::getBlockSweep(preBoundaryHandlingID), "Boundary Handling");
+        timeloopPRE.add() << BeforeFunction(commFunction, "LBM Communication") << Sweep(BoundaryHandling_T::getBlockSweep(boundaryHandlingID), "Boundary Handling");
         // LBM stream collide sweep
         timeloopPRE.add() << Sweep(makeSharedSweep(lbm::makeCellwiseSweep<LatticeModel_T, FlagField_T>(pdfFieldID, flagFieldID, FBfunc::Fluid_Flag)), "LBM DEFAULT");
-
-        // Reset Forces
-        timeloopPRE.addFuncAfterTimeStep(pe_coupling::ForceTorqueOnBodiesResetter(blocks, bodyStorageID), "Reset Body Forces");
 
         // Velocity Check
         timeloopPRE.add() << Sweep(FBfunc::VelocityCheckMEM<LatticeModel_T, FlagField_T, BodyField_T>(blocks, bodyStorageID, bodyFieldID, pdfFieldID, flagFieldID, FBfunc::Fluid_Flag, config),
                                    "LBM Velocity Check");
 
-        shared_ptr<FBfunc::PressureDropper> PressureDropper = make_shared<FBfunc::PressureDropper>(blocks, bodyStorageID, config);
+        shared_ptr<FBfunc::PressureDropper> PressureDropper = make_shared<FBfunc::PressureDropper>(blocks, bodyStorageID, config, true);
         timeloopPRE.addFuncAfterTimeStep( SharedFunctor<FBfunc::PressureDropper>(PressureDropper), "Calculate Pressure Drop");
 
-        WcTimingPool timeloopTimingPRE;
+        // Reset Forces
+        timeloopPRE.addFuncAfterTimeStep(pe_coupling::ForceTorqueOnBodiesResetter(blocks, bodyStorageID), "Reset Body Forces");
 
+        WcTimingPool timeloopTimingPRE;
 
         ////////////////////
        // MAIN TIME LOOP //
@@ -1156,7 +1204,7 @@ namespace fluidizedBed {
        }
 
        if (calculatePressureDrop) {
-          timeloop.addFuncAfterTimeStep(FBfunc::PressureDropper(blocks, bodyStorageID, config), "Calculate Pressure Drop");
+          timeloop.addFuncAfterTimeStep(FBfunc::PressureDropper(blocks, bodyStorageID, config, false), "Calculate Pressure Drop");
        }
 
        if (calculateParticleFlux) {
@@ -1188,7 +1236,7 @@ namespace fluidizedBed {
 
        // advance pe rigid body simulation
        if (!fixedBed) {
-           timeloop.addFuncAfterTimeStep( pe_coupling::TimeStep( blocks, bodyStorageID, cr, syncCall, config.lbmSubCycles, config.peSubCycles ), "pe Time Step" );
+           timeloop.addFuncAfterTimeStep( pe_coupling::TimeStep( blocks, bodyStorageID, *cr, syncCall, config.lbmSubCycles, config.peSubCycles ), "pe Time Step" );
        }
 
        ////////////////
@@ -1219,11 +1267,10 @@ namespace fluidizedBed {
           timeloop.addFuncAfterTimeStep(vtk::writeFiles(flagFieldVTK), "VTK (flag field data)");
        }
 
-
        if (writeFluidField) {
           // pdf field (ghost layers cannot be written because re-sampling/coarsening is applied)
           auto pdfFieldVTK = vtk::createVTKOutput_BlockData(blocks, "fluid_field", frequencyFluidField, 0, false);      // 0 => no fieldghostlayer
-          pdfFieldVTK->setSamplingResolution(samplingResolutionFluidField);
+           pdfFieldVTK->setSamplingResolution(samplingResolutionFluidField);
 
           blockforest::communication::UniformBufferedScheme<stencil::D3Q27> pdfGhostLayerSync(blocks);
           pdfGhostLayerSync.addPackInfo(make_shared<field::communication::PackInfo<PdfField_T> >(pdfFieldID));
@@ -1281,20 +1328,35 @@ namespace fluidizedBed {
                 std::cout << std::endl << "||||||||||||| PRELIMINARY SIM ||||||||||||||" << std::endl;
             }
 
-            real_t pressureDifference = real_t(1000);
+            real_t relativePressureDifference = real_t(1000);
+            real_t previousPressure = real_t(0);
 
-            while (pressureDifference > eps) {
+            // perform a single simulation step
+            timeloopPRE.singleStep(timeloopTimingPRE);
+            previousPressure = PressureDropper->getPressureDrop();
+
+            while (relativePressureDifference > eps) {
+
                 // perform a single simulation step
                 timeloopPRE.singleStep(timeloopTimingPRE);
 
-                pressureDifference = fabs(PressureDropper->getPressureDrop() - pressureDifference) / pressureDifference;
+                if (timeloopPRE.getCurrentTimeStep() % uint_t(10) == uint_t(0)) {
 
-                if (timeloopPRE.getCurrentTimeStep() % 20) {
+                    relativePressureDifference = fabs(PressureDropper->getPressureDrop() - previousPressure) / previousPressure;
+
                     WALBERLA_LOG_INFO_ON_ROOT(
                             "Current pressure drop over whole bed: " << PressureDropper->getPressureDrop()
                                                                      << " [Pa] after "
                                                                      << timeloopPRE.getCurrentTimeStep()
                                                                      << " timesteps!");
+                    WALBERLA_LOG_INFO_ON_ROOT(
+                            "Relativ change: " << relativePressureDifference );
+
+                    previousPressure = PressureDropper->getPressureDrop();
+
+                    WALBERLA_MPI_SECTION() {
+                        mpi::broadcastObject(relativePressureDifference);
+                    }
                 }
             }
 

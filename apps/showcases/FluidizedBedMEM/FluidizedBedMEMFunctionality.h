@@ -168,10 +168,11 @@ namespace FBfunc {
 
         PressureDropper(const shared_ptr<StructuredBlockStorage> &blocks,
                         const BlockDataID &bodyStorageID,
-                        SetupFB &config) :
+                        SetupFB &config, const bool preliminaryTimeloop ) :
                 blocks_(blocks), bodyStorageID_(bodyStorageID),
                 checkFrequency_((config.evaluationFreq > 0) ? config.evaluationFreq : uint_c(1)), executionCounter_(uint_c(0)),
-                preFac_((config.densityFluid_SI * config.dx_SI * config.dx_SI / (config.dt_SI * config.dt_SI)) / (real_c(config.xlength * config.zlength))) {
+                preFac_((config.densityFluid_SI * config.dx_SI * config.dx_SI / (config.dt_SI * config.dt_SI)) / (real_c(config.xlength * config.zlength))),
+                preliminaryTimeloop_(preliminaryTimeloop), currentPressureDrop_(real_t(0)){
 
             std::ofstream output;
             output.open("PressureDrop.txt", std::ofstream::out | std::ofstream::trunc);
@@ -180,30 +181,34 @@ namespace FBfunc {
 
         void operator()() {
             ++executionCounter_;
-            if ((executionCounter_ - uint_c(1)) % checkFrequency_ != 0)
+            if (((executionCounter_ - uint_c(1)) % checkFrequency_ != 0) && !preliminaryTimeloop_)
                 return;
 
-            pe::Vec3 forceSum = pe::Vec3(0.0, 0.0, 0.0);
+            pe::Vec3 force = pe::Vec3(0.0, 0.0, 0.0);
 
             for (auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt) {
                 for (auto bodyIt = pe::BodyIterator::begin(*blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt) {
-                    forceSum += bodyIt->getForce();
+                    force += bodyIt->getForce();
                 }
             }
 
             WALBERLA_MPI_SECTION() {
-                mpi::reduceInplace(forceSum[0], mpi::SUM);
-                mpi::reduceInplace(forceSum[1], mpi::SUM);
-                mpi::reduceInplace(forceSum[2], mpi::SUM);
+                mpi::reduceInplace(force[0], mpi::SUM);
+                mpi::reduceInplace(force[1], mpi::SUM);
+                mpi::reduceInplace(force[2], mpi::SUM);
             }
+
             WALBERLA_ROOT_SECTION() {
-                forceSum = forceSum * preFac_;
-                currentPressureDrop_ = forceSum.length();
-                std::ofstream output;
-                output.open("PressureDrop.txt", std::ofstream::out | std::ofstream::app);
-                //output << executionCounter_ << "\tx: " << forceSum[0]<<"\ty: " << forceSum[1]<<"\tz: "<< forceSum[2]<<"\tAbs: "<< forceSum.length() << "\t[Pa]" << std::endl;
-                output << executionCounter_ << "\t" << currentPressureDrop_ << "\t[Pa]" << std::endl;
-                output.close();
+
+                currentPressureDrop_ = force.length() * preFac_;
+
+                if (!preliminaryTimeloop_) {
+                    std::ofstream output;
+                    output.open("PressureDrop.txt", std::ofstream::out | std::ofstream::app);
+                    //output << executionCounter_ << "\tx: " << forceSum[0]<<"\ty: " << forceSum[1]<<"\tz: "<< forceSum[2]<<"\tAbs: "<< forceSum.length() << "\t[Pa]" << std::endl;
+                    output << executionCounter_ << "\t" << currentPressureDrop_ << "\t[Pa]" << std::endl;
+                    output.close();
+                }
             }
 
         }
@@ -219,6 +224,7 @@ namespace FBfunc {
         const uint_t checkFrequency_;
         uint_t executionCounter_;
         const real_t preFac_;
+        const bool preliminaryTimeloop_;
 
         real_t currentPressureDrop_;
 
@@ -1155,10 +1161,6 @@ namespace FBfunc {
 
     }; //
 
-////////////////
-//     MEM    //
-////////////////
-
     template<typename LatticeModel_T, typename FlagField_T, typename BodyField_T>
     class VelocityCheckMEM {
     public:
@@ -1267,115 +1269,6 @@ namespace FBfunc {
         uint_t executionCounter_;
 
     }; // VelocityCheckMEM
-
-    //TODO unfinished (see MEM)
-    template< typename LatticeModel_T, typename FlagField_T , typename BodyAndVolumeFractionField_T>
-    class VelocityCheckPSM
-    {
-    public:
-
-        typedef lbm::PdfField< LatticeModel_T > PdfField;
-
-        VelocityCheckPSM( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDataID & fractionFieldID, const ConstBlockDataID & pdfFieldId, const ConstBlockDataID & flagFieldId,
-                          const Set< FlagUID > & cellsToCheck, FBfunc::SetupFB & config) :
-                blocks_(blocks), fractionFieldID_( fractionFieldID ), pdfFieldId_( pdfFieldId ),
-                flagFieldId_( flagFieldId ), cellsToCheck_( cellsToCheck ),
-                uMax_(config.stopVel * config.stopVel), checkFrequency_((config.velCheckFreq > 0) ? config.velCheckFreq : uint_c(1)), dx_SI_(config.dx_SI), executionCounter_(uint_c(0)){
-
-            std::ofstream output;
-            output.open("MaximalLBMvelocity.txt", std::ofstream::out | std::ofstream::trunc);
-            output.close();
-        }
-
-        void operator()( const IBlock * const block )
-        {
-            ++executionCounter_;
-            if( ( executionCounter_ - uint_c(1) ) % checkFrequency_ != 0 )
-                return;
-
-            const FlagField_T                  * flagField   = block->getData< FlagField_T     >( flagFieldId_ );
-            const PdfField                     *  pdfField   = block->getData< PdfField        >(  pdfFieldId_ );
-            const BodyAndVolumeFractionField_T * fractionField = block->getData<BodyAndVolumeFractionField_T>( fractionFieldID_ );
-
-            //const pe::BodyStorage * bodyStorage = block->getData< pe::BodyStorage >( bodyStorageID_ );
-
-            const CellInterval & cellBB = pdfField->xyzSize();
-            WALBERLA_ASSERT_EQUAL( flagField->xyzSize(), cellBB );
-
-            real_t currentMax = real_c(0.0);
-
-            typename FlagField_T::flag_t mask = 0;
-            for( auto flag = cellsToCheck_.begin(); flag != cellsToCheck_.end(); ++flag )
-                mask = static_cast< typename FlagField_T::flag_t >( mask | flagField->getFlag( *flag ) );
-
-            for( cell_idx_t z = cellBB.zMin(); z <= cellBB.zMax(); ++z ) {
-                for( cell_idx_t y = cellBB.yMin(); y <= cellBB.yMax(); ++y ) {
-                    for( cell_idx_t x = cellBB.xMin(); x <= cellBB.xMax(); ++x ){
-                        if( flagField->isPartOfMaskSet(x,y,z,mask) )
-                        {
-                            if( pdfField->getVelocity( x, y, z ).sqrLength() > uMax_  ){
-
-                                real_t sumSolidFrac = real_c(0);
-                                Cell globalPos;
-                                blocks_->transformBlockLocalToGlobalCell(globalPos, *block , Cell(x,y,z));
-                                std::ofstream output;
-                                output.open("BrokenArea" + std::to_string(MPIManager::instance()->rank()) + ".txt");
-
-                                output << "Position of maximum value is x: " << globalPos.x()*dx_SI_*1000 << "   y: " << globalPos.y()*dx_SI_*1000 << "   z: " << globalPos.z()*dx_SI_*1000 <<" [mm]"<< std::endl;
-                                output << "Broken velocity is " << pdfField->getVelocity( x, y, z ).length() << std::endl << std::endl;
-
-                                for ( auto dir = stencil::D3Q27::beginNoCenter(); dir!= stencil::D3Q27::end(); ++dir ){
-
-                                    if( flagField->isPartOfMaskSet(x + dir.cx(),y + dir.cy(),z + dir.cz(), mask)){
-                                        output << "Cell in direction\t"<< dir.cx() << "\t" << dir.cy() << "\t" << dir.cz() << "\thas velocity " << pdfField->getVelocity( x + dir.cx(), y + dir.cy(), z + dir.cz() ).length() << std::endl;
-                                    }
-                                    else{
-                                        output << "Cell in direction\t"<< dir.cx() << "\t" << dir.cy() << "\t" << dir.cz() << "\tis solid" << std::endl << std::endl;
-                                    }
-                                }
-
-                                for( auto bodyFracIt = fractionField->get(x,y,z).begin(); bodyFracIt != fractionField->get(x,y,z).end(); ++bodyFracIt ){
-                                    output << "Body with ID: "<< (*bodyFracIt).first << " has a solid volume fraction of: " << (*bodyFracIt).second << std::endl << std::endl;
-                                    sumSolidFrac += (*bodyFracIt).second;
-                                }
-
-                                output.close();
-                                WALBERLA_CHECK( false , "Position of maximum value is x: "
-                                        << globalPos.x()*dx_SI_*1000 << "   y: " << globalPos.y()*dx_SI_*1000 << "   z: " << globalPos.z()*dx_SI_*1000 <<" [mm]"
-                                        << std::endl << "Total solid volume fraction:\t" <<  sumSolidFrac << std::endl );
-                            }
-
-                            if (currentMax < pdfField->getVelocity( x, y, z ).sqrLength()){
-                                currentMax = pdfField->getVelocity( x, y, z ).sqrLength();
-                            }
-                        }
-                    }
-                }
-            }
-            WALBERLA_MPI_SECTION(){
-                mpi::reduceInplace( currentMax, mpi::MAX );
-            }
-            WALBERLA_ROOT_SECTION(){
-                std::cout << "Maximal LBM Velocity: " << sqrt(currentMax) << std::endl;
-                std::ofstream output;
-                output.open( "MaximalLBMvelocity.txt", std::ofstream::out | std::ofstream::app);
-                output << executionCounter_ << "\t" << sqrt(currentMax) << std::endl;
-                output.close();
-            }
-        }
-
-    private:
-        shared_ptr< StructuredBlockStorage > blocks_;
-        const BlockDataID fractionFieldID_;
-        const ConstBlockDataID  pdfFieldId_;
-        const ConstBlockDataID flagFieldId_;
-        const Set< FlagUID > cellsToCheck_;
-        const real_t uMax_;
-        const uint_t checkFrequency_;
-        const real_t dx_SI_;
-        uint_t executionCounter_;
-
-    }; // VelocityCheckPSM
 
     // CALCULATE SOLID FRACTION
     template<typename FlagField_T>

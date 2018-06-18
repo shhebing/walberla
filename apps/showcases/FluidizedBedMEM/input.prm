@@ -3,14 +3,14 @@
 
 Model
 {
-    turbulence_model true;
+    turbulence_model false;
 }
 
 Geometry
 {
-    width  0.10;
+    width  0.04;
     depth  0.02;
-    height 0.40;
+    height 0.08;
     offset_bot 0.00;
     offset_top 0.00;
 
@@ -25,8 +25,8 @@ Geometry
     diameter_standard_distribution_B 0.00006;
     cell_size 0.00020;
 
-    blocks_width 5;
-    blocks_height 20;
+    blocks_width 2;
+    blocks_height 4;
     blocks_depth 1;
 
     initial_sphere_distance 0.00400;
@@ -39,18 +39,18 @@ Geometry
 
 FluidizedBed
 {
-    #particles_A 5000;
-    #particles_B 3000;
-    density_particle_A 22.5;
-    density_particle_B 22.5;
+    #particles_A 200;
+    #particles_B 100;
+    density_particle_A 5;
+    density_particle_B 5;
 
     density_fluid 1.2;
     dynamic_viscosity 1.84e-5;
     gravity 9.81;
 
-    volume_flow_rate 2.5;
+    //volume_flow_rate 2.5;
     //velocity 0.4;
-    //particle_RE 50.0;
+    particle_RE 10.0;
 }
 
 Simulation
@@ -62,7 +62,7 @@ Simulation
     path_to_checkpoint_pdf    /simdata/schuster/i10hpc/dsfd/checkpoint_pdf.dat;
     enable_checkpointing true;
 
-    evaluation_frequency 100;
+    evaluation_frequency 2;
     velocity_check_frequency 10;
     checkpoint_frequency 100000;
 
@@ -77,18 +77,18 @@ Simulation
 
     smagorinsky_constant 0.1;
 
-    simulation_time 8.0;
+    simulation_time 0.5;
     //#time_steps 80000;
-    ramping_time 2.0;
+    ramping_time 0.5;
     //#ramping_steps 20000;
-    start_ramping_scaling 0.75;
+    start_ramping_scaling 0.50;
 
-    run_preliminary_timeloop false;
-    eps           0.05;
+    run_preliminary_timeloop true;
+    eps                      0.001;
 
     create_packed_bed true;
-    check_maximum_particle_velocity true;   //else check average particle velocity
-    settle_velocity 0.001;
+    check_maximum_particle_velocity true;   // else check for average particle velocity
+    settle_velocity 0.02;
     settle_check_frequency 200;
     pe_accelerator 1;
     fixed_bed false;
@@ -96,6 +96,11 @@ Simulation
 
 Material
 {
+    use_DEM false;                           // else use HCSITS
+
+    HCSITS_max_iterations           10;
+    HCSITS_relaxation_parameter     0.7;
+
     static_friction_particles_A 0.5;
     static_friction_particles_B 0.5;
     static_friction_particles_wall 0.5;
@@ -165,7 +170,7 @@ VTK
     frequency_spheres 200;
 
     write_flag_field false;
-    frequency_flag_field 200000;
+    frequency_flag_field 10000000;
 
     write_fluid_field false;
     frequency_fluid_field 50000;
