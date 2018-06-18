@@ -1,0 +1,177 @@
+// Everything is to be specified in SI units! [m], [s], [kg]
+// Except parameters labeled LBM
+
+Model
+{
+    turbulence_model true;
+}
+
+Geometry
+{
+    width  0.10;
+    depth  0.02;
+    height 0.40;
+    offset_bot 0.00;
+    offset_top 0.00;
+
+    width_periodic false;
+    depth_periodic false;
+
+    two_species true;
+
+    diameter_A 0.00215;
+    diameter_B 0.00375;
+    diameter_standard_distribution_A 0.00004;
+    diameter_standard_distribution_B 0.00006;
+    cell_size 0.00020;
+
+    blocks_width 5;
+    blocks_height 20;
+    blocks_depth 1;
+
+    initial_sphere_distance 0.00400;
+    initial_sphere_random_velocity  0.001;
+
+    spot_inflow false;
+    spot_diameter 0.01;
+
+}
+
+FluidizedBed
+{
+    #particles_A 5000;
+    #particles_B 3000;
+    density_particle_A 22.5;
+    density_particle_B 22.5;
+
+    density_fluid 1.2;
+    dynamic_viscosity 1.84e-5;
+    gravity 9.81;
+
+    volume_flow_rate 2.5;
+    //velocity 0.4;
+    //particle_RE 50.0;
+}
+
+Simulation
+{
+    use_lubrication false;
+
+    initialize_from_checkpoint false;
+    path_to_checkpoint_bodies /simdata/schuster/i10hpc/dsfd/checkpoint_bodies.dat;
+    path_to_checkpoint_pdf    /simdata/schuster/i10hpc/dsfd/checkpoint_pdf.dat;
+    enable_checkpointing true;
+
+    evaluation_frequency 100;
+    velocity_check_frequency 10;
+    checkpoint_frequency 100000;
+
+    use_force_averaging true;
+
+    LBM_velocity       0.06;
+    //time_step 1e-5;
+    //omega 1.95;
+    //tau 0.55;
+
+    abort_LBM_velocity 0.50;
+
+    smagorinsky_constant 0.1;
+
+    simulation_time 8.0;
+    //#time_steps 80000;
+    ramping_time 2.0;
+    //#ramping_steps 20000;
+    start_ramping_scaling 0.75;
+
+    run_preliminary_timeloop false;
+    eps           0.05;
+
+    create_packed_bed true;
+    check_maximum_particle_velocity true;   //else check average particle velocity
+    settle_velocity 0.001;
+    settle_check_frequency 200;
+    pe_accelerator 1;
+    fixed_bed false;
+}
+
+Material
+{
+    static_friction_particles_A 0.5;
+    static_friction_particles_B 0.5;
+    static_friction_particles_wall 0.5;
+    dynamic_friction_particles_A 0.5;
+    dynamic_friction_particles_B 0.5;
+    dynamic_friction_wall 0.5;
+
+    restitution_particles_A 0.2;
+    restitution_particles_B 0.2;
+    restitution_wall 0.2;
+    collision_time_particles_A 10;
+    collision_time_particles_B 10;
+    collision_time_wall 10;
+    tangential_damping_factor_particles_A 1.0;
+    tangential_damping_factor_particles_B 1.0;
+    tangential_damping_factor_wall 1.0;
+    timesteps_per_collision 100;
+}
+
+Evaluation
+{
+    mass_center                 true;
+    pressure_drop               true;
+    ergun_pressure_drop         false;
+    pressure_difference         false;
+    particle_flux               false;
+    granular_temperature_global false;
+    granular_temperature_local  false;
+    solid_volume_fraction       false;
+    collision_count             false;
+
+    box1    true;
+    box2    true;
+    box3    true;
+
+    box1_Size_x 0.02;
+    box1_Size_y 0.02;
+    box1_Size_z 0.02;
+
+    box1_Center_x 0.05;
+    box1_Center_y 0.05;
+    box1_Center_z 0.01;
+
+    box2_Size_x 0.02;
+    box2_Size_y 0.02;
+    box2_Size_z 0.02;
+
+    box2_Center_x 0.05;
+    box2_Center_y 0.10;
+    box2_Center_z 0.01;
+
+    box3_Size_x 0.02;
+    box3_Size_y 0.02;
+    box3_Size_z 0.02;
+
+    box3_Center_x 0.05;
+    box3_Center_y 0.15;
+    box3_Center_z 0.01;
+}
+
+VTK
+{
+    write_packed_bed true;
+    frequency_packed_bed 1000;
+
+    write_spheres true;
+    frequency_spheres 200;
+
+    write_flag_field false;
+    frequency_flag_field 200000;
+
+    write_fluid_field false;
+    frequency_fluid_field 50000;
+    sampling_resolution_fluid_field 2.0;
+
+    write_omega false;
+    frequency_omega  50000;
+    sampling_resolution omega 1.0;
+}
