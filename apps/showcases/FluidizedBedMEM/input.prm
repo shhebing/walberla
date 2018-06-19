@@ -25,9 +25,9 @@ Geometry
     diameter_standard_distribution_B 0.00006;
     cell_size 0.00020;
 
-    blocks_width 2;
-    blocks_height 4;
-    blocks_depth 1;
+    blocks_width 4;
+    blocks_height 8;
+    blocks_depth 2;
 
     initial_sphere_distance 0.00400;
     initial_sphere_random_velocity  0.001;
@@ -50,7 +50,7 @@ FluidizedBed
 
     //volume_flow_rate 2.5;
     //velocity 0.4;
-    particle_RE 10.0;
+    particle_RE 5.0;
 }
 
 Simulation
@@ -68,7 +68,7 @@ Simulation
 
     use_force_averaging true;
 
-    LBM_velocity       0.06;
+    LBM_velocity       0.05;
     //time_step 1e-5;
     //omega 1.95;
     //tau 0.55;
@@ -84,7 +84,7 @@ Simulation
     start_ramping_scaling 0.50;
 
     run_preliminary_timeloop true;
-    eps                      0.001;
+    eps                      0.002;
 
     create_packed_bed true;
     check_maximum_particle_velocity true;   // else check for average particle velocity
