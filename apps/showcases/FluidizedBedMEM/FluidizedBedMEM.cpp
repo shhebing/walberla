@@ -403,7 +403,6 @@ namespace fluidizedBed {
         const real_t settleVelocity = sim_parameters.getParameter<real_t>("settle_velocity", real_c(0.002));
         const uint_t settleCheckFrequency = sim_parameters.getParameter<uint_t>("settle_check_frequency", uint_t(100));
         const real_t peAccelerator = sim_parameters.getParameter<real_t>("pe_accelerator", real_c(50));
-        const bool  fixedBed = sim_parameters.getParameter<bool>("fixed_bed", false);
 
         const bool runPreliminaryTimeloop = sim_parameters.getParameter<bool>("run_preliminary_timeloop", false);
         const real_t eps = sim_parameters.getParameter<real_t>("eps", real_c(0.05));
@@ -469,7 +468,7 @@ namespace fluidizedBed {
           timestepsRamping = sim_parameters.getParameter<uint_t>("#ramping_steps", uint_c(0));
        }
 
-       const real_t initialRampingVelocityFactor = sim_parameters.getParameter<real_t>("start_ramping_scaling", real_c(0.50));
+       const real_t initialRampingVelocityFactor = sim_parameters.getParameter<real_t>("initial_ramping_scaling", real_c(0.50));
 
        const real_t initialSphereVel = geo_parameters.getParameter<real_t>("initial_sphere_random_velocity", real_c(0.0)) * (config.dt_SI / config.dx_SI);
        const real_t initialSphereDistance = geo_parameters.getParameter<real_t>("initial_sphere_distance", real_c(diameterA_SI * 1.5)) / config.dx_SI;
@@ -1136,20 +1135,19 @@ namespace fluidizedBed {
 
        SweepTimeloop timeloop(blocks->getBlockStorage(), timesteps);
 
-       if (!fixedBed) {
+        // sweep for updating the pe body mapping into the LBM simulation
+        timeloop.add() << Sweep(
+                pe_coupling::BodyMapping<BoundaryHandling_T>(blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID,
+                                                             FBfunc::MO_Flag, FBfunc::FormerMO_Flag),
+                "Body Mapping");
 
-             // sweep for updating the pe body mapping into the LBM simulation
-             timeloop.add() << Sweep(pe_coupling::BodyMapping<BoundaryHandling_T>(blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, FBfunc::MO_Flag, FBfunc::FormerMO_Flag),
-                                     "Body Mapping");
-
-             // sweep for restoring PDFs in cells previously occupied by pe bodies
-              typedef pe_coupling::EquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T > Reconstructor_T;
-              Reconstructor_T reconstructor( blocks, boundaryHandlingID, pdfFieldID, bodyFieldID );
-             timeloop.add()
-                   << Sweep(pe_coupling::PDFReconstruction<LatticeModel_T, BoundaryHandling_T, Reconstructor_T>
-                                  (blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, reconstructor, FBfunc::FormerMO_Flag, FBfunc::Fluid_Flag), "PDF Restore");
-
-       }
+        // sweep for restoring PDFs in cells previously occupied by pe bodies
+        typedef pe_coupling::EquilibriumReconstructor<LatticeModel_T, BoundaryHandling_T> Reconstructor_T;
+        Reconstructor_T reconstructor(blocks, boundaryHandlingID, pdfFieldID, bodyFieldID);
+        timeloop.add()
+                << Sweep(pe_coupling::PDFReconstruction<LatticeModel_T, BoundaryHandling_T, Reconstructor_T>
+                                 (blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, reconstructor,
+                                  FBfunc::FormerMO_Flag, FBfunc::Fluid_Flag), "PDF Restore");
 
        if (turb) {
           // create flag field filter for turbulence model
@@ -1235,9 +1233,7 @@ namespace fluidizedBed {
        }
 
        // advance pe rigid body simulation
-       if (!fixedBed) {
-           timeloop.addFuncAfterTimeStep( pe_coupling::TimeStep( blocks, bodyStorageID, *cr, syncCall, config.lbmSubCycles, config.peSubCycles ), "pe Time Step" );
-       }
+       timeloop.addFuncAfterTimeStep( pe_coupling::TimeStep( blocks, bodyStorageID, *cr, syncCall, config.lbmSubCycles, config.peSubCycles ), "pe Time Step" );
 
        ////////////////
        // VTK OUTPUT //
@@ -1302,10 +1298,6 @@ namespace fluidizedBed {
           timeloop.add()
                 << Sweep(FBfunc::VelocityCheckMEM<LatticeModel_T, FlagField_T, BodyField_T>(blocks, bodyStorageID, bodyFieldID, pdfFieldID, flagFieldID, FBfunc::Fluid_Flag, config),
                          "LBM Velocity Check");
-
-       if (fixedBed){
-          timeloop.addFuncAfterTimeStep(pe_coupling::ForceTorqueOnBodiesResetter(blocks, bodyStorageID), "Reset Body Forces");
-       }
 
        WcTimingPool timeloopTiming;
 

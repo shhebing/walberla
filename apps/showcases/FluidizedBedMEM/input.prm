@@ -39,10 +39,10 @@ Geometry
 
 FluidizedBed
 {
-    #particles_A 200;
-    #particles_B 100;
-    density_particle_A 5;
-    density_particle_B 5;
+    #particles_A 250;
+    #particles_B 250;
+    density_particle_A 2;
+    density_particle_B 2;
 
     density_fluid 1.2;
     dynamic_viscosity 1.84e-5;
@@ -50,7 +50,7 @@ FluidizedBed
 
     //volume_flow_rate 2.5;
     //velocity 0.4;
-    particle_RE 5.0;
+    particle_RE 2.0;
 }
 
 Simulation
@@ -58,8 +58,8 @@ Simulation
     use_lubrication false;
 
     initialize_from_checkpoint false;
-    path_to_checkpoint_bodies /simdata/schuster/i10hpc/dsfd/checkpoint_bodies.dat;
-    path_to_checkpoint_pdf    /simdata/schuster/i10hpc/dsfd/checkpoint_pdf.dat;
+    path_to_checkpoint_bodies /pathToCheckpointFiles/checkpoint_bodies.dat;
+    path_to_checkpoint_pdf    /pathToCheckpointFiles/checkpoint_pdf.dat;
     enable_checkpointing true;
 
     evaluation_frequency 2;
@@ -68,7 +68,7 @@ Simulation
 
     use_force_averaging true;
 
-    LBM_velocity       0.05;
+    LBM_velocity       0.01;
     //time_step 1e-5;
     //omega 1.95;
     //tau 0.55;
@@ -77,30 +77,43 @@ Simulation
 
     smagorinsky_constant 0.1;
 
-    simulation_time 0.5;
+    // "ramping_time" or ""#ramping_steps" corresponds to the initial phase of the simulation
+    // where velocity is linearly increased from "initial_ramping_scaling" * inflow velocity until full inflow velocity
+
+    simulation_time 2.0;
     //#time_steps 80000;
     ramping_time 0.5;
     //#ramping_steps 20000;
-    start_ramping_scaling 0.50;
+    initial_ramping_scaling 0.50;
 
-    run_preliminary_timeloop true;
-    eps                      0.002;
+    // create a packed bed by letting the particles settle on the bottom without simulating any fluid (pe only)
+    // maximum or average velocity is checked with the specified frequency
+    // if particles fall too slow or too fast, try alternating "pe_accelerator"
 
     create_packed_bed true;
     check_maximum_particle_velocity true;   // else check for average particle velocity
     settle_velocity 0.02;
     settle_check_frequency 200;
     pe_accelerator 1;
-    fixed_bed false;
+
+    // start a preliminary timeloop with fixed particles
+    // inflow velocity is set to velocity * "initial_ramping_scaling"
+    // until relative change in force on all particles is less then eps (evaluated every 10 timesteps)
+    // this can also be used to validate pressure drop over a packed bed
+
+    run_preliminary_timeloop true;
+    eps                      0.001;
 }
 
 Material
 {
     use_DEM false;                           // else use HCSITS
 
+    // HCSITS parameters
     HCSITS_max_iterations           10;
     HCSITS_relaxation_parameter     0.7;
 
+    // DEM parameters
     static_friction_particles_A 0.5;
     static_friction_particles_B 0.5;
     static_friction_particles_wall 0.5;
