@@ -1,10 +1,4 @@
-//
-// Created by schuster on 10.05.17.
-//
-
 #pragma once
-
-//#include "TimeStep_DS.h"
 
 namespace FBfunc {
 
@@ -12,7 +6,6 @@ namespace FBfunc {
     using walberla::uint_t;
 
     typedef walberla::uint8_t flag_t;
-//typedef FlagField< flag_t > FlagField_T;
 
 ////////////////
 // Parameters //
@@ -358,9 +351,9 @@ namespace FBfunc {
                 probes_(config.probesAABB),
                 checkFrequency_((config.evaluationFreq > 0) ? config.evaluationFreq : uint_c(1)), executionCounter_(0)
         {
-            //std::ofstream output;
-            //output.open("GranularTemperatureSQRT.txt", std::ofstream::out | std::ofstream::trunc);
-            //output.close();
+            std::ofstream output;
+            output.open("GranularTemperatureSQRT_local.txt", std::ofstream::out | std::ofstream::trunc);
+            output.close();
         }
 
         void operator()() {
@@ -434,10 +427,10 @@ namespace FBfunc {
                     granTempZ = granTempZ * preFac_;
                     real_t granTemp3D = (granTempX+granTempY+granTempZ)/3;
                     std::ofstream output;
-                    output.open("GranularTemperatureSQRT" + std::to_string(probeCounter) + ".txt", std::ofstream::out | std::ofstream::app);
+                    output.open("GranularTemperatureSQRT_local" + std::to_string(probeCounter) + ".txt", std::ofstream::out | std::ofstream::app);
                     output << executionCounter_ << "\t" << sqrt(granTempX) << "\t" << sqrt(granTempY) << "\t" << sqrt(granTempZ) << "\t[m/s]" << std::endl;
-                    output.open("GranularTemperature3dSQRT" + std::to_string(probeCounter) + ".txt", std::ofstream::out | std::ofstream::app);
-                    output << executionCounter_ << "\t" << sqrt(granTemp3D) << "\t[m/s]" << std::endl;
+                    //output.open("GranularTemperature3dSQRT" + std::to_string(probeCounter) + ".txt", std::ofstream::out | std::ofstream::app);
+                    //output << executionCounter_ << "\t" << sqrt(granTemp3D) << "\t[m/s]" << std::endl;
                     output.close();
                 }
 
@@ -589,15 +582,13 @@ namespace FBfunc {
                 }
             }
 
-            // NACH KIDANEMARIAM.pdf Gleichung (28)#
-            // Neu: Selbst entwickelte Gleichung!!!!
+            // NACH KIDANEMARIAM Gleichung (28)
 
             WALBERLA_MPI_SECTION() {
                 mpi::reduceInplace(velSumY, mpi::SUM);
                 mpi::reduceInplace(velSumAbs, mpi::SUM);
             }
             WALBERLA_ROOT_SECTION() {
-                //velSumY   = velSumY   * 4.0/3.0 * math::PI * densitySolid_SI_ * dx_SI_ * dx_SI_ * dx_SI_ / dt_SI_ ;
                 velSumY = velSumY * preFac_;
                 velSumAbs = velSumAbs * preFac_;
 
@@ -852,15 +843,11 @@ namespace FBfunc {
             const flag_t       solid     = flagField->getFlag(FBfunc::MO_Flag);
 
             uint_t probeCounter = uint_c(1);
-            //CellInterval localBox = CellInterval();
             CellInterval globalFieldCellBB;
             uint_t numberOfLinesWithoutSolids = uint_c(0);
 
             for (std::vector<CellInterval>::const_iterator it = areas_.begin(); it != areas_.end(); ++it) {
 
-                //real_t boxVolume = real_c(it->numCells());
-                //blocks_->transformGlobalToBlockLocalCellInterval(localBox, *block, *it);
-                //localBox.intersect(flagField->xyzSize());
                 blocks_->transformBlockLocalToGlobalCellInterval(globalFieldCellBB, *block, flagField->xyzSize());
                 globalFieldCellBB.intersect(*it);
 
@@ -1006,9 +993,9 @@ namespace FBfunc {
         auto pdfFieldVTK = vtk::createVTKOutput_BlockData(blocks, "fluid_field-once", 1, 0, false, basefolder);      // 0 => no fieldghostlayer
         pdfFieldVTK->setSamplingResolution(samplingRes);
 
-        //blockforest::communication::UniformBufferedScheme<stencil::D3Q27> pdfGhostLayerSync(blocks);
-        //pdfGhostLayerSync.addPackInfo(make_shared<field::communication::PackInfo<PdfField_T> >(pdfFieldID));
-        //pdfFieldVTK->addBeforeFunction(pdfGhostLayerSync);
+        blockforest::communication::UniformBufferedScheme<stencil::D3Q27> pdfGhostLayerSync(blocks);
+        pdfGhostLayerSync.addPackInfo(make_shared<field::communication::PackInfo<PdfField_T> >(pdfFieldID));
+        pdfFieldVTK->addBeforeFunction(pdfGhostLayerSync);
 
         field::FlagFieldCellFilter<FlagField_T> fluidFilter(flagFieldID);
         fluidFilter.addFlag(Fluid_Flag);
@@ -1080,7 +1067,6 @@ namespace FBfunc {
     real_t getForceY(const shared_ptr<StructuredBlockStorage> &blocks,
                      const BlockDataID &bodyStorageID) {
 
-        //pe::Vec3 forceSum = pe::Vec3(0.0);
         real_t forceSum = real_c(0.0);
 
         for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt) {
@@ -1231,8 +1217,6 @@ namespace FBfunc {
                                 }
                                 output.close();
 
-                                //vtkSpherePDF<LatticeModel_T, FlagField_T>(blocks_, bodyStorageID_, pdfFieldId_, flagFieldId_, real_c(1.0), basefolder_);
-
                                 WALBERLA_CHECK(false, "Position of maximum value is x: " << globalPos.x() * dx_SI_ * 1000 << "   y: " << globalPos.y() * dx_SI_ * 1000
                                                                                          << "   z: " << globalPos.z() * dx_SI_ * 1000 << " [mm]" << std::endl << std::endl);
                             }
@@ -1331,11 +1315,6 @@ namespace FBfunc {
         uint_t executionCounter_;
 
     }; // Fraction Calculator
-
-
-/////////////////////////////////
-// OLD
-/////////////////////////////////
 
 // CHECK POINT CREATER
 
