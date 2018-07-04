@@ -427,6 +427,7 @@ namespace FBfunc {
                     std::ofstream output;
                     output.open("GranularTemperatureLocalSQRT" + std::to_string(probeCounter) + ".txt", std::ofstream::out | std::ofstream::app);
                     output << executionCounter_ << "\t" << sqrt(granTempX) << "\t" << sqrt(granTempY) << "\t" << sqrt(granTempZ) << "\t[m/s]" << std::endl;
+
                     output.close();
                 }
 
@@ -824,13 +825,13 @@ namespace FBfunc {
     public:
 
         GasAreaFractionCalculator(const shared_ptr<StructuredBlockStorage> &blocks, const ConstBlockDataID &flagFieldId,
-                                   FBfunc::SetupFB &config) :
+                                  FBfunc::SetupFB &config) :
                 blocks_(blocks), flagFieldId_(flagFieldId), areas_(config.probesCell),
                 checkFrequency_((config.evaluationFreq > 0) ? config.evaluationFreq : uint_c(1)), executionCounter_(uint_c(0)) {
 
             for (std::vector<CellInterval>::const_iterator it = areas_.begin(); it != areas_.end(); ++it) {
-                it->zMin() = blocks->getDomainCellBB().zMin();
-                it->zMax() = blocks->getDomainCellBB().zMax();
+                it ->  zMin() =  blocks->getDomainCellBB().zMin();
+                it ->  zMax() =  blocks->getDomainCellBB().zMax();
             }
 
         }
@@ -899,40 +900,6 @@ namespace FBfunc {
 
     }; // Area Calculator
 
-
-/////////////////////
-// VTK OUT         //
-/////////////////////
-
-    template<typename LatticeModel_T, typename FlagField_T>
-    void vtkSpherePDF(const shared_ptr<StructuredBlockStorage> &blocks, const BlockDataID &bodyStorageID, const ConstBlockDataID &pdfFieldID,
-                      const ConstBlockDataID &flagFieldID, const real_t samplingRes, const std::string basefolder) {
-
-// spheres
-        auto sphereVtkOutput = make_shared<pe::SphereVtkOutput>(bodyStorageID, blocks->getBlockStorage());
-        auto sphereVTK = vtk::createVTKOutput_PointData(sphereVtkOutput, "spheres-once", 1, basefolder);
-        vtk::writeFiles(sphereVTK);
-
-// pdf field (ghost layers cannot be written because re-sampling/coarsening is applied)
-
-        auto pdfFieldVTK = vtk::createVTKOutput_BlockData(blocks, "fluid_field-once", 1, 0, false, basefolder);      // 0 => no fieldghostlayer
-        pdfFieldVTK->setSamplingResolution(samplingRes);
-
-        //blockforest::communication::UniformBufferedScheme<stencil::D3Q27> pdfGhostLayerSync(blocks);
-        //pdfGhostLayerSync.addPackInfo(make_shared<field::communication::PackInfo<PdfField_T> >(pdfFieldID));
-        //pdfFieldVTK->addBeforeFunction(pdfGhostLayerSync);
-
-        field::FlagFieldCellFilter<FlagField_T> fluidFilter(flagFieldID);
-        fluidFilter.addFlag(Fluid_Flag);
-        pdfFieldVTK->addCellInclusionFilter(fluidFilter);
-
-        pdfFieldVTK->addCellDataWriter(make_shared<lbm::VelocityVTKWriter<LatticeModel_T, float> >(pdfFieldID, "VelocityFromPDF"));
-        pdfFieldVTK->addCellDataWriter(make_shared<lbm::DensityVTKWriter<LatticeModel_T, float> >(pdfFieldID, "DensityFromPDF"));
-
-        vtk::writeFiles(pdfFieldVTK);
-
-    }
-
 /////////////////////////////////
 // OUTSIDE TIME LOOP FUNCTIONS
 /////////////////////////////////
@@ -992,7 +959,6 @@ namespace FBfunc {
     real_t getForceY(const shared_ptr<StructuredBlockStorage> &blocks,
                      const BlockDataID &bodyStorageID) {
 
-        //pe::Vec3 forceSum = pe::Vec3(0.0);
         real_t forceSum = real_c(0.0);
 
         for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt) {
@@ -1143,8 +1109,6 @@ namespace FBfunc {
                                 }
                                 output.close();
 
-                                //vtkSpherePDF<LatticeModel_T, FlagField_T>(blocks_, bodyStorageID_, pdfFieldId_, flagFieldId_, real_c(1.0), basefolder_);
-
                                 WALBERLA_CHECK(false, "Position of maximum value is x: " << globalPos.x() * dx_SI_ * 1000 << "   y: " << globalPos.y() * dx_SI_ * 1000
                                                                                          << "   z: " << globalPos.z() * dx_SI_ * 1000 << " [mm]" << std::endl << std::endl);
                             }
@@ -1247,11 +1211,6 @@ namespace FBfunc {
         uint_t executionCounter_;
 
     }; // Fraction Calculator
-
-
-/////////////////////////////////
-// OLD
-/////////////////////////////////
 
 // CHECK POINT CREATER
 
