@@ -1,10 +1,4 @@
-//
-// Created by schuster on 10.05.17.
-//
-
 #pragma once
-
-//#include "TimeStep_DS.h"
 
 namespace FBfunc {
 
@@ -12,13 +6,13 @@ namespace FBfunc {
     using walberla::uint_t;
 
     typedef walberla::uint8_t flag_t;
-//typedef FlagField< flag_t > FlagField_T;
 
 ////////////////
 // Parameters //
 ////////////////
 
     struct SetupFB {
+
         // geometry
         uint_t xlength;                //[m]
         uint_t ylength;                //[m]
@@ -205,7 +199,6 @@ namespace FBfunc {
                 if (!preliminaryTimeloop_) {
                     std::ofstream output;
                     output.open("PressureDrop.txt", std::ofstream::out | std::ofstream::app);
-                    //output << executionCounter_ << "\tx: " << forceSum[0]<<"\ty: " << forceSum[1]<<"\tz: "<< forceSum[2]<<"\tAbs: "<< forceSum.length() << "\t[Pa]" << std::endl;
                     output << executionCounter_ << "\t" << currentPressureDrop_ << "\t[Pa]" << std::endl;
                     output.close();
                 }
@@ -231,10 +224,10 @@ namespace FBfunc {
     };
 
 // ADD EXTERNAL FORCES
-    class ExternalForcer {
+    class ExternalForce {
 
     public:
-        ExternalForcer(const shared_ptr<StructuredBlockStorage> &blocks,
+        ExternalForce(const shared_ptr<StructuredBlockStorage> &blocks,
                        const BlockDataID &bodyStorageID,
                        SetupFB &config) :
                 blocks_(blocks), bodyStorageID_(bodyStorageID),
@@ -326,7 +319,6 @@ namespace FBfunc {
                 granTempX = granTempX * preFac_;
                 granTempY = granTempY * preFac_;
                 granTempZ = granTempZ * preFac_;
-                //real_t granTemp3D = (granTempX+granTempY+granTempZ)/3;
                 std::ofstream output;
                 output.open("GranularTemperatureSQRT.txt", std::ofstream::out | std::ofstream::app);
                 output << executionCounter_ << "\t" << sqrt(granTempX) << "\t" << sqrt(granTempY) << "\t" << sqrt(granTempZ) << "\t[m/s]" << std::endl;
@@ -358,9 +350,9 @@ namespace FBfunc {
                 probes_(config.probesAABB),
                 checkFrequency_((config.evaluationFreq > 0) ? config.evaluationFreq : uint_c(1)), executionCounter_(0)
         {
-            //std::ofstream output;
-            //output.open("GranularTemperatureSQRT.txt", std::ofstream::out | std::ofstream::trunc);
-            //output.close();
+            std::ofstream output;
+            output.open("GranularTemperatureLocalSQRT.txt", std::ofstream::out | std::ofstream::trunc);
+            output.close();
         }
 
         void operator()() {
@@ -432,12 +424,9 @@ namespace FBfunc {
                     granTempX = granTempX * preFac_;
                     granTempY = granTempY * preFac_;
                     granTempZ = granTempZ * preFac_;
-                    real_t granTemp3D = (granTempX+granTempY+granTempZ)/3;
                     std::ofstream output;
-                    output.open("GranularTemperatureSQRT" + std::to_string(probeCounter) + ".txt", std::ofstream::out | std::ofstream::app);
+                    output.open("GranularTemperatureLocalSQRT" + std::to_string(probeCounter) + ".txt", std::ofstream::out | std::ofstream::app);
                     output << executionCounter_ << "\t" << sqrt(granTempX) << "\t" << sqrt(granTempY) << "\t" << sqrt(granTempZ) << "\t[m/s]" << std::endl;
-                    output.open("GranularTemperature3dSQRT" + std::to_string(probeCounter) + ".txt", std::ofstream::out | std::ofstream::app);
-                    output << executionCounter_ << "\t" << sqrt(granTemp3D) << "\t[m/s]" << std::endl;
                     output.close();
                 }
 
@@ -555,11 +544,11 @@ namespace FBfunc {
     };
 
 // CALCULATE PARTICLE FLUX
-    class ParticleFluxer {
+    class ParticleFlux {
 
     public:
 
-        ParticleFluxer(const shared_ptr<StructuredBlockStorage> &blocks,
+        ParticleFlux(const shared_ptr<StructuredBlockStorage> &blocks,
                        const BlockDataID &bodyStorageID,
                        SetupFB &config) :
                 blocks_(blocks), bodyStorageID_(bodyStorageID),
@@ -589,15 +578,15 @@ namespace FBfunc {
                 }
             }
 
-            // NACH KIDANEMARIAM.pdf Gleichung (28)#
-            // Neu: Selbst entwickelte Gleichung!!!!
+            // Equation inspired from:
+            // Interface-resolved direct numerical simulation of the erosion of a sediment bed sheared by laminar channel flow
+            // Kidanemariam and Uhlmann, 2014
 
             WALBERLA_MPI_SECTION() {
                 mpi::reduceInplace(velSumY, mpi::SUM);
                 mpi::reduceInplace(velSumAbs, mpi::SUM);
             }
             WALBERLA_ROOT_SECTION() {
-                //velSumY   = velSumY   * 4.0/3.0 * math::PI * densitySolid_SI_ * dx_SI_ * dx_SI_ * dx_SI_ / dt_SI_ ;
                 velSumY = velSumY * preFac_;
                 velSumAbs = velSumAbs * preFac_;
 
@@ -659,14 +648,14 @@ namespace FBfunc {
 */
 // CALCULATE PRESSURE WITH DENSITY
     template<typename LatticeModel_T, typename FlagField_T>
-    class PressureSweeper {
+    class PressureByDensity {
 
     public:
 
         typedef lbm::PdfField<LatticeModel_T> PdfField;
 
-        PressureSweeper(const shared_ptr<StructuredBlockStorage> &blocks, const ConstBlockDataID &pdfFieldId, const ConstBlockDataID &flagFieldId,
-                        const CellInterval &globalLowerPlane, const CellInterval &globalUpperPlane, const FlagUID &flagToCheck, SetupFB & config) :
+        PressureByDensity(const shared_ptr<StructuredBlockStorage> &blocks, const ConstBlockDataID &pdfFieldId, const ConstBlockDataID &flagFieldId,
+                          const CellInterval &globalLowerPlane, const CellInterval &globalUpperPlane, const FlagUID &flagToCheck, SetupFB & config) :
 
                 blocks_(blocks), pdfFieldId_(pdfFieldId), flagFieldId_(flagFieldId),  globalLowerPlane_(globalLowerPlane), globalUpperPlane_(globalUpperPlane),
                 flagToCheck_(flagToCheck),
@@ -679,41 +668,44 @@ namespace FBfunc {
             output.close();
         }
 
-        void operator()(const IBlock *const block) {
+        void operator()() {
             ++executionCounter_;
             if ((executionCounter_ - uint_c(1)) % checkFrequency_ != 0)
                 return;
 
-            const FlagField_T *flagField = block->getData<FlagField_T>(flagFieldId_);
-            const PdfField *pdfField = block->getData<PdfField>(pdfFieldId_);
-            const flag_t fluid = flagField->getFlag(flagToCheck_);
-
-            CellInterval localLowerPlane = CellInterval();
-            CellInterval localUpperPlane = CellInterval();
-
-            blocks_->transformGlobalToBlockLocalCellInterval(localLowerPlane, *block, globalLowerPlane_);
-            blocks_->transformGlobalToBlockLocalCellInterval(localUpperPlane, *block, globalUpperPlane_);
-
-            localLowerPlane.intersect(pdfField->xyzSize());
-            localUpperPlane.intersect(pdfField->xyzSize());
-
             real_t lowerDensitySum = real_c(0);
             real_t upperDensitySum = real_c(0);
 
-            for (cell_idx_t z = localLowerPlane.zMin(); z <= localLowerPlane.zMax(); ++z) {
-                for (cell_idx_t y = localLowerPlane.yMin(); y <= localLowerPlane.yMax(); ++y) {
-                    for (cell_idx_t x = localLowerPlane.xMin(); x <= localLowerPlane.xMax(); ++x) {
-                        if (flagField->isFlagSet(x, y, z, fluid)) {
-                            lowerDensitySum += pdfField->getDensity(x, y, z);
+            for (auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt) {
+
+                const FlagField_T *flagField = blockIt->getData<FlagField_T>(flagFieldId_);
+                const PdfField *pdfField = blockIt->getData<PdfField>(pdfFieldId_);
+                const flag_t fluid = flagField->getFlag(flagToCheck_);
+
+                CellInterval localLowerPlane = CellInterval();
+                CellInterval localUpperPlane = CellInterval();
+
+                blocks_->transformGlobalToBlockLocalCellInterval(localLowerPlane, *blockIt, globalLowerPlane_);
+                blocks_->transformGlobalToBlockLocalCellInterval(localUpperPlane, *blockIt, globalUpperPlane_);
+
+                localLowerPlane.intersect(pdfField->xyzSize());
+                localUpperPlane.intersect(pdfField->xyzSize());
+
+                for (cell_idx_t z = localLowerPlane.zMin(); z <= localLowerPlane.zMax(); ++z) {
+                    for (cell_idx_t y = localLowerPlane.yMin(); y <= localLowerPlane.yMax(); ++y) {
+                        for (cell_idx_t x = localLowerPlane.xMin(); x <= localLowerPlane.xMax(); ++x) {
+                            if (flagField->isFlagSet(x, y, z, fluid)) {
+                                lowerDensitySum += pdfField->getDensity(x, y, z);
+                            }
                         }
                     }
                 }
-            }
-            for (cell_idx_t z = localUpperPlane.zMin(); z <= localUpperPlane.zMax(); ++z) {
-                for (cell_idx_t y = localUpperPlane.yMin(); y <= localUpperPlane.yMax(); ++y) {
-                    for (cell_idx_t x = localUpperPlane.xMin(); x <= localUpperPlane.xMax(); ++x) {
-                        if (flagField->isFlagSet(x, y, z, fluid)) {
-                            upperDensitySum += pdfField->getDensity(x, y, z);
+                for (cell_idx_t z = localUpperPlane.zMin(); z <= localUpperPlane.zMax(); ++z) {
+                    for (cell_idx_t y = localUpperPlane.yMin(); y <= localUpperPlane.yMax(); ++y) {
+                        for (cell_idx_t x = localUpperPlane.xMin(); x <= localUpperPlane.xMax(); ++x) {
+                            if (flagField->isFlagSet(x, y, z, fluid)) {
+                                upperDensitySum += pdfField->getDensity(x, y, z);
+                            }
                         }
                     }
                 }
@@ -832,89 +824,6 @@ namespace FBfunc {
     public:
 
         GasAreaFractionCalculator(const shared_ptr<StructuredBlockStorage> &blocks, const ConstBlockDataID &flagFieldId,
-                                  FBfunc::SetupFB &config) :
-                blocks_(blocks), flagFieldId_(flagFieldId), areas_(config.probesCell),
-                checkFrequency_((config.evaluationFreq > 0) ? config.evaluationFreq : uint_c(1)), executionCounter_(uint_c(0)) {
-
-            for (std::vector<CellInterval>::const_iterator it = areas_.begin(); it != areas_.end(); ++it) {
-                it ->  zMin() =  blocks->getDomainCellBB().zMin();
-                it ->  zMax() =  blocks->getDomainCellBB().zMax();
-            }
-
-        }
-
-        void operator()(const IBlock *const block) {
-            ++executionCounter_;
-            if ((executionCounter_ - uint_c(1)) % checkFrequency_ != 0)
-                return;
-
-            const FlagField_T *flagField = block->getData<FlagField_T>(flagFieldId_);
-            const flag_t       solid     = flagField->getFlag(FBfunc::MO_Flag);
-
-            uint_t probeCounter = uint_c(1);
-            //CellInterval localBox = CellInterval();
-            CellInterval globalFieldCellBB;
-            uint_t numberOfLinesWithoutSolids = uint_c(0);
-
-            for (std::vector<CellInterval>::const_iterator it = areas_.begin(); it != areas_.end(); ++it) {
-
-                //real_t boxVolume = real_c(it->numCells());
-                //blocks_->transformGlobalToBlockLocalCellInterval(localBox, *block, *it);
-                //localBox.intersect(flagField->xyzSize());
-                blocks_->transformBlockLocalToGlobalCellInterval(globalFieldCellBB, *block, flagField->xyzSize());
-                globalFieldCellBB.intersect(*it);
-
-                uint_t numberOfSolidCells = uint_c(0);
-
-                for (cell_idx_t x = it->xMin(); x <= it->xMax(); ++x) {
-                    for (cell_idx_t y = it->yMin(); y <= it->yMax(); ++y)
-                    {
-                        for (cell_idx_t z = it->zMin(); z <= it->zMax(); ++z) {
-                            if (globalFieldCellBB.contains(x,y,z)) {
-                                if (flagField->isFlagSet(x, y, z, solid)) {
-                                    ++numberOfSolidCells;
-                                }
-                            }
-                            WALBERLA_MPI_SECTION() {
-                                mpi::reduceInplace(numberOfSolidCells, mpi::SUM);
-                            }
-                            WALBERLA_ROOT_SECTION() {
-                                if ( numberOfSolidCells == uint_c(0)){
-                                    ++numberOfLinesWithoutSolids;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                WALBERLA_ROOT_SECTION() {
-                    std::ofstream output;
-                    output.open("GasAreaFraction" + std::to_string(probeCounter) + ".txt", std::ofstream::out | std::ofstream::app);
-                    output << executionCounter_ << "\t" << numberOfLinesWithoutSolids / (it->xSize()*it->ySize()) << std::endl;
-                    output.close();
-                }
-
-                ++probeCounter;
-            }
-        }
-
-    private:
-
-        shared_ptr<StructuredBlockStorage> blocks_;
-        const ConstBlockDataID flagFieldId_;
-        const std::vector<CellInterval> areas_;
-        const uint_t checkFrequency_;
-        uint_t executionCounter_;
-
-    }; // Area Calculator
-
-
-    // CALCULATE AREA FRACTION
-    template<typename FlagField_T>
-    class GasAreaFractionCalculator2 {
-    public:
-
-        GasAreaFractionCalculator2(const shared_ptr<StructuredBlockStorage> &blocks, const ConstBlockDataID &flagFieldId,
                                    FBfunc::SetupFB &config) :
                 blocks_(blocks), flagFieldId_(flagFieldId), areas_(config.probesCell),
                 checkFrequency_((config.evaluationFreq > 0) ? config.evaluationFreq : uint_c(1)), executionCounter_(uint_c(0)) {
@@ -926,30 +835,33 @@ namespace FBfunc {
 
         }
 
-        void operator()(const IBlock *const block) {
+        void operator()() {
             ++executionCounter_;
             if ((executionCounter_ - uint_c(1)) % checkFrequency_ != 0)
                 return;
-
-            const FlagField_T *flagField = block->getData<FlagField_T>(flagFieldId_);
-            const flag_t solid = flagField->getFlag(FBfunc::MO_Flag);
 
             uint_t probeCounter = uint_c(1);
             CellInterval globalFieldCellBB;
 
             for (std::vector<CellInterval>::const_iterator it = areas_.begin(); it != areas_.end(); ++it) {
 
-                blocks_->transformBlockLocalToGlobalCellInterval(globalFieldCellBB, *block, flagField->xyzSize());
-                globalFieldCellBB.intersect(*it);
-
                 std::vector<uint_t> area = std::vector<uint_t>(it->xSize() * it->ySize(), uint_c(0));
 
-                for (cell_idx_t x = it->xMin(); x <= it->xMax(); ++x) {
-                    for (cell_idx_t y = it->yMin(); y <= it->yMax(); ++y) {
-                        for (cell_idx_t z = it->zMin(); z <= it->zMax(); ++z) {
-                            if (globalFieldCellBB.contains(x, y, z)) {
-                                if (flagField->isFlagSet(x, y, z, solid)) {
-                                    area[ (x - it->xMin()) + ( (y - it->yMin()) * it->xSize() ) ] += uint_c(1);
+                for (auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt) {
+
+                    const FlagField_T *flagField = blockIt->getData<FlagField_T>(flagFieldId_);
+                    const flag_t solid = flagField->getFlag(FBfunc::MO_Flag);
+
+                    blocks_->transformBlockLocalToGlobalCellInterval(globalFieldCellBB, *blockIt, flagField->xyzSize());
+                    globalFieldCellBB.intersect(*it);
+
+                    for (cell_idx_t x = it->xMin(); x <= it->xMax(); ++x) {
+                        for (cell_idx_t y = it->yMin(); y <= it->yMax(); ++y) {
+                            for (cell_idx_t z = it->zMin(); z <= it->zMax(); ++z) {
+                                if (globalFieldCellBB.contains(x, y, z)) {
+                                    if (flagField->isFlagSet(x, y, z, solid)) {
+                                        area[(x - it->xMin()) + ((y - it->yMin()) * it->xSize())] += uint_c(1);
+                                    }
                                 }
                             }
                         }
@@ -1145,7 +1057,7 @@ namespace FBfunc {
                 mpi::allReduceInplace(velSum[0], mpi::SUM);
                 mpi::allReduceInplace(velSum[1], mpi::SUM);
                 mpi::allReduceInplace(velSum[2], mpi::SUM);
-                mpi::allReduceInplace(numCells, mpi::SUM);
+                mpi::allReduceInplace(numCells , mpi::SUM);
             }
 
             return (velSum.length()/real_c(numCells));
@@ -1272,22 +1184,19 @@ namespace FBfunc {
 
     // CALCULATE SOLID FRACTION
     template<typename FlagField_T>
-    class FractionCalculatorMEM {
+    class FractionCalculator {
     public:
 
-        FractionCalculatorMEM(const shared_ptr<StructuredBlockStorage> &blocks, const ConstBlockDataID &flagFieldId,
+        FractionCalculator(const shared_ptr<StructuredBlockStorage> &blocks, const ConstBlockDataID &flagFieldId,
                               FBfunc::SetupFB &config) :
                 blocks_(blocks), flagFieldId_(flagFieldId), probes_(config.probesCell),
                 checkFrequency_((config.evaluationFreq > 0) ? config.evaluationFreq : uint_c(1)), executionCounter_(uint_c(0)) {
         }
 
-        void operator()(const IBlock *const block) {
+        void operator()() {
             ++executionCounter_;
             if ((executionCounter_ - uint_c(1)) % checkFrequency_ != 0)
                 return;
-
-            const FlagField_T *flagField = block->getData<FlagField_T>(flagFieldId_);
-            const flag_t solid           = flagField->getFlag(FBfunc::MO_Flag);
 
             uint_t probeCounter = uint_c(1);
             CellInterval localBox = CellInterval();
@@ -1295,15 +1204,22 @@ namespace FBfunc {
             for (std::vector<CellInterval>::const_iterator it = probes_.begin(); it != probes_.end(); ++it) {
 
                 real_t boxVolume = real_c(it->numCells());
-                blocks_->transformGlobalToBlockLocalCellInterval(localBox, *block, *it);
-                localBox.intersect(flagField->xyzSize());
+                real_t numberMOcells = real_t(0);
 
-                real_t numberMOcells = 0;
-                for (cell_idx_t z = localBox.zMin(); z <= localBox.zMax(); ++z) {
-                    for (cell_idx_t y = localBox.yMin(); y <= localBox.yMax(); ++y) {
-                        for (cell_idx_t x = localBox.xMin(); x <= localBox.xMax(); ++x) {
-                            if (flagField->isFlagSet(x, y, z, solid)) {
-                                ++numberMOcells;
+                for (auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt) {
+
+                    const FlagField_T *flagField = blockIt->getData<FlagField_T>(flagFieldId_);
+                    const flag_t solid           = flagField->getFlag(FBfunc::MO_Flag);
+
+                    blocks_->transformGlobalToBlockLocalCellInterval(localBox, *blockIt, *it);
+                    localBox.intersect(flagField->xyzSize());
+
+                    for (cell_idx_t z = localBox.zMin(); z <= localBox.zMax(); ++z) {
+                        for (cell_idx_t y = localBox.yMin(); y <= localBox.yMax(); ++y) {
+                            for (cell_idx_t x = localBox.xMin(); x <= localBox.xMax(); ++x) {
+                                if (flagField->isFlagSet(x, y, z, solid)) {
+                                    ++numberMOcells;
+                                }
                             }
                         }
                     }

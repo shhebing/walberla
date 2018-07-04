@@ -698,7 +698,6 @@ namespace fluidizedBed {
        if (box1) {
           config.probesAABB.push_back(probe1);
           config.probesCell.push_back(blocks->getCellBBFromAABB(probe1));
-
        }
        if (box2) {
           config.probesAABB.push_back(probe2);
@@ -1103,9 +1102,6 @@ namespace fluidizedBed {
           // moving bodies are handled by the momentum exchange method
           pe_coupling::mapMovingBodies<BoundaryHandling_T>(*blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, FBfunc::MO_Flag, pe_coupling::selectRegularBodies);
 
-        // map planes into the LBM simulation -> act as no-slip boundaries
-        //pe_coupling::mapBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, FBfunc::NoSlip_Flag, pe_coupling::selectGlobalBodies );
-
         /////////////////////
         // PRE TIME LOOP   //
         /////////////////////
@@ -1138,14 +1134,12 @@ namespace fluidizedBed {
         // sweep for updating the pe body mapping into the LBM simulation
         timeloop.add() << Sweep(
                 pe_coupling::BodyMapping<BoundaryHandling_T>(blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID,
-                                                             FBfunc::MO_Flag, FBfunc::FormerMO_Flag),
-                "Body Mapping");
+                                                             FBfunc::MO_Flag, FBfunc::FormerMO_Flag), "Body Mapping");
 
         // sweep for restoring PDFs in cells previously occupied by pe bodies
         typedef pe_coupling::EquilibriumReconstructor<LatticeModel_T, BoundaryHandling_T> Reconstructor_T;
         Reconstructor_T reconstructor(blocks, boundaryHandlingID, pdfFieldID, bodyFieldID);
-        timeloop.add()
-                << Sweep(pe_coupling::PDFReconstruction<LatticeModel_T, BoundaryHandling_T, Reconstructor_T>
+        timeloop.add() << Sweep(pe_coupling::PDFReconstruction<LatticeModel_T, BoundaryHandling_T, Reconstructor_T>
                                  (blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, reconstructor,
                                   FBfunc::FormerMO_Flag, FBfunc::Fluid_Flag), "PDF Restore");
 
@@ -1180,6 +1174,10 @@ namespace fluidizedBed {
         timeloop.add() << Sweep(makeSharedSweep(lbm::makeCellwiseSweep<LatticeModel_T, FlagField_T>(pdfFieldID, flagFieldID, FBfunc::Fluid_Flag)), "LBM DEFAULT");
         //timeloop.add() << Sweep( lbm::SplitPureSweep< LatticeModel_T >( pdfFieldID ), "LBM SPLIT PURE" );
 
+        // Velocity Check
+        timeloop.add() << Sweep(FBfunc::VelocityCheckMEM<LatticeModel_T, FlagField_T, BodyField_T>
+                                        (blocks, bodyStorageID, bodyFieldID, pdfFieldID, flagFieldID, FBfunc::Fluid_Flag, config), "LBM Velocity Check");
+
         if( useForceAveraging ) {
 
             // store force/torque from hydrodynamic interactions in container1
@@ -1206,7 +1204,7 @@ namespace fluidizedBed {
        }
 
        if (calculateParticleFlux) {
-          timeloop.addFuncAfterTimeStep(FBfunc::ParticleFluxer(blocks, bodyStorageID, config), "Calculate Particle Flux");
+          timeloop.addFuncAfterTimeStep(FBfunc::ParticleFlux(blocks, bodyStorageID, config), "Calculate Particle Flux");
        }
 
        if (calculateGranularTempGlobal) {
@@ -1218,14 +1216,14 @@ namespace fluidizedBed {
        }
 
        if (calculatePressureDifference) {
-          timeloop.add() << Sweep(FBfunc::PressureSweeper<LatticeModel_T, FlagField_T>(blocks, pdfFieldID, flagFieldID, lowerCellPlane, upperCellPlane, FBfunc::Fluid_Flag, config),
+          timeloop.addFuncAfterTimeStep(FBfunc::PressureByDensity<LatticeModel_T, FlagField_T>(blocks, pdfFieldID, flagFieldID, lowerCellPlane, upperCellPlane, FBfunc::Fluid_Flag, config),
                                   "Calculate Pressure Drop with Density");
        }
 
-       timeloop.addFuncAfterTimeStep(FBfunc::ExternalForcer(blocks, bodyStorageID, config), "Add External Forces");
+       timeloop.addFuncAfterTimeStep(FBfunc::ExternalForce(blocks, bodyStorageID, config), "Add External Forces");
 
        if (calculateSolidVolumeFraction) {
-          timeloop.add() << Sweep(FBfunc::FractionCalculatorMEM<FlagField_T>(blocks, flagFieldID, config), "Calculate Solid Volume Fraction");
+          timeloop.addFuncAfterTimeStep(FBfunc::FractionCalculator<FlagField_T>(blocks, flagFieldID, config), "Calculate Solid Volume Fraction");
        }
 
        if (calculateCenterOfMass) {
@@ -1292,12 +1290,6 @@ namespace fluidizedBed {
                                                                 (xPeriodic || zPeriodic) ? radiusA + real_c(2) * overlap : real_c(2) * overlap), "Obstacle Location Check");
 
        timeloop.addFuncAfterTimeStep(FBfunc::ObstacleLinearVelocityCheck(blocks, bodyStorageID, config), "Obstacle Velocity Check");
-
-       // Velocity Check
-
-          timeloop.add()
-                << Sweep(FBfunc::VelocityCheckMEM<LatticeModel_T, FlagField_T, BodyField_T>(blocks, bodyStorageID, bodyFieldID, pdfFieldID, flagFieldID, FBfunc::Fluid_Flag, config),
-                         "LBM Velocity Check");
 
        WcTimingPool timeloopTiming;
 

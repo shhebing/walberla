@@ -1,4 +1,4 @@
-// Everything is to be specified in SI units! [m], [s], [kg]
+// Everything is to be specified in SI units!
 // Except parameters labeled LBM
 
 Model
