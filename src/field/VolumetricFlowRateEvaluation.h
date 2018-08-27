@@ -51,7 +51,7 @@ typedef std::function< real_t () >  FlowRateSolution_T;
 typedef std::function< Vector3< real_t > ( const Vector3< real_t > & ) >  FlowRateVelocitySolution_T;
 
 const std::string     volumetricFlowRateEvaluationFilename("flowrate.dat");
-const real_t          volumetricFlowRateEvaluationNormalization( real_t(1) );
+const real_t          volumetricFlowRateEvaluationNormalization( 1_r );
 const Vector3<bool>   volumetricFlowRateEvaluationAxis( Vector3<bool>( true, false, false ) );
 const Vector3<real_t> volumetricFlowRateEvaluationPoint( Vector3<real_t>( real_c(0.5) ) );
 
@@ -164,7 +164,7 @@ public:
       filename_( internal::volumetricFlowRateEvaluationFilename ),
       normalizationFactor_( internal::volumetricFlowRateEvaluationNormalization ),
       axis_( internal::volumetricFlowRateEvaluationAxis ), surfacePoint_( internal::volumetricFlowRateEvaluationPoint ),
-      flowRate_( real_t(0) ), velocitySolutionFlowRate_( real_t(0) ),
+      flowRate_( 0_r ), velocitySolutionFlowRate_( 0_r ),
       requiredSelectors_(requiredSelectors), incompatibleSelectors_( incompatibleSelectors )
    {
       auto _blocks = blocks.lock();
@@ -183,7 +183,7 @@ public:
       filename_( internal::volumetricFlowRateEvaluationFilename ),
       normalizationFactor_( internal::volumetricFlowRateEvaluationNormalization ),
       axis_( internal::volumetricFlowRateEvaluationAxis ), surfacePoint_( internal::volumetricFlowRateEvaluationPoint ),
-      flowRate_( real_t(0) ), velocitySolutionFlowRate_( real_t(0) ),
+      flowRate_( 0_r ), velocitySolutionFlowRate_( 0_r ),
       requiredSelectors_(requiredSelectors), incompatibleSelectors_( incompatibleSelectors )
    {
       static_assert( (boost::is_same< Filter_T, DefaultEvaluationFilter >::value),
@@ -206,7 +206,7 @@ public:
    real_t solution() const
    {
       if( !solution_ )
-         return real_t(0);
+         return 0_r;
 
       auto blocks = blocks_.lock();
       WALBERLA_CHECK_NOT_NULLPTR( blocks, "Trying to access 'VolumetricFlowRateEvaluation' for a block storage object that doesn't exist anymore" );
@@ -287,8 +287,8 @@ void VolumetricFlowRateEvaluation< VelocityField_T, Filter_T >::operator()()
    sp[1] += surfacePoint_[1] * domainAABB.ySize();
    sp[2] += surfacePoint_[2] * domainAABB.zSize();
 
-   real_t _flowRate( real_t(0) );
-   real_t _velocitySolutionFlowRate( real_t(0) );
+   real_t _flowRate( 0_r );
+   real_t _velocitySolutionFlowRate( 0_r );
 
    for( auto block = blocks->begin( requiredSelectors_, incompatibleSelectors_ ); block != blocks->end(); ++block )
    {
@@ -468,8 +468,8 @@ void VolumetricFlowRateEvaluation< VelocityField_T, Filter_T >::operator()()
       {
          std::ofstream file( filename_.c_str(), std::ofstream::out | std::ofstream::app );
          file << ( executionCounter_ - uint_t(1) ) << " " << flowRate_ << " " << velocitySolutionFlowRate_ << " " << _solution << " "
-              << ( isIdentical( velocitySolutionFlowRate_, real_t(0) ) ? real_t(0) : std::abs( ( flowRate_ - velocitySolutionFlowRate_ ) / velocitySolutionFlowRate_ ) ) << " "
-              << ( isIdentical( _solution, real_t(0) ) ? real_t(0) : std::abs( ( flowRate_ - _solution ) / _solution ) ) << std::endl;
+              << ( isIdentical( velocitySolutionFlowRate_, 0_r ) ? 0_r : std::abs( ( flowRate_ - velocitySolutionFlowRate_ ) / velocitySolutionFlowRate_ ) ) << " "
+              << ( isIdentical( _solution, 0_r ) ? 0_r : std::abs( ( flowRate_ - _solution ) / _solution ) ) << std::endl;
          file.close();
       }
    }

@@ -74,7 +74,7 @@ void RBGS< Stencil_T >::update( IBlock * const block, const bool rb )
 {
 #ifndef NDEBUG
    for( auto dir = Stencil_T::beginNoCenter(); dir != Stencil_T::end(); ++dir )
-      WALBERLA_ASSERT( realIsIdentical( dir.length(), real_t(1) ) );
+      WALBERLA_ASSERT( realIsIdentical( dir.length(), 1_r ) );
 #endif
 
    Field_T * uf( NULL );

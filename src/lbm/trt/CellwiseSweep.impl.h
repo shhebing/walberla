@@ -67,17 +67,17 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
    const real_t lambda_d = src->latticeModel().collisionModel().lambda_d();
 
    // common prefactors for calculating the equilibrium parts
-   const real_t t0   = real_t(4.0) / real_t( 9.0);                // 1/3      for C
-   const real_t t1x2 = real_t(1.0) / real_t( 9.0) * real_t(2.0);  // 1/18 * 2 for N, S, W, E, T, B
-   const real_t t2x2 = real_t(1.0) / real_t(36.0) * real_t(2.0);  // 1/36 * 2 else
+   const real_t t0   = 4.0_r / real_t( 9.0);                // 1/3      for C
+   const real_t t1x2 = 1.0_r / real_t( 9.0) * 2.0_r;  // 1/18 * 2 for N, S, W, E, T, B
+   const real_t t2x2 = 1.0_r / 36.0_r * 2.0_r;  // 1/36 * 2 else
 
-   const real_t inv2csq2 = real_t(1.0) / ( real_t(2.0) * ( real_t(1.0) / real_t(3.0) ) * ( real_t(1.0) / real_t(3.0) ) ); //speed of sound related factor for equilibrium distribution function
+   const real_t inv2csq2 = 1.0_r / ( 2.0_r * ( 1.0_r / 3.0_r ) * ( 1.0_r / 3.0_r ) ); //speed of sound related factor for equilibrium distribution function
    const real_t fac1     = t1x2 * inv2csq2;
    const real_t fac2     = t2x2 * inv2csq2;
 
    // relaxation parameter variables
-   const real_t lambda_e_scaled = real_t(0.5) * lambda_e; // 0.5 times the usual value ...
-   const real_t lambda_d_scaled = real_t(0.5) * lambda_d; // ... due to the way of calculations
+   const real_t lambda_e_scaled = 0.5_r * lambda_e; // 0.5 times the usual value ...
+   const real_t lambda_d_scaled = 0.5_r * lambda_d; // ... due to the way of calculations
 
    WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ( src, numberOfGhostLayersToInclude,
 
@@ -89,31 +89,31 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
 
          WALBERLA_LBM_CELLWISE_SWEEP_D2Q9_DENSITY_VELOCITY_INCOMP()
 
-         this->densityVelocityOut( x, y, z, lm, Vector3<real_t>( velX, velY, real_t(0) ), rho + real_t(1) );
+         this->densityVelocityOut( x, y, z, lm, Vector3<real_t>( velX, velY, 0_r ), rho + 1_r );
 
-         const real_t feq_common = rho - real_t(1.5) * ( velX * velX + velY * velY );
+         const real_t feq_common = rho - 1.5_r * ( velX * velX + velY * velY );
 
-         dst->get( x, y, z, Stencil_T::idx[C] ) = vC * (real_t(1.0) - lambda_e) + lambda_e * t0 * feq_common;
+         dst->get( x, y, z, Stencil_T::idx[C] ) = vC * (1.0_r - lambda_e) + lambda_e * t0 * feq_common;
 
          const real_t velXPY = velX + velY;
          const real_t  sym_NE_SW = lambda_e_scaled * ( vNE + vSW - fac2 * velXPY * velXPY - t2x2 * feq_common );
-         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - real_t(3.0) * t2x2 * velXPY );
+         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - 3.0_r * t2x2 * velXPY );
          dst->get( x, y, z, Stencil_T::idx[NE] ) = vNE - sym_NE_SW - asym_NE_SW;
          dst->get( x, y, z, Stencil_T::idx[SW] ) = vSW - sym_NE_SW + asym_NE_SW;
 
          const real_t velXMY = velX - velY;
          const real_t  sym_SE_NW = lambda_e_scaled * ( vSE + vNW - fac2 * velXMY * velXMY - t2x2 * feq_common );
-         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - real_t(3.0) * t2x2 * velXMY );
+         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - 3.0_r * t2x2 * velXMY );
          dst->get( x, y, z, Stencil_T::idx[SE] ) = vSE - sym_SE_NW - asym_SE_NW;
          dst->get( x, y, z, Stencil_T::idx[NW] ) = vNW - sym_SE_NW + asym_SE_NW;
 
          const real_t  sym_N_S = lambda_e_scaled * ( vN + vS - fac1 * velY * velY - t1x2 * feq_common );
-         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - real_t(3.0) * t1x2 * velY );
+         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - 3.0_r * t1x2 * velY );
          dst->get( x, y, z, Stencil_T::idx[N] ) = vN - sym_N_S - asym_N_S;
          dst->get( x, y, z, Stencil_T::idx[S] ) = vS - sym_N_S + asym_N_S;
 
          const real_t  sym_E_W = lambda_e_scaled * ( vE + vW - fac1 * velX * velX - t1x2 * feq_common );
-         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - real_t(3.0) * t1x2 * velX );
+         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - 3.0_r * t1x2 * velX );
          dst->get( x, y, z, Stencil_T::idx[E] ) = vE - sym_E_W - asym_E_W;
          dst->get( x, y, z, Stencil_T::idx[W] ) = vW - sym_E_W + asym_E_W;
       }
@@ -128,17 +128,17 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
    const real_t lambda_d = src->latticeModel().collisionModel().lambda_d();
 
    // common prefactors for calculating the equilibrium parts
-   const real_t t0   = real_t(4.0) / real_t( 9.0);                // 1/3      for C
-   const real_t t1x2 = real_t(1.0) / real_t( 9.0) * real_t(2.0);  // 1/18 * 2 for N, S, W, E, T, B
-   const real_t t2x2 = real_t(1.0) / real_t(36.0) * real_t(2.0);  // 1/36 * 2 else
+   const real_t t0   = 4.0_r / real_t( 9.0);                // 1/3      for C
+   const real_t t1x2 = 1.0_r / real_t( 9.0) * 2.0_r;  // 1/18 * 2 for N, S, W, E, T, B
+   const real_t t2x2 = 1.0_r / 36.0_r * 2.0_r;  // 1/36 * 2 else
 
-   const real_t inv2csq2 = real_t(1.0) / ( real_t(2.0) * ( real_t(1.0) / real_t(3.0) ) * ( real_t(1.0) / real_t(3.0) ) ); //speed of sound related factor for equilibrium distribution function
+   const real_t inv2csq2 = 1.0_r / ( 2.0_r * ( 1.0_r / 3.0_r ) * ( 1.0_r / 3.0_r ) ); //speed of sound related factor for equilibrium distribution function
    const real_t fac1     = t1x2 * inv2csq2;
    const real_t fac2     = t2x2 * inv2csq2;
 
    // relaxation parameter variables
-   const real_t lambda_e_scaled = real_t(0.5) * lambda_e; // 0.5 times the usual value ...
-   const real_t lambda_d_scaled = real_t(0.5) * lambda_d; // ... due to the way of calculations
+   const real_t lambda_e_scaled = 0.5_r * lambda_e; // 0.5 times the usual value ...
+   const real_t lambda_d_scaled = 0.5_r * lambda_d; // ... due to the way of calculations
 
    WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ( src, numberOfGhostLayersToInclude,
 
@@ -150,31 +150,31 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
 
          WALBERLA_LBM_CELLWISE_SWEEP_D2Q9_DENSITY_VELOCITY_INCOMP()
 
-         this->densityVelocityOut( x, y, z, lm, Vector3<real_t>( velX, velY, real_t(0) ), rho + real_t(1) );
+         this->densityVelocityOut( x, y, z, lm, Vector3<real_t>( velX, velY, 0_r ), rho + 1_r );
 
-         const real_t feq_common = rho - real_t(1.5) * ( velX * velX + velY * velY );
+         const real_t feq_common = rho - 1.5_r * ( velX * velX + velY * velY );
 
-         src->get( x, y, z, Stencil_T::idx[C] ) = vC * (real_t(1.0) - lambda_e) + lambda_e * t0 * feq_common;
+         src->get( x, y, z, Stencil_T::idx[C] ) = vC * (1.0_r - lambda_e) + lambda_e * t0 * feq_common;
 
          const real_t velXPY = velX + velY;
          const real_t  sym_NE_SW = lambda_e_scaled * ( vNE + vSW - fac2 * velXPY * velXPY - t2x2 * feq_common );
-         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - real_t(3.0) * t2x2 * velXPY );
+         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - 3.0_r * t2x2 * velXPY );
          src->get( x, y, z, Stencil_T::idx[NE] ) = vNE - sym_NE_SW - asym_NE_SW;
          src->get( x, y, z, Stencil_T::idx[SW] ) = vSW - sym_NE_SW + asym_NE_SW;
 
          const real_t velXMY = velX - velY;
          const real_t  sym_SE_NW = lambda_e_scaled * ( vSE + vNW - fac2 * velXMY * velXMY - t2x2 * feq_common );
-         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - real_t(3.0) * t2x2 * velXMY );
+         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - 3.0_r * t2x2 * velXMY );
          src->get( x, y, z, Stencil_T::idx[SE] ) = vSE - sym_SE_NW - asym_SE_NW;
          src->get( x, y, z, Stencil_T::idx[NW] ) = vNW - sym_SE_NW + asym_SE_NW;
 
          const real_t  sym_N_S = lambda_e_scaled * ( vN + vS - fac1 * velY * velY - t1x2 * feq_common );
-         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - real_t(3.0) * t1x2 * velY );
+         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - 3.0_r * t1x2 * velY );
          src->get( x, y, z, Stencil_T::idx[N] ) = vN - sym_N_S - asym_N_S;
          src->get( x, y, z, Stencil_T::idx[S] ) = vS - sym_N_S + asym_N_S;
 
          const real_t  sym_E_W = lambda_e_scaled * ( vE + vW - fac1 * velX * velX - t1x2 * feq_common );
-         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - real_t(3.0) * t1x2 * velX );
+         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - 3.0_r * t1x2 * velX );
          src->get( x, y, z, Stencil_T::idx[E] ) = vE - sym_E_W - asym_E_W;
          src->get( x, y, z, Stencil_T::idx[W] ) = vW - sym_E_W + asym_E_W;
       }
@@ -212,17 +212,17 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
    const real_t lambda_d = src->latticeModel().collisionModel().lambda_d();
 
    // common prefactors for calculating the equilibrium parts
-   const real_t t0   = real_t(1.0) / real_t(3.0);                 // 1/3      for C
-   const real_t t1x2 = real_t(1.0) / real_t(18.0) * real_t(2.0);  // 1/18 * 2 for N, S, W, E, T, B
-   const real_t t2x2 = real_t(1.0) / real_t(36.0) * real_t(2.0);  // 1/36 * 2 else
+   const real_t t0   = 1.0_r / 3.0_r;                 // 1/3      for C
+   const real_t t1x2 = 1.0_r / 18.0_r * 2.0_r;  // 1/18 * 2 for N, S, W, E, T, B
+   const real_t t2x2 = 1.0_r / 36.0_r * 2.0_r;  // 1/36 * 2 else
 
-   const real_t inv2csq2 = real_t(1.0) / ( real_t(2.0) * ( real_t(1.0) / real_t(3.0) ) * ( real_t(1.0) / real_t(3.0) ) ); //speed of sound related factor for equilibrium distribution function
+   const real_t inv2csq2 = 1.0_r / ( 2.0_r * ( 1.0_r / 3.0_r ) * ( 1.0_r / 3.0_r ) ); //speed of sound related factor for equilibrium distribution function
    const real_t fac1     = t1x2 * inv2csq2;
    const real_t fac2     = t2x2 * inv2csq2;
 
    // relaxation parameter variables
-   const real_t lambda_e_scaled = real_t(0.5) * lambda_e; // 0.5 times the usual value ...
-   const real_t lambda_d_scaled = real_t(0.5) * lambda_d; // ... due to the way of calculations
+   const real_t lambda_e_scaled = 0.5_r * lambda_e; // 0.5 times the usual value ...
+   const real_t lambda_d_scaled = 0.5_r * lambda_d; // ... due to the way of calculations
 
    WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ( src, numberOfGhostLayersToInclude,
 
@@ -234,60 +234,60 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
 
          WALBERLA_LBM_CELLWISE_SWEEP_D3Q19_DENSITY_VELOCITY_INCOMP()
          
-         this->densityVelocityOut( x, y, z, lm, Vector3<real_t>( velX, velY, velZ ), rho + real_t(1) );
+         this->densityVelocityOut( x, y, z, lm, Vector3<real_t>( velX, velY, velZ ), rho + 1_r );
 
-         const real_t feq_common = rho - real_t(1.5) * ( velX * velX + velY * velY + velZ * velZ );
+         const real_t feq_common = rho - 1.5_r * ( velX * velX + velY * velY + velZ * velZ );
 
-         dst->get( x, y, z, Stencil_T::idx[C] ) = vC * (real_t(1.0) - lambda_e) + lambda_e * t0 * feq_common;
+         dst->get( x, y, z, Stencil_T::idx[C] ) = vC * (1.0_r - lambda_e) + lambda_e * t0 * feq_common;
 
          const real_t velXPY = velX + velY;
          const real_t  sym_NE_SW = lambda_e_scaled * ( vNE + vSW - fac2 * velXPY * velXPY - t2x2 * feq_common );
-         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - real_t(3.0) * t2x2 * velXPY );
+         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - 3.0_r * t2x2 * velXPY );
          dst->get( x, y, z, Stencil_T::idx[NE] ) = vNE - sym_NE_SW - asym_NE_SW;
          dst->get( x, y, z, Stencil_T::idx[SW] ) = vSW - sym_NE_SW + asym_NE_SW;
 
          const real_t velXMY = velX - velY;
          const real_t  sym_SE_NW = lambda_e_scaled * ( vSE + vNW - fac2 * velXMY * velXMY - t2x2 * feq_common );
-         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - real_t(3.0) * t2x2 * velXMY );
+         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - 3.0_r * t2x2 * velXMY );
          dst->get( x, y, z, Stencil_T::idx[SE] ) = vSE - sym_SE_NW - asym_SE_NW;
          dst->get( x, y, z, Stencil_T::idx[NW] ) = vNW - sym_SE_NW + asym_SE_NW;
 
          const real_t velXPZ = velX + velZ;
          const real_t  sym_TE_BW = lambda_e_scaled * ( vTE + vBW - fac2 * velXPZ * velXPZ - t2x2 * feq_common );
-         const real_t asym_TE_BW = lambda_d_scaled * ( vTE - vBW - real_t(3.0) * t2x2 * velXPZ );
+         const real_t asym_TE_BW = lambda_d_scaled * ( vTE - vBW - 3.0_r * t2x2 * velXPZ );
          dst->get( x, y, z, Stencil_T::idx[TE] ) = vTE - sym_TE_BW - asym_TE_BW;
          dst->get( x, y, z, Stencil_T::idx[BW] ) = vBW - sym_TE_BW + asym_TE_BW;
 
          const real_t velXMZ = velX - velZ;
          const real_t  sym_BE_TW = lambda_e_scaled * ( vBE + vTW - fac2 * velXMZ * velXMZ - t2x2 * feq_common );
-         const real_t asym_BE_TW = lambda_d_scaled * ( vBE - vTW - real_t(3.0) * t2x2 * velXMZ );
+         const real_t asym_BE_TW = lambda_d_scaled * ( vBE - vTW - 3.0_r * t2x2 * velXMZ );
          dst->get( x, y, z, Stencil_T::idx[BE] ) = vBE - sym_BE_TW - asym_BE_TW;
          dst->get( x, y, z, Stencil_T::idx[TW] ) = vTW - sym_BE_TW + asym_BE_TW;
 
          const real_t velYPZ = velY + velZ;
          const real_t  sym_TN_BS = lambda_e_scaled * ( vTN + vBS - fac2 * velYPZ * velYPZ - t2x2 * feq_common );
-         const real_t asym_TN_BS = lambda_d_scaled * ( vTN - vBS - real_t(3.0) * t2x2 * velYPZ );
+         const real_t asym_TN_BS = lambda_d_scaled * ( vTN - vBS - 3.0_r * t2x2 * velYPZ );
          dst->get( x, y, z, Stencil_T::idx[TN] ) = vTN - sym_TN_BS - asym_TN_BS;
          dst->get( x, y, z, Stencil_T::idx[BS] ) = vBS - sym_TN_BS + asym_TN_BS;
 
          const real_t velYMZ = velY - velZ;
          const real_t  sym_BN_TS = lambda_e_scaled * ( vBN + vTS - fac2 * velYMZ * velYMZ - t2x2 * feq_common );
-         const real_t asym_BN_TS = lambda_d_scaled * ( vBN - vTS - real_t(3.0) * t2x2 * velYMZ );
+         const real_t asym_BN_TS = lambda_d_scaled * ( vBN - vTS - 3.0_r * t2x2 * velYMZ );
          dst->get( x, y, z, Stencil_T::idx[BN] ) = vBN - sym_BN_TS - asym_BN_TS;
          dst->get( x, y, z, Stencil_T::idx[TS] ) = vTS - sym_BN_TS + asym_BN_TS;
 
          const real_t  sym_N_S = lambda_e_scaled * ( vN + vS - fac1 * velY * velY - t1x2 * feq_common );
-         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - real_t(3.0) * t1x2 * velY );
+         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - 3.0_r * t1x2 * velY );
          dst->get( x, y, z, Stencil_T::idx[N] ) = vN - sym_N_S - asym_N_S;
          dst->get( x, y, z, Stencil_T::idx[S] ) = vS - sym_N_S + asym_N_S;
 
          const real_t  sym_E_W = lambda_e_scaled * ( vE + vW - fac1 * velX * velX - t1x2 * feq_common );
-         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - real_t(3.0) * t1x2 * velX );
+         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - 3.0_r * t1x2 * velX );
          dst->get( x, y, z, Stencil_T::idx[E] ) = vE - sym_E_W - asym_E_W;
          dst->get( x, y, z, Stencil_T::idx[W] ) = vW - sym_E_W + asym_E_W;
 
          const real_t  sym_T_B = lambda_e_scaled * ( vT + vB  - fac1 * velZ * velZ - t1x2 * feq_common );
-         const real_t asym_T_B = lambda_d_scaled * ( vT - vB - real_t(3.0) * t1x2 * velZ );
+         const real_t asym_T_B = lambda_d_scaled * ( vT - vB - 3.0_r * t1x2 * velZ );
          dst->get( x, y, z, Stencil_T::idx[T] ) = vT - sym_T_B - asym_T_B;
          dst->get( x, y, z, Stencil_T::idx[B] ) = vB - sym_T_B + asym_T_B;
       }
@@ -302,17 +302,17 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
    const real_t lambda_d = src->latticeModel().collisionModel().lambda_d();
 
    // common prefactors for calculating the equilibrium parts
-   const real_t t0   = real_t(1.0) / real_t(3.0);                 // 1/3      for C
-   const real_t t1x2 = real_t(1.0) / real_t(18.0) * real_t(2.0);  // 1/18 * 2 for N, S, W, E, T, B
-   const real_t t2x2 = real_t(1.0) / real_t(36.0) * real_t(2.0);  // 1/36 * 2 else
+   const real_t t0   = 1.0_r / 3.0_r;                 // 1/3      for C
+   const real_t t1x2 = 1.0_r / 18.0_r * 2.0_r;  // 1/18 * 2 for N, S, W, E, T, B
+   const real_t t2x2 = 1.0_r / 36.0_r * 2.0_r;  // 1/36 * 2 else
 
-   const real_t inv2csq2 = real_t(1.0) / ( real_t(2.0) * ( real_t(1.0) / real_t(3.0) ) * ( real_t(1.0) / real_t(3.0) ) ); //speed of sound related factor for equilibrium distribution function
+   const real_t inv2csq2 = 1.0_r / ( 2.0_r * ( 1.0_r / 3.0_r ) * ( 1.0_r / 3.0_r ) ); //speed of sound related factor for equilibrium distribution function
    const real_t fac1     = t1x2 * inv2csq2;
    const real_t fac2     = t2x2 * inv2csq2;
 
    // relaxation parameter variables
-   const real_t lambda_e_scaled = real_t(0.5) * lambda_e; // 0.5 times the usual value ...
-   const real_t lambda_d_scaled = real_t(0.5) * lambda_d; // ... due to the way of calculations
+   const real_t lambda_e_scaled = 0.5_r * lambda_e; // 0.5 times the usual value ...
+   const real_t lambda_d_scaled = 0.5_r * lambda_d; // ... due to the way of calculations
 
    WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ( src, numberOfGhostLayersToInclude,
 
@@ -324,60 +324,60 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
 
          WALBERLA_LBM_CELLWISE_SWEEP_D3Q19_DENSITY_VELOCITY_INCOMP()
          
-         this->densityVelocityOut( x, y, z, lm, Vector3<real_t>( velX, velY, velZ ), rho + real_t(1) );
+         this->densityVelocityOut( x, y, z, lm, Vector3<real_t>( velX, velY, velZ ), rho + 1_r );
 
-         const real_t feq_common = rho - real_t(1.5) * ( velX * velX + velY * velY + velZ * velZ );
+         const real_t feq_common = rho - 1.5_r * ( velX * velX + velY * velY + velZ * velZ );
 
-         src->get( x, y, z, Stencil_T::idx[C] ) = vC * (real_t(1.0) - lambda_e) + lambda_e * t0 * feq_common;
+         src->get( x, y, z, Stencil_T::idx[C] ) = vC * (1.0_r - lambda_e) + lambda_e * t0 * feq_common;
 
          const real_t velXPY = velX + velY;
          const real_t  sym_NE_SW = lambda_e_scaled * ( vNE + vSW - fac2 * velXPY * velXPY - t2x2 * feq_common );
-         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - real_t(3.0) * t2x2 * velXPY );
+         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - 3.0_r * t2x2 * velXPY );
          src->get( x, y, z, Stencil_T::idx[NE] ) = vNE - sym_NE_SW - asym_NE_SW;
          src->get( x, y, z, Stencil_T::idx[SW] ) = vSW - sym_NE_SW + asym_NE_SW;
 
          const real_t velXMY = velX - velY;
          const real_t  sym_SE_NW = lambda_e_scaled * ( vSE + vNW - fac2 * velXMY * velXMY - t2x2 * feq_common );
-         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - real_t(3.0) * t2x2 * velXMY );
+         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - 3.0_r * t2x2 * velXMY );
          src->get( x, y, z, Stencil_T::idx[SE] ) = vSE - sym_SE_NW - asym_SE_NW;
          src->get( x, y, z, Stencil_T::idx[NW] ) = vNW - sym_SE_NW + asym_SE_NW;
 
          const real_t velXPZ = velX + velZ;
          const real_t  sym_TE_BW = lambda_e_scaled * ( vTE + vBW - fac2 * velXPZ * velXPZ - t2x2 * feq_common );
-         const real_t asym_TE_BW = lambda_d_scaled * ( vTE - vBW - real_t(3.0) * t2x2 * velXPZ );
+         const real_t asym_TE_BW = lambda_d_scaled * ( vTE - vBW - 3.0_r * t2x2 * velXPZ );
          src->get( x, y, z, Stencil_T::idx[TE] ) = vTE - sym_TE_BW - asym_TE_BW;
          src->get( x, y, z, Stencil_T::idx[BW] ) = vBW - sym_TE_BW + asym_TE_BW;
 
          const real_t velXMZ = velX - velZ;
          const real_t  sym_BE_TW = lambda_e_scaled * ( vBE + vTW - fac2 * velXMZ * velXMZ - t2x2 * feq_common );
-         const real_t asym_BE_TW = lambda_d_scaled * ( vBE - vTW - real_t(3.0) * t2x2 * velXMZ );
+         const real_t asym_BE_TW = lambda_d_scaled * ( vBE - vTW - 3.0_r * t2x2 * velXMZ );
          src->get( x, y, z, Stencil_T::idx[BE] ) = vBE - sym_BE_TW - asym_BE_TW;
          src->get( x, y, z, Stencil_T::idx[TW] ) = vTW - sym_BE_TW + asym_BE_TW;
 
          const real_t velYPZ = velY + velZ;
          const real_t  sym_TN_BS = lambda_e_scaled * ( vTN + vBS - fac2 * velYPZ * velYPZ - t2x2 * feq_common );
-         const real_t asym_TN_BS = lambda_d_scaled * ( vTN - vBS - real_t(3.0) * t2x2 * velYPZ );
+         const real_t asym_TN_BS = lambda_d_scaled * ( vTN - vBS - 3.0_r * t2x2 * velYPZ );
          src->get( x, y, z, Stencil_T::idx[TN] ) = vTN - sym_TN_BS - asym_TN_BS;
          src->get( x, y, z, Stencil_T::idx[BS] ) = vBS - sym_TN_BS + asym_TN_BS;
 
          const real_t velYMZ = velY - velZ;
          const real_t  sym_BN_TS = lambda_e_scaled * ( vBN + vTS - fac2 * velYMZ * velYMZ - t2x2 * feq_common );
-         const real_t asym_BN_TS = lambda_d_scaled * ( vBN - vTS - real_t(3.0) * t2x2 * velYMZ );
+         const real_t asym_BN_TS = lambda_d_scaled * ( vBN - vTS - 3.0_r * t2x2 * velYMZ );
          src->get( x, y, z, Stencil_T::idx[BN] ) = vBN - sym_BN_TS - asym_BN_TS;
          src->get( x, y, z, Stencil_T::idx[TS] ) = vTS - sym_BN_TS + asym_BN_TS;
 
          const real_t  sym_N_S = lambda_e_scaled * ( vN + vS - fac1 * velY * velY - t1x2 * feq_common );
-         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - real_t(3.0) * t1x2 * velY );
+         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - 3.0_r * t1x2 * velY );
          src->get( x, y, z, Stencil_T::idx[N] ) = vN - sym_N_S - asym_N_S;
          src->get( x, y, z, Stencil_T::idx[S] ) = vS - sym_N_S + asym_N_S;
 
          const real_t  sym_E_W = lambda_e_scaled * ( vE + vW - fac1 * velX * velX - t1x2 * feq_common );
-         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - real_t(3.0) * t1x2 * velX );
+         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - 3.0_r * t1x2 * velX );
          src->get( x, y, z, Stencil_T::idx[E] ) = vE - sym_E_W - asym_E_W;
          src->get( x, y, z, Stencil_T::idx[W] ) = vW - sym_E_W + asym_E_W;
 
          const real_t  sym_T_B = lambda_e_scaled * ( vT + vB  - fac1 * velZ * velZ - t1x2 * feq_common );
-         const real_t asym_T_B = lambda_d_scaled * ( vT - vB - real_t(3.0) * t1x2 * velZ );
+         const real_t asym_T_B = lambda_d_scaled * ( vT - vB - 3.0_r * t1x2 * velZ );
          src->get( x, y, z, Stencil_T::idx[T] ) = vT - sym_T_B - asym_T_B;
          src->get( x, y, z, Stencil_T::idx[B] ) = vB - sym_T_B + asym_T_B;
       }
@@ -411,15 +411,15 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
    const real_t lambda_d = src->latticeModel().collisionModel().lambda_d();
 
    // common prefactors for calculating the equilibrium parts
-   const real_t t0_0   = real_t(1.0) / real_t(3.0);                 // 1/3      for C
-   const real_t t1x2_0 = real_t(1.0) / real_t(18.0) * real_t(2.0);  // 1/18 * 2 for N, S, W, E, T, B
-   const real_t t2x2_0 = real_t(1.0) / real_t(36.0) * real_t(2.0);  // 1/36 * 2 else
+   const real_t t0_0   = 1.0_r / 3.0_r;                 // 1/3      for C
+   const real_t t1x2_0 = 1.0_r / 18.0_r * 2.0_r;  // 1/18 * 2 for N, S, W, E, T, B
+   const real_t t2x2_0 = 1.0_r / 36.0_r * 2.0_r;  // 1/36 * 2 else
 
-   const real_t inv2csq2 = real_t(1.0) / ( real_t(2.0) * ( real_t(1.0) / real_t(3.0) ) * ( real_t(1.0) / real_t(3.0) ) ); //speed of sound related factor for equilibrium distribution function
+   const real_t inv2csq2 = 1.0_r / ( 2.0_r * ( 1.0_r / 3.0_r ) * ( 1.0_r / 3.0_r ) ); //speed of sound related factor for equilibrium distribution function
 
    // relaxation parameter variables
-   const real_t lambda_e_scaled = real_t(0.5) * lambda_e; // 0.5 times the usual value ...
-   const real_t lambda_d_scaled = real_t(0.5) * lambda_d; // ... due to the way of calculations
+   const real_t lambda_e_scaled = 0.5_r * lambda_e; // 0.5 times the usual value ...
+   const real_t lambda_d_scaled = 0.5_r * lambda_d; // ... due to the way of calculations
 
    WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ( src, numberOfGhostLayersToInclude,
 
@@ -433,46 +433,46 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
          
          this->densityVelocityOut( x, y, z, lm, Vector3<real_t>( velX, velY, velZ ), rho );
 
-         const real_t feq_common = real_t(1.0) - real_t(1.5) * ( velX * velX + velY * velY + velZ * velZ );
+         const real_t feq_common = 1.0_r - 1.5_r * ( velX * velX + velY * velY + velZ * velZ );
 
-         dst->get( x, y, z, Stencil_T::idx[C] ) = vC * (real_t(1.0) - lambda_e) + lambda_e * t0_0 * rho * feq_common;
+         dst->get( x, y, z, Stencil_T::idx[C] ) = vC * (1.0_r - lambda_e) + lambda_e * t0_0 * rho * feq_common;
 
          const real_t t2x2 = t2x2_0 * rho;
          const real_t fac2 = t2x2 * inv2csq2;
 
          const real_t velXPY = velX + velY;
          const real_t  sym_NE_SW = lambda_e_scaled * ( vNE + vSW - fac2 * velXPY * velXPY - t2x2 * feq_common );
-         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - real_t(3.0) * t2x2 * velXPY );
+         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - 3.0_r * t2x2 * velXPY );
          dst->get( x, y, z, Stencil_T::idx[NE] ) = vNE - sym_NE_SW - asym_NE_SW;
          dst->get( x, y, z, Stencil_T::idx[SW] ) = vSW - sym_NE_SW + asym_NE_SW;
 
          const real_t velXMY = velX - velY;
          const real_t  sym_SE_NW = lambda_e_scaled * ( vSE + vNW - fac2 * velXMY * velXMY - t2x2 * feq_common );
-         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - real_t(3.0) * t2x2 * velXMY );
+         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - 3.0_r * t2x2 * velXMY );
          dst->get( x, y, z, Stencil_T::idx[SE] ) = vSE - sym_SE_NW - asym_SE_NW;
          dst->get( x, y, z, Stencil_T::idx[NW] ) = vNW - sym_SE_NW + asym_SE_NW;
 
          const real_t velXPZ = velX + velZ;
          const real_t  sym_TE_BW = lambda_e_scaled * ( vTE + vBW - fac2 * velXPZ * velXPZ - t2x2 * feq_common );
-         const real_t asym_TE_BW = lambda_d_scaled * ( vTE - vBW - real_t(3.0) * t2x2 * velXPZ );
+         const real_t asym_TE_BW = lambda_d_scaled * ( vTE - vBW - 3.0_r * t2x2 * velXPZ );
          dst->get( x, y, z, Stencil_T::idx[TE] ) = vTE - sym_TE_BW - asym_TE_BW;
          dst->get( x, y, z, Stencil_T::idx[BW] ) = vBW - sym_TE_BW + asym_TE_BW;
 
          const real_t velXMZ = velX - velZ;
          const real_t  sym_BE_TW = lambda_e_scaled * ( vBE + vTW - fac2 * velXMZ * velXMZ - t2x2 * feq_common );
-         const real_t asym_BE_TW = lambda_d_scaled * ( vBE - vTW - real_t(3.0) * t2x2 * velXMZ );
+         const real_t asym_BE_TW = lambda_d_scaled * ( vBE - vTW - 3.0_r * t2x2 * velXMZ );
          dst->get( x, y, z, Stencil_T::idx[BE] ) = vBE - sym_BE_TW - asym_BE_TW;
          dst->get( x, y, z, Stencil_T::idx[TW] ) = vTW - sym_BE_TW + asym_BE_TW;
 
          const real_t velYPZ = velY + velZ;
          const real_t  sym_TN_BS = lambda_e_scaled * ( vTN + vBS - fac2 * velYPZ * velYPZ - t2x2 * feq_common );
-         const real_t asym_TN_BS = lambda_d_scaled * ( vTN - vBS - real_t(3.0) * t2x2 * velYPZ );
+         const real_t asym_TN_BS = lambda_d_scaled * ( vTN - vBS - 3.0_r * t2x2 * velYPZ );
          dst->get( x, y, z, Stencil_T::idx[TN] ) = vTN - sym_TN_BS - asym_TN_BS;
          dst->get( x, y, z, Stencil_T::idx[BS] ) = vBS - sym_TN_BS + asym_TN_BS;
 
          const real_t velYMZ = velY - velZ;
          const real_t  sym_BN_TS = lambda_e_scaled * ( vBN + vTS - fac2 * velYMZ * velYMZ - t2x2 * feq_common );
-         const real_t asym_BN_TS = lambda_d_scaled * ( vBN - vTS - real_t(3.0) * t2x2 * velYMZ );
+         const real_t asym_BN_TS = lambda_d_scaled * ( vBN - vTS - 3.0_r * t2x2 * velYMZ );
          dst->get( x, y, z, Stencil_T::idx[BN] ) = vBN - sym_BN_TS - asym_BN_TS;
          dst->get( x, y, z, Stencil_T::idx[TS] ) = vTS - sym_BN_TS + asym_BN_TS;
 
@@ -480,17 +480,17 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
          const real_t fac1 = t1x2 * inv2csq2;
 
          const real_t  sym_N_S = lambda_e_scaled * ( vN + vS - fac1 * velY * velY - t1x2 * feq_common );
-         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - real_t(3.0) * t1x2 * velY );
+         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - 3.0_r * t1x2 * velY );
          dst->get( x, y, z, Stencil_T::idx[N] ) = vN - sym_N_S - asym_N_S;
          dst->get( x, y, z, Stencil_T::idx[S] ) = vS - sym_N_S + asym_N_S;
 
          const real_t  sym_E_W = lambda_e_scaled * ( vE + vW - fac1 * velX * velX - t1x2 * feq_common );
-         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - real_t(3.0) * t1x2 * velX );
+         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - 3.0_r * t1x2 * velX );
          dst->get( x, y, z, Stencil_T::idx[E] ) = vE - sym_E_W - asym_E_W;
          dst->get( x, y, z, Stencil_T::idx[W] ) = vW - sym_E_W + asym_E_W;
 
          const real_t  sym_T_B = lambda_e_scaled * ( vT + vB  - fac1 * velZ * velZ - t1x2 * feq_common );
-         const real_t asym_T_B = lambda_d_scaled * ( vT - vB - real_t(3.0) * t1x2 * velZ );
+         const real_t asym_T_B = lambda_d_scaled * ( vT - vB - 3.0_r * t1x2 * velZ );
          dst->get( x, y, z, Stencil_T::idx[T] ) = vT - sym_T_B - asym_T_B;
          dst->get( x, y, z, Stencil_T::idx[B] ) = vB - sym_T_B + asym_T_B;
       }
@@ -505,15 +505,15 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
    const real_t lambda_d = src->latticeModel().collisionModel().lambda_d();
 
    // common prefactors for calculating the equilibrium parts
-   const real_t t0_0   = real_t(1.0) / real_t(3.0);                 // 1/3      for C
-   const real_t t1x2_0 = real_t(1.0) / real_t(18.0) * real_t(2.0);  // 1/18 * 2 for N, S, W, E, T, B
-   const real_t t2x2_0 = real_t(1.0) / real_t(36.0) * real_t(2.0);  // 1/36 * 2 else
+   const real_t t0_0   = 1.0_r / 3.0_r;                 // 1/3      for C
+   const real_t t1x2_0 = 1.0_r / 18.0_r * 2.0_r;  // 1/18 * 2 for N, S, W, E, T, B
+   const real_t t2x2_0 = 1.0_r / 36.0_r * 2.0_r;  // 1/36 * 2 else
 
-   const real_t inv2csq2 = real_t(1.0) / ( real_t(2.0) * ( real_t(1.0) / real_t(3.0) ) * ( real_t(1.0) / real_t(3.0) ) ); //speed of sound related factor for equilibrium distribution function
+   const real_t inv2csq2 = 1.0_r / ( 2.0_r * ( 1.0_r / 3.0_r ) * ( 1.0_r / 3.0_r ) ); //speed of sound related factor for equilibrium distribution function
 
    // relaxation parameter variables
-   const real_t lambda_e_scaled = real_t(0.5) * lambda_e; // 0.5 times the usual value ...
-   const real_t lambda_d_scaled = real_t(0.5) * lambda_d; // ... due to the way of calculations
+   const real_t lambda_e_scaled = 0.5_r * lambda_e; // 0.5 times the usual value ...
+   const real_t lambda_d_scaled = 0.5_r * lambda_d; // ... due to the way of calculations
 
    WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ( src, numberOfGhostLayersToInclude,
 
@@ -527,46 +527,46 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
          
          this->densityVelocityOut( x, y, z, lm, Vector3<real_t>( velX, velY, velZ ), rho );
 
-         const real_t feq_common = real_t(1.0) - real_t(1.5) * ( velX * velX + velY * velY + velZ * velZ );
+         const real_t feq_common = 1.0_r - 1.5_r * ( velX * velX + velY * velY + velZ * velZ );
 
-         src->get( x, y, z, Stencil_T::idx[C] ) = vC * (real_t(1.0) - lambda_e) + lambda_e * t0_0 * rho * feq_common;
+         src->get( x, y, z, Stencil_T::idx[C] ) = vC * (1.0_r - lambda_e) + lambda_e * t0_0 * rho * feq_common;
 
          const real_t t2x2 = t2x2_0 * rho;
          const real_t fac2 = t2x2 * inv2csq2;
 
          const real_t velXPY = velX + velY;
          const real_t  sym_NE_SW = lambda_e_scaled * ( vNE + vSW - fac2 * velXPY * velXPY - t2x2 * feq_common );
-         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - real_t(3.0) * t2x2 * velXPY );
+         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - 3.0_r * t2x2 * velXPY );
          src->get( x, y, z, Stencil_T::idx[NE] ) = vNE - sym_NE_SW - asym_NE_SW;
          src->get( x, y, z, Stencil_T::idx[SW] ) = vSW - sym_NE_SW + asym_NE_SW;
 
          const real_t velXMY = velX - velY;
          const real_t  sym_SE_NW = lambda_e_scaled * ( vSE + vNW - fac2 * velXMY * velXMY - t2x2 * feq_common );
-         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - real_t(3.0) * t2x2 * velXMY );
+         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - 3.0_r * t2x2 * velXMY );
          src->get( x, y, z, Stencil_T::idx[SE] ) = vSE - sym_SE_NW - asym_SE_NW;
          src->get( x, y, z, Stencil_T::idx[NW] ) = vNW - sym_SE_NW + asym_SE_NW;
 
          const real_t velXPZ = velX + velZ;
          const real_t  sym_TE_BW = lambda_e_scaled * ( vTE + vBW - fac2 * velXPZ * velXPZ - t2x2 * feq_common );
-         const real_t asym_TE_BW = lambda_d_scaled * ( vTE - vBW - real_t(3.0) * t2x2 * velXPZ );
+         const real_t asym_TE_BW = lambda_d_scaled * ( vTE - vBW - 3.0_r * t2x2 * velXPZ );
          src->get( x, y, z, Stencil_T::idx[TE] ) = vTE - sym_TE_BW - asym_TE_BW;
          src->get( x, y, z, Stencil_T::idx[BW] ) = vBW - sym_TE_BW + asym_TE_BW;
 
          const real_t velXMZ = velX - velZ;
          const real_t  sym_BE_TW = lambda_e_scaled * ( vBE + vTW - fac2 * velXMZ * velXMZ - t2x2 * feq_common );
-         const real_t asym_BE_TW = lambda_d_scaled * ( vBE - vTW - real_t(3.0) * t2x2 * velXMZ );
+         const real_t asym_BE_TW = lambda_d_scaled * ( vBE - vTW - 3.0_r * t2x2 * velXMZ );
          src->get( x, y, z, Stencil_T::idx[BE] ) = vBE - sym_BE_TW - asym_BE_TW;
          src->get( x, y, z, Stencil_T::idx[TW] ) = vTW - sym_BE_TW + asym_BE_TW;
 
          const real_t velYPZ = velY + velZ;
          const real_t  sym_TN_BS = lambda_e_scaled * ( vTN + vBS - fac2 * velYPZ * velYPZ - t2x2 * feq_common );
-         const real_t asym_TN_BS = lambda_d_scaled * ( vTN - vBS - real_t(3.0) * t2x2 * velYPZ );
+         const real_t asym_TN_BS = lambda_d_scaled * ( vTN - vBS - 3.0_r * t2x2 * velYPZ );
          src->get( x, y, z, Stencil_T::idx[TN] ) = vTN - sym_TN_BS - asym_TN_BS;
          src->get( x, y, z, Stencil_T::idx[BS] ) = vBS - sym_TN_BS + asym_TN_BS;
 
          const real_t velYMZ = velY - velZ;
          const real_t  sym_BN_TS = lambda_e_scaled * ( vBN + vTS - fac2 * velYMZ * velYMZ - t2x2 * feq_common );
-         const real_t asym_BN_TS = lambda_d_scaled * ( vBN - vTS - real_t(3.0) * t2x2 * velYMZ );
+         const real_t asym_BN_TS = lambda_d_scaled * ( vBN - vTS - 3.0_r * t2x2 * velYMZ );
          src->get( x, y, z, Stencil_T::idx[BN] ) = vBN - sym_BN_TS - asym_BN_TS;
          src->get( x, y, z, Stencil_T::idx[TS] ) = vTS - sym_BN_TS + asym_BN_TS;
 
@@ -574,17 +574,17 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
          const real_t fac1 = t1x2 * inv2csq2;
 
          const real_t  sym_N_S = lambda_e_scaled * ( vN + vS - fac1 * velY * velY - t1x2 * feq_common );
-         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - real_t(3.0) * t1x2 * velY );
+         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - 3.0_r * t1x2 * velY );
          src->get( x, y, z, Stencil_T::idx[N] ) = vN - sym_N_S - asym_N_S;
          src->get( x, y, z, Stencil_T::idx[S] ) = vS - sym_N_S + asym_N_S;
 
          const real_t  sym_E_W = lambda_e_scaled * ( vE + vW - fac1 * velX * velX - t1x2 * feq_common );
-         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - real_t(3.0) * t1x2 * velX );
+         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - 3.0_r * t1x2 * velX );
          src->get( x, y, z, Stencil_T::idx[E] ) = vE - sym_E_W - asym_E_W;
          src->get( x, y, z, Stencil_T::idx[W] ) = vW - sym_E_W + asym_E_W;
 
          const real_t  sym_T_B = lambda_e_scaled * ( vT + vB  - fac1 * velZ * velZ - t1x2 * feq_common );
-         const real_t asym_T_B = lambda_d_scaled * ( vT - vB - real_t(3.0) * t1x2 * velZ );
+         const real_t asym_T_B = lambda_d_scaled * ( vT - vB - 3.0_r * t1x2 * velZ );
          src->get( x, y, z, Stencil_T::idx[T] ) = vT - sym_T_B - asym_T_B;
          src->get( x, y, z, Stencil_T::idx[B] ) = vB - sym_T_B + asym_T_B;
       }
@@ -617,21 +617,21 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
    const real_t lambda_e = src->latticeModel().collisionModel().lambda_e();
    const real_t lambda_d = src->latticeModel().collisionModel().lambda_d();
 
-   const real_t three_w1( real_t(1) / real_t(6) );
-   const real_t three_w2( real_t(1) / real_t(12) );
+   const real_t three_w1( 1_r / 6_r );
+   const real_t three_w2( 1_r / 12_r );
 
    // common prefactors for calculating the equilibrium parts
-   const real_t t0   = real_t(1.0) / real_t(3.0);                 // 1/3      for C
-   const real_t t1x2 = real_t(1.0) / real_t(18.0) * real_t(2.0);  // 1/18 * 2 for N, S, W, E, T, B
-   const real_t t2x2 = real_t(1.0) / real_t(36.0) * real_t(2.0);  // 1/36 * 2 else
+   const real_t t0   = 1.0_r / 3.0_r;                 // 1/3      for C
+   const real_t t1x2 = 1.0_r / 18.0_r * 2.0_r;  // 1/18 * 2 for N, S, W, E, T, B
+   const real_t t2x2 = 1.0_r / 36.0_r * 2.0_r;  // 1/36 * 2 else
 
-   const real_t inv2csq2 = real_t(1.0) / ( real_t(2.0) * ( real_t(1.0) / real_t(3.0) ) * ( real_t(1.0) / real_t(3.0) ) ); //speed of sound related factor for equilibrium distribution function
+   const real_t inv2csq2 = 1.0_r / ( 2.0_r * ( 1.0_r / 3.0_r ) * ( 1.0_r / 3.0_r ) ); //speed of sound related factor for equilibrium distribution function
    const real_t fac1     = t1x2 * inv2csq2;
    const real_t fac2     = t2x2 * inv2csq2;
 
    // relaxation parameter variables
-   const real_t lambda_e_scaled = real_t(0.5) * lambda_e; // 0.5 times the usual value ...
-   const real_t lambda_d_scaled = real_t(0.5) * lambda_d; // ... due to the way of calculations
+   const real_t lambda_e_scaled = 0.5_r * lambda_e; // 0.5 times the usual value ...
+   const real_t lambda_d_scaled = 0.5_r * lambda_d; // ... due to the way of calculations
 
    WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ( src, numberOfGhostLayersToInclude,
 
@@ -643,62 +643,62 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
 
          WALBERLA_LBM_CELLWISE_SWEEP_D3Q19_DENSITY_VELOCITY_INCOMP()
          
-         this->densityVelocityOut( x, y, z, lm, Vector3<real_t>( velX, velY, velZ ), rho + real_t(1) );
+         this->densityVelocityOut( x, y, z, lm, Vector3<real_t>( velX, velY, velZ ), rho + 1_r );
 
-         const real_t feq_common = rho - real_t(1.5) * ( velX * velX + velY * velY + velZ * velZ );
+         const real_t feq_common = rho - 1.5_r * ( velX * velX + velY * velY + velZ * velZ );
 
-         dst->get( x, y, z, Stencil_T::idx[C] ) = vC * (real_t(1.0) - lambda_e) + lambda_e * t0 * feq_common; // no force term
+         dst->get( x, y, z, Stencil_T::idx[C] ) = vC * (1.0_r - lambda_e) + lambda_e * t0 * feq_common; // no force term
 
          const Vector3< real_t > & force = src->latticeModel().forceModel().force(x,y,z);
          
          const real_t velXPY = velX + velY;
          const real_t  sym_NE_SW = lambda_e_scaled * ( vNE + vSW - fac2 * velXPY * velXPY - t2x2 * feq_common );
-         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - real_t(3.0) * t2x2 * velXPY );
+         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - 3.0_r * t2x2 * velXPY );
          dst->get( x, y, z, Stencil_T::idx[NE] ) = vNE - sym_NE_SW - asym_NE_SW + three_w2 * (  force[0] + force[1] );
          dst->get( x, y, z, Stencil_T::idx[SW] ) = vSW - sym_NE_SW + asym_NE_SW + three_w2 * ( -force[0] - force[1] );
 
          const real_t velXMY = velX - velY;
          const real_t  sym_SE_NW = lambda_e_scaled * ( vSE + vNW - fac2 * velXMY * velXMY - t2x2 * feq_common );
-         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - real_t(3.0) * t2x2 * velXMY );
+         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - 3.0_r * t2x2 * velXMY );
          dst->get( x, y, z, Stencil_T::idx[SE] ) = vSE - sym_SE_NW - asym_SE_NW + three_w2 * (  force[0] - force[1] );
          dst->get( x, y, z, Stencil_T::idx[NW] ) = vNW - sym_SE_NW + asym_SE_NW + three_w2 * (  force[1] - force[0] );
 
          const real_t velXPZ = velX + velZ;
          const real_t  sym_TE_BW = lambda_e_scaled * ( vTE + vBW - fac2 * velXPZ * velXPZ - t2x2 * feq_common );
-         const real_t asym_TE_BW = lambda_d_scaled * ( vTE - vBW - real_t(3.0) * t2x2 * velXPZ );
+         const real_t asym_TE_BW = lambda_d_scaled * ( vTE - vBW - 3.0_r * t2x2 * velXPZ );
          dst->get( x, y, z, Stencil_T::idx[TE] ) = vTE - sym_TE_BW - asym_TE_BW + three_w2 * (  force[0] + force[2] );
          dst->get( x, y, z, Stencil_T::idx[BW] ) = vBW - sym_TE_BW + asym_TE_BW + three_w2 * ( -force[0] - force[2] );
 
          const real_t velXMZ = velX - velZ;
          const real_t  sym_BE_TW = lambda_e_scaled * ( vBE + vTW - fac2 * velXMZ * velXMZ - t2x2 * feq_common );
-         const real_t asym_BE_TW = lambda_d_scaled * ( vBE - vTW - real_t(3.0) * t2x2 * velXMZ );
+         const real_t asym_BE_TW = lambda_d_scaled * ( vBE - vTW - 3.0_r * t2x2 * velXMZ );
          dst->get( x, y, z, Stencil_T::idx[BE] ) = vBE - sym_BE_TW - asym_BE_TW + three_w2 * (  force[0] - force[2] );
          dst->get( x, y, z, Stencil_T::idx[TW] ) = vTW - sym_BE_TW + asym_BE_TW + three_w2 * (  force[2] - force[0] );
 
          const real_t velYPZ = velY + velZ;
          const real_t  sym_TN_BS = lambda_e_scaled * ( vTN + vBS - fac2 * velYPZ * velYPZ - t2x2 * feq_common );
-         const real_t asym_TN_BS = lambda_d_scaled * ( vTN - vBS - real_t(3.0) * t2x2 * velYPZ );
+         const real_t asym_TN_BS = lambda_d_scaled * ( vTN - vBS - 3.0_r * t2x2 * velYPZ );
          dst->get( x, y, z, Stencil_T::idx[TN] ) = vTN - sym_TN_BS - asym_TN_BS + three_w2 * (  force[1] + force[2] );
          dst->get( x, y, z, Stencil_T::idx[BS] ) = vBS - sym_TN_BS + asym_TN_BS + three_w2 * ( -force[1] - force[2] );
 
          const real_t velYMZ = velY - velZ;
          const real_t  sym_BN_TS = lambda_e_scaled * ( vBN + vTS - fac2 * velYMZ * velYMZ - t2x2 * feq_common );
-         const real_t asym_BN_TS = lambda_d_scaled * ( vBN - vTS - real_t(3.0) * t2x2 * velYMZ );
+         const real_t asym_BN_TS = lambda_d_scaled * ( vBN - vTS - 3.0_r * t2x2 * velYMZ );
          dst->get( x, y, z, Stencil_T::idx[BN] ) = vBN - sym_BN_TS - asym_BN_TS + three_w2 * (  force[1] - force[2] );
          dst->get( x, y, z, Stencil_T::idx[TS] ) = vTS - sym_BN_TS + asym_BN_TS + three_w2 * (  force[2] - force[1] );
 
          const real_t  sym_N_S = lambda_e_scaled * ( vN + vS - fac1 * velY * velY - t1x2 * feq_common );
-         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - real_t(3.0) * t1x2 * velY );
+         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - 3.0_r * t1x2 * velY );
          dst->get( x, y, z, Stencil_T::idx[N] ) = vN - sym_N_S - asym_N_S + three_w1 * force[1];
          dst->get( x, y, z, Stencil_T::idx[S] ) = vS - sym_N_S + asym_N_S - three_w1 * force[1];
 
          const real_t  sym_E_W = lambda_e_scaled * ( vE + vW - fac1 * velX * velX - t1x2 * feq_common );
-         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - real_t(3.0) * t1x2 * velX );
+         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - 3.0_r * t1x2 * velX );
          dst->get( x, y, z, Stencil_T::idx[E] ) = vE - sym_E_W - asym_E_W + three_w1 * force[0];
          dst->get( x, y, z, Stencil_T::idx[W] ) = vW - sym_E_W + asym_E_W - three_w1 * force[0];
 
          const real_t  sym_T_B = lambda_e_scaled * ( vT + vB  - fac1 * velZ * velZ - t1x2 * feq_common );
-         const real_t asym_T_B = lambda_d_scaled * ( vT - vB - real_t(3.0) * t1x2 * velZ );
+         const real_t asym_T_B = lambda_d_scaled * ( vT - vB - 3.0_r * t1x2 * velZ );
          dst->get( x, y, z, Stencil_T::idx[T] ) = vT - sym_T_B - asym_T_B + three_w1 * force[2];
          dst->get( x, y, z, Stencil_T::idx[B] ) = vB - sym_T_B + asym_T_B - three_w1 * force[2];
       }
@@ -712,21 +712,21 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
    const real_t lambda_e = src->latticeModel().collisionModel().lambda_e();
    const real_t lambda_d = src->latticeModel().collisionModel().lambda_d();
 
-   const real_t three_w1( real_t(1) / real_t(6) );
-   const real_t three_w2( real_t(1) / real_t(12) );
+   const real_t three_w1( 1_r / 6_r );
+   const real_t three_w2( 1_r / 12_r );
 
    // common prefactors for calculating the equilibrium parts
-   const real_t t0   = real_t(1.0) / real_t(3.0);                 // 1/3      for C
-   const real_t t1x2 = real_t(1.0) / real_t(18.0) * real_t(2.0);  // 1/18 * 2 for N, S, W, E, T, B
-   const real_t t2x2 = real_t(1.0) / real_t(36.0) * real_t(2.0);  // 1/36 * 2 else
+   const real_t t0   = 1.0_r / 3.0_r;                 // 1/3      for C
+   const real_t t1x2 = 1.0_r / 18.0_r * 2.0_r;  // 1/18 * 2 for N, S, W, E, T, B
+   const real_t t2x2 = 1.0_r / 36.0_r * 2.0_r;  // 1/36 * 2 else
 
-   const real_t inv2csq2 = real_t(1.0) / ( real_t(2.0) * ( real_t(1.0) / real_t(3.0) ) * ( real_t(1.0) / real_t(3.0) ) ); //speed of sound related factor for equilibrium distribution function
+   const real_t inv2csq2 = 1.0_r / ( 2.0_r * ( 1.0_r / 3.0_r ) * ( 1.0_r / 3.0_r ) ); //speed of sound related factor for equilibrium distribution function
    const real_t fac1     = t1x2 * inv2csq2;
    const real_t fac2     = t2x2 * inv2csq2;
 
    // relaxation parameter variables
-   const real_t lambda_e_scaled = real_t(0.5) * lambda_e; // 0.5 times the usual value ...
-   const real_t lambda_d_scaled = real_t(0.5) * lambda_d; // ... due to the way of calculations
+   const real_t lambda_e_scaled = 0.5_r * lambda_e; // 0.5 times the usual value ...
+   const real_t lambda_d_scaled = 0.5_r * lambda_d; // ... due to the way of calculations
 
    WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ( src, numberOfGhostLayersToInclude,
 
@@ -738,62 +738,62 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
 
          WALBERLA_LBM_CELLWISE_SWEEP_D3Q19_DENSITY_VELOCITY_INCOMP()
          
-         this->densityVelocityOut( x, y, z, lm, Vector3<real_t>( velX, velY, velZ ), rho + real_t(1) );
+         this->densityVelocityOut( x, y, z, lm, Vector3<real_t>( velX, velY, velZ ), rho + 1_r );
 
-         const real_t feq_common = rho - real_t(1.5) * ( velX * velX + velY * velY + velZ * velZ );
+         const real_t feq_common = rho - 1.5_r * ( velX * velX + velY * velY + velZ * velZ );
 
-         src->get( x, y, z, Stencil_T::idx[C] ) = vC * (real_t(1.0) - lambda_e) + lambda_e * t0 * feq_common; // no force term
+         src->get( x, y, z, Stencil_T::idx[C] ) = vC * (1.0_r - lambda_e) + lambda_e * t0 * feq_common; // no force term
 
          const Vector3< real_t > & force = src->latticeModel().forceModel().force(x,y,z);
          
          const real_t velXPY = velX + velY;
          const real_t  sym_NE_SW = lambda_e_scaled * ( vNE + vSW - fac2 * velXPY * velXPY - t2x2 * feq_common );
-         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - real_t(3.0) * t2x2 * velXPY );
+         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - 3.0_r * t2x2 * velXPY );
          src->get( x, y, z, Stencil_T::idx[NE] ) = vNE - sym_NE_SW - asym_NE_SW + three_w2 * (  force[0] + force[1] );
          src->get( x, y, z, Stencil_T::idx[SW] ) = vSW - sym_NE_SW + asym_NE_SW + three_w2 * ( -force[0] - force[1] );
 
          const real_t velXMY = velX - velY;
          const real_t  sym_SE_NW = lambda_e_scaled * ( vSE + vNW - fac2 * velXMY * velXMY - t2x2 * feq_common );
-         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - real_t(3.0) * t2x2 * velXMY );
+         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - 3.0_r * t2x2 * velXMY );
          src->get( x, y, z, Stencil_T::idx[SE] ) = vSE - sym_SE_NW - asym_SE_NW + three_w2 * (  force[0] - force[1] );
          src->get( x, y, z, Stencil_T::idx[NW] ) = vNW - sym_SE_NW + asym_SE_NW + three_w2 * (  force[1] - force[0] );
 
          const real_t velXPZ = velX + velZ;
          const real_t  sym_TE_BW = lambda_e_scaled * ( vTE + vBW - fac2 * velXPZ * velXPZ - t2x2 * feq_common );
-         const real_t asym_TE_BW = lambda_d_scaled * ( vTE - vBW - real_t(3.0) * t2x2 * velXPZ );
+         const real_t asym_TE_BW = lambda_d_scaled * ( vTE - vBW - 3.0_r * t2x2 * velXPZ );
          src->get( x, y, z, Stencil_T::idx[TE] ) = vTE - sym_TE_BW - asym_TE_BW + three_w2 * (  force[0] + force[2] );
          src->get( x, y, z, Stencil_T::idx[BW] ) = vBW - sym_TE_BW + asym_TE_BW + three_w2 * ( -force[0] - force[2] );
 
          const real_t velXMZ = velX - velZ;
          const real_t  sym_BE_TW = lambda_e_scaled * ( vBE + vTW - fac2 * velXMZ * velXMZ - t2x2 * feq_common );
-         const real_t asym_BE_TW = lambda_d_scaled * ( vBE - vTW - real_t(3.0) * t2x2 * velXMZ );
+         const real_t asym_BE_TW = lambda_d_scaled * ( vBE - vTW - 3.0_r * t2x2 * velXMZ );
          src->get( x, y, z, Stencil_T::idx[BE] ) = vBE - sym_BE_TW - asym_BE_TW + three_w2 * (  force[0] - force[2] );
          src->get( x, y, z, Stencil_T::idx[TW] ) = vTW - sym_BE_TW + asym_BE_TW + three_w2 * (  force[2] - force[0] );
 
          const real_t velYPZ = velY + velZ;
          const real_t  sym_TN_BS = lambda_e_scaled * ( vTN + vBS - fac2 * velYPZ * velYPZ - t2x2 * feq_common );
-         const real_t asym_TN_BS = lambda_d_scaled * ( vTN - vBS - real_t(3.0) * t2x2 * velYPZ );
+         const real_t asym_TN_BS = lambda_d_scaled * ( vTN - vBS - 3.0_r * t2x2 * velYPZ );
          src->get( x, y, z, Stencil_T::idx[TN] ) = vTN - sym_TN_BS - asym_TN_BS + three_w2 * (  force[1] + force[2] );
          src->get( x, y, z, Stencil_T::idx[BS] ) = vBS - sym_TN_BS + asym_TN_BS + three_w2 * ( -force[1] - force[2] );
 
          const real_t velYMZ = velY - velZ;
          const real_t  sym_BN_TS = lambda_e_scaled * ( vBN + vTS - fac2 * velYMZ * velYMZ - t2x2 * feq_common );
-         const real_t asym_BN_TS = lambda_d_scaled * ( vBN - vTS - real_t(3.0) * t2x2 * velYMZ );
+         const real_t asym_BN_TS = lambda_d_scaled * ( vBN - vTS - 3.0_r * t2x2 * velYMZ );
          src->get( x, y, z, Stencil_T::idx[BN] ) = vBN - sym_BN_TS - asym_BN_TS + three_w2 * (  force[1] - force[2] );
          src->get( x, y, z, Stencil_T::idx[TS] ) = vTS - sym_BN_TS + asym_BN_TS + three_w2 * (  force[2] - force[1] );
 
          const real_t  sym_N_S = lambda_e_scaled * ( vN + vS - fac1 * velY * velY - t1x2 * feq_common );
-         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - real_t(3.0) * t1x2 * velY );
+         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - 3.0_r * t1x2 * velY );
          src->get( x, y, z, Stencil_T::idx[N] ) = vN - sym_N_S - asym_N_S + three_w1 * force[1];
          src->get( x, y, z, Stencil_T::idx[S] ) = vS - sym_N_S + asym_N_S - three_w1 * force[1];
 
          const real_t  sym_E_W = lambda_e_scaled * ( vE + vW - fac1 * velX * velX - t1x2 * feq_common );
-         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - real_t(3.0) * t1x2 * velX );
+         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - 3.0_r * t1x2 * velX );
          src->get( x, y, z, Stencil_T::idx[E] ) = vE - sym_E_W - asym_E_W + three_w1 * force[0];
          src->get( x, y, z, Stencil_T::idx[W] ) = vW - sym_E_W + asym_E_W - three_w1 * force[0];
 
          const real_t  sym_T_B = lambda_e_scaled * ( vT + vB  - fac1 * velZ * velZ - t1x2 * feq_common );
-         const real_t asym_T_B = lambda_d_scaled * ( vT - vB - real_t(3.0) * t1x2 * velZ );
+         const real_t asym_T_B = lambda_d_scaled * ( vT - vB - 3.0_r * t1x2 * velZ );
          src->get( x, y, z, Stencil_T::idx[T] ) = vT - sym_T_B - asym_T_B + three_w1 * force[2];
          src->get( x, y, z, Stencil_T::idx[B] ) = vB - sym_T_B + asym_T_B - three_w1 * force[2];
       }
@@ -831,19 +831,19 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
    const real_t lambda_d = src->latticeModel().collisionModel().lambda_d();
 
    // common prefactors for calculating the equilibrium parts
-   const real_t t0   = real_t(8.0) / real_t(27.0);                // 8/27    for C
-   const real_t t1x2 = real_t(2.0) / real_t(27.0) * real_t(2.0);  // 2/27 * 2 for N, S, W, E, T, B
-   const real_t t2x2 = real_t(1.0) / real_t(54.0) * real_t(2.0);  // 1/54 * 2 else
-   const real_t t3x2 = real_t(1.0) / real_t(216.0) * real_t(2.0); // 1/216    for TNE,BSW,TNW,BSE,TSE,BNW,TSW,BNE
+   const real_t t0   = 8.0_r / 27.0_r;                // 8/27    for C
+   const real_t t1x2 = 2.0_r / 27.0_r * 2.0_r;  // 2/27 * 2 for N, S, W, E, T, B
+   const real_t t2x2 = 1.0_r / 54.0_r * 2.0_r;  // 1/54 * 2 else
+   const real_t t3x2 = 1.0_r / 216.0_r * 2.0_r; // 1/216    for TNE,BSW,TNW,BSE,TSE,BNW,TSW,BNE
 
-   const real_t inv2csq2 = real_t(1.0) / ( real_t(2.0) * ( real_t(1.0) / real_t(3.0) ) * ( real_t(1.0) / real_t(3.0) ) ); //speed of sound related factor for equilibrium distribution function
+   const real_t inv2csq2 = 1.0_r / ( 2.0_r * ( 1.0_r / 3.0_r ) * ( 1.0_r / 3.0_r ) ); //speed of sound related factor for equilibrium distribution function
    const real_t fac1     = t1x2 * inv2csq2;
    const real_t fac2     = t2x2 * inv2csq2;
    const real_t fac3     = t3x2 * inv2csq2;
 
    // relaxation parameter variables
-   const real_t lambda_e_scaled = real_t(0.5) * lambda_e; // 0.5 times the usual value ...
-   const real_t lambda_d_scaled = real_t(0.5) * lambda_d; // ... due to the way of calculations
+   const real_t lambda_e_scaled = 0.5_r * lambda_e; // 0.5 times the usual value ...
+   const real_t lambda_d_scaled = 0.5_r * lambda_d; // ... due to the way of calculations
 
 
    WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ( src, numberOfGhostLayersToInclude,
@@ -856,84 +856,84 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
 
          WALBERLA_LBM_CELLWISE_SWEEP_D3Q27_DENSITY_VELOCITY_INCOMP()
 
-         this->densityVelocityOut( x, y, z, lm, Vector3<real_t>( velX, velY, velZ ), rho + real_t(1) );
+         this->densityVelocityOut( x, y, z, lm, Vector3<real_t>( velX, velY, velZ ), rho + 1_r );
 
-         const real_t feq_common = rho - real_t(1.5) * ( velX * velX + velY * velY + velZ * velZ );
+         const real_t feq_common = rho - 1.5_r * ( velX * velX + velY * velY + velZ * velZ );
 
-         dst->get( x, y, z, Stencil_T::idx[C] ) = vC * (real_t(1.0) - lambda_e) + lambda_e * t0 * feq_common;
+         dst->get( x, y, z, Stencil_T::idx[C] ) = vC * (1.0_r - lambda_e) + lambda_e * t0 * feq_common;
 
          const real_t velXPY = velX + velY;
          const real_t  sym_NE_SW = lambda_e_scaled * ( vNE + vSW - fac2 * velXPY * velXPY - t2x2 * feq_common );
-         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - real_t(3.0) * t2x2 * velXPY );
+         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - 3.0_r * t2x2 * velXPY );
          dst->get( x, y, z, Stencil_T::idx[NE] ) = vNE - sym_NE_SW - asym_NE_SW;
          dst->get( x, y, z, Stencil_T::idx[SW] ) = vSW - sym_NE_SW + asym_NE_SW;
 
          const real_t velXMY = velX - velY;
          const real_t  sym_SE_NW = lambda_e_scaled * ( vSE + vNW - fac2 * velXMY * velXMY - t2x2 * feq_common );
-         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - real_t(3.0) * t2x2 * velXMY );
+         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - 3.0_r * t2x2 * velXMY );
          dst->get( x, y, z, Stencil_T::idx[SE] ) = vSE - sym_SE_NW - asym_SE_NW;
          dst->get( x, y, z, Stencil_T::idx[NW] ) = vNW - sym_SE_NW + asym_SE_NW;
 
          const real_t velXPZ = velX + velZ;
          const real_t  sym_TE_BW = lambda_e_scaled * ( vTE + vBW - fac2 * velXPZ * velXPZ - t2x2 * feq_common );
-         const real_t asym_TE_BW = lambda_d_scaled * ( vTE - vBW - real_t(3.0) * t2x2 * velXPZ );
+         const real_t asym_TE_BW = lambda_d_scaled * ( vTE - vBW - 3.0_r * t2x2 * velXPZ );
          dst->get( x, y, z, Stencil_T::idx[TE] ) = vTE - sym_TE_BW - asym_TE_BW;
          dst->get( x, y, z, Stencil_T::idx[BW] ) = vBW - sym_TE_BW + asym_TE_BW;
 
          const real_t velXMZ = velX - velZ;
          const real_t  sym_BE_TW = lambda_e_scaled * ( vBE + vTW - fac2 * velXMZ * velXMZ - t2x2 * feq_common );
-         const real_t asym_BE_TW = lambda_d_scaled * ( vBE - vTW - real_t(3.0) * t2x2 * velXMZ );
+         const real_t asym_BE_TW = lambda_d_scaled * ( vBE - vTW - 3.0_r * t2x2 * velXMZ );
          dst->get( x, y, z, Stencil_T::idx[BE] ) = vBE - sym_BE_TW - asym_BE_TW;
          dst->get( x, y, z, Stencil_T::idx[TW] ) = vTW - sym_BE_TW + asym_BE_TW;
 
          const real_t velYPZ = velY + velZ;
          const real_t  sym_TN_BS = lambda_e_scaled * ( vTN + vBS - fac2 * velYPZ * velYPZ - t2x2 * feq_common );
-         const real_t asym_TN_BS = lambda_d_scaled * ( vTN - vBS - real_t(3.0) * t2x2 * velYPZ );
+         const real_t asym_TN_BS = lambda_d_scaled * ( vTN - vBS - 3.0_r * t2x2 * velYPZ );
          dst->get( x, y, z, Stencil_T::idx[TN] ) = vTN - sym_TN_BS - asym_TN_BS;
          dst->get( x, y, z, Stencil_T::idx[BS] ) = vBS - sym_TN_BS + asym_TN_BS;
 
          const real_t velYMZ = velY - velZ;
          const real_t  sym_BN_TS = lambda_e_scaled * ( vBN + vTS - fac2 * velYMZ * velYMZ - t2x2 * feq_common );
-         const real_t asym_BN_TS = lambda_d_scaled * ( vBN - vTS - real_t(3.0) * t2x2 * velYMZ );
+         const real_t asym_BN_TS = lambda_d_scaled * ( vBN - vTS - 3.0_r * t2x2 * velYMZ );
          dst->get( x, y, z, Stencil_T::idx[BN] ) = vBN - sym_BN_TS - asym_BN_TS;
          dst->get( x, y, z, Stencil_T::idx[TS] ) = vTS - sym_BN_TS + asym_BN_TS;
 
          const real_t  sym_N_S = lambda_e_scaled * ( vN + vS - fac1 * velY * velY - t1x2 * feq_common );
-         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - real_t(3.0) * t1x2 * velY );
+         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - 3.0_r * t1x2 * velY );
          dst->get( x, y, z, Stencil_T::idx[N] ) = vN - sym_N_S - asym_N_S;
          dst->get( x, y, z, Stencil_T::idx[S] ) = vS - sym_N_S + asym_N_S;
 
          const real_t  sym_E_W = lambda_e_scaled * ( vE + vW - fac1 * velX * velX - t1x2 * feq_common );
-         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - real_t(3.0) * t1x2 * velX );
+         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - 3.0_r * t1x2 * velX );
          dst->get( x, y, z, Stencil_T::idx[E] ) = vE - sym_E_W - asym_E_W;
          dst->get( x, y, z, Stencil_T::idx[W] ) = vW - sym_E_W + asym_E_W;
 
          const real_t  sym_T_B = lambda_e_scaled * ( vT + vB  - fac1 * velZ * velZ - t1x2 * feq_common );
-         const real_t asym_T_B = lambda_d_scaled * ( vT - vB - real_t(3.0) * t1x2 * velZ );
+         const real_t asym_T_B = lambda_d_scaled * ( vT - vB - 3.0_r * t1x2 * velZ );
          dst->get( x, y, z, Stencil_T::idx[T] ) = vT - sym_T_B - asym_T_B;
          dst->get( x, y, z, Stencil_T::idx[B] ) = vB - sym_T_B + asym_T_B;
 
          const real_t vel_TNE_BSW = velX + velY + velZ;
          const real_t  sym_TNE_BSW = lambda_e_scaled * ( vTNE + vBSW - fac3 * vel_TNE_BSW * vel_TNE_BSW - t3x2 * feq_common );
-         const real_t asym_TNE_BSW = lambda_d_scaled * ( vTNE - vBSW - real_t(3.0) * t3x2 * vel_TNE_BSW );
+         const real_t asym_TNE_BSW = lambda_d_scaled * ( vTNE - vBSW - 3.0_r * t3x2 * vel_TNE_BSW );
          dst->get( x, y, z, Stencil_T::idx[TNE] ) = vTNE - sym_TNE_BSW - asym_TNE_BSW;
          dst->get( x, y, z, Stencil_T::idx[BSW] ) = vBSW - sym_TNE_BSW + asym_TNE_BSW;
 
          const real_t vel_TNW_BSE = -velX + velY + velZ;
          const real_t  sym_TNW_BSE = lambda_e_scaled * ( vTNW + vBSE - fac3 * vel_TNW_BSE * vel_TNW_BSE - t3x2 * feq_common );
-         const real_t asym_TNW_BSE = lambda_d_scaled * ( vTNW - vBSE - real_t(3.0) * t3x2 * vel_TNW_BSE );
+         const real_t asym_TNW_BSE = lambda_d_scaled * ( vTNW - vBSE - 3.0_r * t3x2 * vel_TNW_BSE );
          dst->get( x, y, z, Stencil_T::idx[TNW] ) = vTNW - sym_TNW_BSE - asym_TNW_BSE;
          dst->get( x, y, z, Stencil_T::idx[BSE] ) = vBSE - sym_TNW_BSE + asym_TNW_BSE;
 
          const real_t vel_TSE_BNW = velX - velY + velZ;
          const real_t  sym_TSE_BNW = lambda_e_scaled * ( vTSE + vBNW - fac3 * vel_TSE_BNW * vel_TSE_BNW - t3x2 * feq_common );
-         const real_t asym_TSE_BNW = lambda_d_scaled * ( vTSE - vBNW - real_t(3.0) * t3x2 * vel_TSE_BNW );
+         const real_t asym_TSE_BNW = lambda_d_scaled * ( vTSE - vBNW - 3.0_r * t3x2 * vel_TSE_BNW );
          dst->get( x, y, z, Stencil_T::idx[TSE] ) = vTSE - sym_TSE_BNW - asym_TSE_BNW;
          dst->get( x, y, z, Stencil_T::idx[BNW] ) = vBNW - sym_TSE_BNW + asym_TSE_BNW;
 
          const real_t vel_TSW_BNE = - velX - velY + velZ;
          const real_t  sym_TSW_BNE = lambda_e_scaled * ( vTSW + vBNE - fac3 * vel_TSW_BNE * vel_TSW_BNE - t3x2 * feq_common );
-         const real_t asym_TSW_BNE = lambda_d_scaled * ( vTSW - vBNE - real_t(3.0) * t3x2 * vel_TSW_BNE );
+         const real_t asym_TSW_BNE = lambda_d_scaled * ( vTSW - vBNE - 3.0_r * t3x2 * vel_TSW_BNE );
          dst->get( x, y, z, Stencil_T::idx[TSW] ) = vTSW - sym_TSW_BNE - asym_TSW_BNE;
          dst->get( x, y, z, Stencil_T::idx[BNE] ) = vBNE - sym_TSW_BNE + asym_TSW_BNE;
 
@@ -949,19 +949,19 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
    const real_t lambda_d = src->latticeModel().collisionModel().lambda_d();
 
    // common prefactors for calculating the equilibrium parts
-   const real_t t0   = real_t(8.0) / real_t(27.0);                // 8/27    for C
-   const real_t t1x2 = real_t(2.0) / real_t(27.0) * real_t(2.0);  // 2/27 * 2 for N, S, W, E, T, B
-   const real_t t2x2 = real_t(1.0) / real_t(54.0) * real_t(2.0);  // 1/54 * 2 else
-   const real_t t3x2 = real_t(1.0) / real_t(216.0)* real_t(2.0);  // 1/216    for TNE,BSW,TNW,BSE,TSE,BNW,TSW,BNE
+   const real_t t0   = 8.0_r / 27.0_r;                // 8/27    for C
+   const real_t t1x2 = 2.0_r / 27.0_r * 2.0_r;  // 2/27 * 2 for N, S, W, E, T, B
+   const real_t t2x2 = 1.0_r / 54.0_r * 2.0_r;  // 1/54 * 2 else
+   const real_t t3x2 = 1.0_r / 216.0_r* 2.0_r;  // 1/216    for TNE,BSW,TNW,BSE,TSE,BNW,TSW,BNE
 
-   const real_t inv2csq2 = real_t(1.0) / ( real_t(2.0) * ( real_t(1.0) / real_t(3.0) ) * ( real_t(1.0) / real_t(3.0) ) ); //speed of sound related factor for equilibrium distribution function
+   const real_t inv2csq2 = 1.0_r / ( 2.0_r * ( 1.0_r / 3.0_r ) * ( 1.0_r / 3.0_r ) ); //speed of sound related factor for equilibrium distribution function
    const real_t fac1     = t1x2 * inv2csq2;
    const real_t fac2     = t2x2 * inv2csq2;
    const real_t fac3     = t3x2 * inv2csq2;
 
    // relaxation parameter variables
-   const real_t lambda_e_scaled = real_t(0.5) * lambda_e; // 0.5 times the usual value ...
-   const real_t lambda_d_scaled = real_t(0.5) * lambda_d; // ... due to the way of calculations
+   const real_t lambda_e_scaled = 0.5_r * lambda_e; // 0.5 times the usual value ...
+   const real_t lambda_d_scaled = 0.5_r * lambda_d; // ... due to the way of calculations
 
    WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ( src, numberOfGhostLayersToInclude,
 
@@ -973,84 +973,84 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
 
          WALBERLA_LBM_CELLWISE_SWEEP_D3Q27_DENSITY_VELOCITY_INCOMP()
 
-         this->densityVelocityOut( x, y, z, lm, Vector3<real_t>( velX, velY, velZ ), rho + real_t(1) );
+         this->densityVelocityOut( x, y, z, lm, Vector3<real_t>( velX, velY, velZ ), rho + 1_r );
 
-         const real_t feq_common = rho - real_t(1.5) * ( velX * velX + velY * velY + velZ * velZ );
+         const real_t feq_common = rho - 1.5_r * ( velX * velX + velY * velY + velZ * velZ );
 
-         src->get( x, y, z, Stencil_T::idx[C] ) = vC * (real_t(1.0) - lambda_e) + lambda_e * t0 * feq_common;
+         src->get( x, y, z, Stencil_T::idx[C] ) = vC * (1.0_r - lambda_e) + lambda_e * t0 * feq_common;
 
          const real_t velXPY = velX + velY;
          const real_t  sym_NE_SW = lambda_e_scaled * ( vNE + vSW - fac2 * velXPY * velXPY - t2x2 * feq_common );
-         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - real_t(3.0) * t2x2 * velXPY );
+         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - 3.0_r * t2x2 * velXPY );
          src->get( x, y, z, Stencil_T::idx[NE] ) = vNE - sym_NE_SW - asym_NE_SW;
          src->get( x, y, z, Stencil_T::idx[SW] ) = vSW - sym_NE_SW + asym_NE_SW;
 
          const real_t velXMY = velX - velY;
          const real_t  sym_SE_NW = lambda_e_scaled * ( vSE + vNW - fac2 * velXMY * velXMY - t2x2 * feq_common );
-         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - real_t(3.0) * t2x2 * velXMY );
+         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - 3.0_r * t2x2 * velXMY );
          src->get( x, y, z, Stencil_T::idx[SE] ) = vSE - sym_SE_NW - asym_SE_NW;
          src->get( x, y, z, Stencil_T::idx[NW] ) = vNW - sym_SE_NW + asym_SE_NW;
 
          const real_t velXPZ = velX + velZ;
          const real_t  sym_TE_BW = lambda_e_scaled * ( vTE + vBW - fac2 * velXPZ * velXPZ - t2x2 * feq_common );
-         const real_t asym_TE_BW = lambda_d_scaled * ( vTE - vBW - real_t(3.0) * t2x2 * velXPZ );
+         const real_t asym_TE_BW = lambda_d_scaled * ( vTE - vBW - 3.0_r * t2x2 * velXPZ );
          src->get( x, y, z, Stencil_T::idx[TE] ) = vTE - sym_TE_BW - asym_TE_BW;
          src->get( x, y, z, Stencil_T::idx[BW] ) = vBW - sym_TE_BW + asym_TE_BW;
 
          const real_t velXMZ = velX - velZ;
          const real_t  sym_BE_TW = lambda_e_scaled * ( vBE + vTW - fac2 * velXMZ * velXMZ - t2x2 * feq_common );
-         const real_t asym_BE_TW = lambda_d_scaled * ( vBE - vTW - real_t(3.0) * t2x2 * velXMZ );
+         const real_t asym_BE_TW = lambda_d_scaled * ( vBE - vTW - 3.0_r * t2x2 * velXMZ );
          src->get( x, y, z, Stencil_T::idx[BE] ) = vBE - sym_BE_TW - asym_BE_TW;
          src->get( x, y, z, Stencil_T::idx[TW] ) = vTW - sym_BE_TW + asym_BE_TW;
 
          const real_t velYPZ = velY + velZ;
          const real_t  sym_TN_BS = lambda_e_scaled * ( vTN + vBS - fac2 * velYPZ * velYPZ - t2x2 * feq_common );
-         const real_t asym_TN_BS = lambda_d_scaled * ( vTN - vBS - real_t(3.0) * t2x2 * velYPZ );
+         const real_t asym_TN_BS = lambda_d_scaled * ( vTN - vBS - 3.0_r * t2x2 * velYPZ );
          src->get( x, y, z, Stencil_T::idx[TN] ) = vTN - sym_TN_BS - asym_TN_BS;
          src->get( x, y, z, Stencil_T::idx[BS] ) = vBS - sym_TN_BS + asym_TN_BS;
 
          const real_t velYMZ = velY - velZ;
          const real_t  sym_BN_TS = lambda_e_scaled * ( vBN + vTS - fac2 * velYMZ * velYMZ - t2x2 * feq_common );
-         const real_t asym_BN_TS = lambda_d_scaled * ( vBN - vTS - real_t(3.0) * t2x2 * velYMZ );
+         const real_t asym_BN_TS = lambda_d_scaled * ( vBN - vTS - 3.0_r * t2x2 * velYMZ );
          src->get( x, y, z, Stencil_T::idx[BN] ) = vBN - sym_BN_TS - asym_BN_TS;
          src->get( x, y, z, Stencil_T::idx[TS] ) = vTS - sym_BN_TS + asym_BN_TS;
 
          const real_t  sym_N_S = lambda_e_scaled * ( vN + vS - fac1 * velY * velY - t1x2 * feq_common );
-         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - real_t(3.0) * t1x2 * velY );
+         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - 3.0_r * t1x2 * velY );
          src->get( x, y, z, Stencil_T::idx[N] ) = vN - sym_N_S - asym_N_S;
          src->get( x, y, z, Stencil_T::idx[S] ) = vS - sym_N_S + asym_N_S;
 
          const real_t  sym_E_W = lambda_e_scaled * ( vE + vW - fac1 * velX * velX - t1x2 * feq_common );
-         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - real_t(3.0) * t1x2 * velX );
+         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - 3.0_r * t1x2 * velX );
          src->get( x, y, z, Stencil_T::idx[E] ) = vE - sym_E_W - asym_E_W;
          src->get( x, y, z, Stencil_T::idx[W] ) = vW - sym_E_W + asym_E_W;
 
          const real_t  sym_T_B = lambda_e_scaled * ( vT + vB  - fac1 * velZ * velZ - t1x2 * feq_common );
-         const real_t asym_T_B = lambda_d_scaled * ( vT - vB - real_t(3.0) * t1x2 * velZ );
+         const real_t asym_T_B = lambda_d_scaled * ( vT - vB - 3.0_r * t1x2 * velZ );
          src->get( x, y, z, Stencil_T::idx[T] ) = vT - sym_T_B - asym_T_B;
          src->get( x, y, z, Stencil_T::idx[B] ) = vB - sym_T_B + asym_T_B;
 
          const real_t vel_TNE_BSW = velX + velY + velZ;
          const real_t  sym_TNE_BSW = lambda_e_scaled * ( vTNE + vBSW - fac3 * vel_TNE_BSW * vel_TNE_BSW - t3x2 * feq_common );
-         const real_t asym_TNE_BSW = lambda_d_scaled * ( vTNE - vBSW - real_t(3.0) * t3x2 * vel_TNE_BSW );
+         const real_t asym_TNE_BSW = lambda_d_scaled * ( vTNE - vBSW - 3.0_r * t3x2 * vel_TNE_BSW );
          src->get( x, y, z, Stencil_T::idx[TNE] ) = vTNE - sym_TNE_BSW - asym_TNE_BSW;
          src->get( x, y, z, Stencil_T::idx[BSW] ) = vBSW - sym_TNE_BSW + asym_TNE_BSW;
 
          const real_t vel_TNW_BSE = -velX + velY + velZ;
          const real_t  sym_TNW_BSE = lambda_e_scaled * ( vTNW + vBSE - fac3 * vel_TNW_BSE * vel_TNW_BSE - t3x2 * feq_common );
-         const real_t asym_TNW_BSE = lambda_d_scaled * ( vTNW - vBSE - real_t(3.0) * t3x2 * vel_TNW_BSE );
+         const real_t asym_TNW_BSE = lambda_d_scaled * ( vTNW - vBSE - 3.0_r * t3x2 * vel_TNW_BSE );
          src->get( x, y, z, Stencil_T::idx[TNW] ) = vTNW - sym_TNW_BSE - asym_TNW_BSE;
          src->get( x, y, z, Stencil_T::idx[BSE] ) = vBSE - sym_TNW_BSE + asym_TNW_BSE;
 
          const real_t vel_TSE_BNW = velX - velY + velZ;
          const real_t  sym_TSE_BNW = lambda_e_scaled * ( vTSE + vBNW - fac3 * vel_TSE_BNW * vel_TSE_BNW - t3x2 * feq_common );
-         const real_t asym_TSE_BNW = lambda_d_scaled * ( vTSE - vBNW - real_t(3.0) * t3x2 * vel_TSE_BNW );
+         const real_t asym_TSE_BNW = lambda_d_scaled * ( vTSE - vBNW - 3.0_r * t3x2 * vel_TSE_BNW );
          src->get( x, y, z, Stencil_T::idx[TSE] ) = vTSE - sym_TSE_BNW - asym_TSE_BNW;
          src->get( x, y, z, Stencil_T::idx[BNW] ) = vBNW - sym_TSE_BNW + asym_TSE_BNW;
 
          const real_t vel_TSW_BNE = - velX - velY + velZ;
          const real_t  sym_TSW_BNE = lambda_e_scaled * ( vTSW + vBNE - fac3 * vel_TSW_BNE * vel_TSW_BNE - t3x2 * feq_common );
-         const real_t asym_TSW_BNE = lambda_d_scaled * ( vTSW - vBNE - real_t(3.0) * t3x2 * vel_TSW_BNE );
+         const real_t asym_TSW_BNE = lambda_d_scaled * ( vTSW - vBNE - 3.0_r * t3x2 * vel_TSW_BNE );
          src->get( x, y, z, Stencil_T::idx[TSW] ) = vTSW - sym_TSW_BNE - asym_TSW_BNE;
          src->get( x, y, z, Stencil_T::idx[BNE] ) = vBNE - sym_TSW_BNE + asym_TSW_BNE;
       }
@@ -1084,16 +1084,16 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
    const real_t lambda_d = src->latticeModel().collisionModel().lambda_d();
 
    // common prefactors for calculating the equilibrium parts
-   const real_t t0_0   = real_t(8.0) / real_t(27.0);                // 8/27    for C
-   const real_t t1x2_0 = real_t(2.0) / real_t(27.0)  * real_t(2.0); // 2/27 * 2 for N, S, W, E, T, B
-   const real_t t2x2_0 = real_t(1.0) / real_t(54.0)  * real_t(2.0); // 1/54 * 2 else
-   const real_t t3x2_0 = real_t(1.0) / real_t(216.0) * real_t(2.0); // 1/216    for TNE,BSW,TNW,BSE,TSE,BNW,TSW,BNE
+   const real_t t0_0   = 8.0_r / 27.0_r;                // 8/27    for C
+   const real_t t1x2_0 = 2.0_r / 27.0_r  * 2.0_r; // 2/27 * 2 for N, S, W, E, T, B
+   const real_t t2x2_0 = 1.0_r / 54.0_r  * 2.0_r; // 1/54 * 2 else
+   const real_t t3x2_0 = 1.0_r / 216.0_r * 2.0_r; // 1/216    for TNE,BSW,TNW,BSE,TSE,BNW,TSW,BNE
 
-   const real_t inv2csq2 = real_t(1.0) / ( real_t(2.0) * ( real_t(1.0) / real_t(3.0) ) * ( real_t(1.0) / real_t(3.0) ) ); //speed of sound related factor for equilibrium distribution function
+   const real_t inv2csq2 = 1.0_r / ( 2.0_r * ( 1.0_r / 3.0_r ) * ( 1.0_r / 3.0_r ) ); //speed of sound related factor for equilibrium distribution function
 
    // relaxation parameter variables
-   const real_t lambda_e_scaled = real_t(0.5) * lambda_e; // 0.5 times the usual value ...
-   const real_t lambda_d_scaled = real_t(0.5) * lambda_d; // ... due to the way of calculations
+   const real_t lambda_e_scaled = 0.5_r * lambda_e; // 0.5 times the usual value ...
+   const real_t lambda_d_scaled = 0.5_r * lambda_d; // ... due to the way of calculations
 
    WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ( src, numberOfGhostLayersToInclude,
 
@@ -1107,46 +1107,46 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
 
          this->densityVelocityOut( x, y, z, lm, Vector3<real_t>( velX, velY, velZ ), rho );
 
-         const real_t feq_common = real_t(1.0) - real_t(1.5) * ( velX * velX + velY * velY + velZ * velZ );
+         const real_t feq_common = 1.0_r - 1.5_r * ( velX * velX + velY * velY + velZ * velZ );
 
-         dst->get( x, y, z, Stencil_T::idx[C] ) = vC * (real_t(1.0) - lambda_e) + lambda_e * t0_0 * rho * feq_common;
+         dst->get( x, y, z, Stencil_T::idx[C] ) = vC * (1.0_r - lambda_e) + lambda_e * t0_0 * rho * feq_common;
 
          const real_t t2x2 = t2x2_0 * rho;
          const real_t fac2 = t2x2 * inv2csq2;
 
          const real_t velXPY = velX + velY;
          const real_t  sym_NE_SW = lambda_e_scaled * ( vNE + vSW - fac2 * velXPY * velXPY - t2x2 * feq_common );
-         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - real_t(3.0) * t2x2 * velXPY );
+         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - 3.0_r * t2x2 * velXPY );
          dst->get( x, y, z, Stencil_T::idx[NE] ) = vNE - sym_NE_SW - asym_NE_SW;
          dst->get( x, y, z, Stencil_T::idx[SW] ) = vSW - sym_NE_SW + asym_NE_SW;
 
          const real_t velXMY = velX - velY;
          const real_t  sym_SE_NW = lambda_e_scaled * ( vSE + vNW - fac2 * velXMY * velXMY - t2x2 * feq_common );
-         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - real_t(3.0) * t2x2 * velXMY );
+         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - 3.0_r * t2x2 * velXMY );
          dst->get( x, y, z, Stencil_T::idx[SE] ) = vSE - sym_SE_NW - asym_SE_NW;
          dst->get( x, y, z, Stencil_T::idx[NW] ) = vNW - sym_SE_NW + asym_SE_NW;
 
          const real_t velXPZ = velX + velZ;
          const real_t  sym_TE_BW = lambda_e_scaled * ( vTE + vBW - fac2 * velXPZ * velXPZ - t2x2 * feq_common );
-         const real_t asym_TE_BW = lambda_d_scaled * ( vTE - vBW - real_t(3.0) * t2x2 * velXPZ );
+         const real_t asym_TE_BW = lambda_d_scaled * ( vTE - vBW - 3.0_r * t2x2 * velXPZ );
          dst->get( x, y, z, Stencil_T::idx[TE] ) = vTE - sym_TE_BW - asym_TE_BW;
          dst->get( x, y, z, Stencil_T::idx[BW] ) = vBW - sym_TE_BW + asym_TE_BW;
 
          const real_t velXMZ = velX - velZ;
          const real_t  sym_BE_TW = lambda_e_scaled * ( vBE + vTW - fac2 * velXMZ * velXMZ - t2x2 * feq_common );
-         const real_t asym_BE_TW = lambda_d_scaled * ( vBE - vTW - real_t(3.0) * t2x2 * velXMZ );
+         const real_t asym_BE_TW = lambda_d_scaled * ( vBE - vTW - 3.0_r * t2x2 * velXMZ );
          dst->get( x, y, z, Stencil_T::idx[BE] ) = vBE - sym_BE_TW - asym_BE_TW;
          dst->get( x, y, z, Stencil_T::idx[TW] ) = vTW - sym_BE_TW + asym_BE_TW;
 
          const real_t velYPZ = velY + velZ;
          const real_t  sym_TN_BS = lambda_e_scaled * ( vTN + vBS - fac2 * velYPZ * velYPZ - t2x2 * feq_common );
-         const real_t asym_TN_BS = lambda_d_scaled * ( vTN - vBS - real_t(3.0) * t2x2 * velYPZ );
+         const real_t asym_TN_BS = lambda_d_scaled * ( vTN - vBS - 3.0_r * t2x2 * velYPZ );
          dst->get( x, y, z, Stencil_T::idx[TN] ) = vTN - sym_TN_BS - asym_TN_BS;
          dst->get( x, y, z, Stencil_T::idx[BS] ) = vBS - sym_TN_BS + asym_TN_BS;
 
          const real_t velYMZ = velY - velZ;
          const real_t  sym_BN_TS = lambda_e_scaled * ( vBN + vTS - fac2 * velYMZ * velYMZ - t2x2 * feq_common );
-         const real_t asym_BN_TS = lambda_d_scaled * ( vBN - vTS - real_t(3.0) * t2x2 * velYMZ );
+         const real_t asym_BN_TS = lambda_d_scaled * ( vBN - vTS - 3.0_r * t2x2 * velYMZ );
          dst->get( x, y, z, Stencil_T::idx[BN] ) = vBN - sym_BN_TS - asym_BN_TS;
          dst->get( x, y, z, Stencil_T::idx[TS] ) = vTS - sym_BN_TS + asym_BN_TS;
 
@@ -1154,17 +1154,17 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
          const real_t fac1 = t1x2 * inv2csq2;
 
          const real_t  sym_N_S = lambda_e_scaled * ( vN + vS - fac1 * velY * velY - t1x2 * feq_common );
-         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - real_t(3.0) * t1x2 * velY );
+         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - 3.0_r * t1x2 * velY );
          dst->get( x, y, z, Stencil_T::idx[N] ) = vN - sym_N_S - asym_N_S;
          dst->get( x, y, z, Stencil_T::idx[S] ) = vS - sym_N_S + asym_N_S;
 
          const real_t  sym_E_W = lambda_e_scaled * ( vE + vW - fac1 * velX * velX - t1x2 * feq_common );
-         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - real_t(3.0) * t1x2 * velX );
+         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - 3.0_r * t1x2 * velX );
          dst->get( x, y, z, Stencil_T::idx[E] ) = vE - sym_E_W - asym_E_W;
          dst->get( x, y, z, Stencil_T::idx[W] ) = vW - sym_E_W + asym_E_W;
 
          const real_t  sym_T_B = lambda_e_scaled * ( vT + vB  - fac1 * velZ * velZ - t1x2 * feq_common );
-         const real_t asym_T_B = lambda_d_scaled * ( vT - vB - real_t(3.0) * t1x2 * velZ );
+         const real_t asym_T_B = lambda_d_scaled * ( vT - vB - 3.0_r * t1x2 * velZ );
          dst->get( x, y, z, Stencil_T::idx[T] ) = vT - sym_T_B - asym_T_B;
          dst->get( x, y, z, Stencil_T::idx[B] ) = vB - sym_T_B + asym_T_B;
 
@@ -1173,25 +1173,25 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
 
          const real_t vel_TNE_BSW = velX + velY + velZ;
          const real_t  sym_TNE_BSW = lambda_e_scaled * ( vTNE + vBSW - fac3 * vel_TNE_BSW * vel_TNE_BSW - t3x2 * feq_common );
-         const real_t asym_TNE_BSW = lambda_d_scaled * ( vTNE - vBSW - real_t(3.0) * t3x2 * vel_TNE_BSW );
+         const real_t asym_TNE_BSW = lambda_d_scaled * ( vTNE - vBSW - 3.0_r * t3x2 * vel_TNE_BSW );
          dst->get( x, y, z, Stencil_T::idx[TNE] ) = vTNE - sym_TNE_BSW - asym_TNE_BSW;
          dst->get( x, y, z, Stencil_T::idx[BSW] ) = vBSW - sym_TNE_BSW + asym_TNE_BSW;
 
          const real_t vel_TNW_BSE = -velX + velY + velZ;
          const real_t  sym_TNW_BSE = lambda_e_scaled * ( vTNW + vBSE - fac3 * vel_TNW_BSE * vel_TNW_BSE - t3x2 * feq_common );
-         const real_t asym_TNW_BSE = lambda_d_scaled * ( vTNW - vBSE - real_t(3.0) * t3x2 * vel_TNW_BSE );
+         const real_t asym_TNW_BSE = lambda_d_scaled * ( vTNW - vBSE - 3.0_r * t3x2 * vel_TNW_BSE );
          dst->get( x, y, z, Stencil_T::idx[TNW] ) = vTNW - sym_TNW_BSE - asym_TNW_BSE;
          dst->get( x, y, z, Stencil_T::idx[BSE] ) = vBSE - sym_TNW_BSE + asym_TNW_BSE;
 
          const real_t vel_TSE_BNW = velX - velY + velZ;
          const real_t  sym_TSE_BNW = lambda_e_scaled * ( vTSE + vBNW - fac3 * vel_TSE_BNW * vel_TSE_BNW - t3x2 * feq_common );
-         const real_t asym_TSE_BNW = lambda_d_scaled * ( vTSE - vBNW - real_t(3.0) * t3x2 * vel_TSE_BNW );
+         const real_t asym_TSE_BNW = lambda_d_scaled * ( vTSE - vBNW - 3.0_r * t3x2 * vel_TSE_BNW );
          dst->get( x, y, z, Stencil_T::idx[TSE] ) = vTSE - sym_TSE_BNW - asym_TSE_BNW;
          dst->get( x, y, z, Stencil_T::idx[BNW] ) = vBNW - sym_TSE_BNW + asym_TSE_BNW;
 
          const real_t vel_TSW_BNE = - velX - velY + velZ;
          const real_t  sym_TSW_BNE = lambda_e_scaled * ( vTSW + vBNE - fac3 * vel_TSW_BNE * vel_TSW_BNE - t3x2 * feq_common );
-         const real_t asym_TSW_BNE = lambda_d_scaled * ( vTSW - vBNE - real_t(3.0) * t3x2 * vel_TSW_BNE );
+         const real_t asym_TSW_BNE = lambda_d_scaled * ( vTSW - vBNE - 3.0_r * t3x2 * vel_TSW_BNE );
          dst->get( x, y, z, Stencil_T::idx[TSW] ) = vTSW - sym_TSW_BNE - asym_TSW_BNE;
          dst->get( x, y, z, Stencil_T::idx[BNE] ) = vBNE - sym_TSW_BNE + asym_TSW_BNE;
       }
@@ -1206,16 +1206,16 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
    const real_t lambda_d = src->latticeModel().collisionModel().lambda_d();
 
    // common prefactors for calculating the equilibrium parts
-   const real_t t0_0   = real_t(8.0) / real_t(27.0);                // 8/27    for C
-   const real_t t1x2_0 = real_t(2.0) / real_t(27.0) * real_t(2.0);  // 2/27 * 2 for N, S, W, E, T, B
-   const real_t t2x2_0 = real_t(1.0) / real_t(54.0) * real_t(2.0);  // 1/54 * 2 else
-   const real_t t3x2_0 = real_t(1.0) / real_t(216.0) * real_t(2.0); // 1/216    for TNE,BSW,TNW,BSE,TSE,BNW,TSW,BNE
+   const real_t t0_0   = 8.0_r / 27.0_r;                // 8/27    for C
+   const real_t t1x2_0 = 2.0_r / 27.0_r * 2.0_r;  // 2/27 * 2 for N, S, W, E, T, B
+   const real_t t2x2_0 = 1.0_r / 54.0_r * 2.0_r;  // 1/54 * 2 else
+   const real_t t3x2_0 = 1.0_r / 216.0_r * 2.0_r; // 1/216    for TNE,BSW,TNW,BSE,TSE,BNW,TSW,BNE
 
-   const real_t inv2csq2 = real_t(1.0) / ( real_t(2.0) * ( real_t(1.0) / real_t(3.0) ) * ( real_t(1.0) / real_t(3.0) ) ); //speed of sound related factor for equilibrium distribution function
+   const real_t inv2csq2 = 1.0_r / ( 2.0_r * ( 1.0_r / 3.0_r ) * ( 1.0_r / 3.0_r ) ); //speed of sound related factor for equilibrium distribution function
 
    // relaxation parameter variables
-   const real_t lambda_e_scaled = real_t(0.5) * lambda_e; // 0.5 times the usual value ...
-   const real_t lambda_d_scaled = real_t(0.5) * lambda_d; // ... due to the way of calculations
+   const real_t lambda_e_scaled = 0.5_r * lambda_e; // 0.5 times the usual value ...
+   const real_t lambda_d_scaled = 0.5_r * lambda_d; // ... due to the way of calculations
 
    WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ( src, numberOfGhostLayersToInclude,
 
@@ -1229,46 +1229,46 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
 
          this->densityVelocityOut( x, y, z, lm, Vector3<real_t>( velX, velY, velZ ), rho );
 
-         const real_t feq_common = real_t(1.0) - real_t(1.5) * ( velX * velX + velY * velY + velZ * velZ );
+         const real_t feq_common = 1.0_r - 1.5_r * ( velX * velX + velY * velY + velZ * velZ );
 
-         src->get( x, y, z, Stencil_T::idx[C] ) = vC * (real_t(1.0) - lambda_e) + lambda_e * t0_0 * rho * feq_common;
+         src->get( x, y, z, Stencil_T::idx[C] ) = vC * (1.0_r - lambda_e) + lambda_e * t0_0 * rho * feq_common;
 
          const real_t t2x2 = t2x2_0 * rho;
          const real_t fac2 = t2x2 * inv2csq2;
 
          const real_t velXPY = velX + velY;
          const real_t  sym_NE_SW = lambda_e_scaled * ( vNE + vSW - fac2 * velXPY * velXPY - t2x2 * feq_common );
-         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - real_t(3.0) * t2x2 * velXPY );
+         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - 3.0_r * t2x2 * velXPY );
          src->get( x, y, z, Stencil_T::idx[NE] ) = vNE - sym_NE_SW - asym_NE_SW;
          src->get( x, y, z, Stencil_T::idx[SW] ) = vSW - sym_NE_SW + asym_NE_SW;
 
          const real_t velXMY = velX - velY;
          const real_t  sym_SE_NW = lambda_e_scaled * ( vSE + vNW - fac2 * velXMY * velXMY - t2x2 * feq_common );
-         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - real_t(3.0) * t2x2 * velXMY );
+         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - 3.0_r * t2x2 * velXMY );
          src->get( x, y, z, Stencil_T::idx[SE] ) = vSE - sym_SE_NW - asym_SE_NW;
          src->get( x, y, z, Stencil_T::idx[NW] ) = vNW - sym_SE_NW + asym_SE_NW;
 
          const real_t velXPZ = velX + velZ;
          const real_t  sym_TE_BW = lambda_e_scaled * ( vTE + vBW - fac2 * velXPZ * velXPZ - t2x2 * feq_common );
-         const real_t asym_TE_BW = lambda_d_scaled * ( vTE - vBW - real_t(3.0) * t2x2 * velXPZ );
+         const real_t asym_TE_BW = lambda_d_scaled * ( vTE - vBW - 3.0_r * t2x2 * velXPZ );
          src->get( x, y, z, Stencil_T::idx[TE] ) = vTE - sym_TE_BW - asym_TE_BW;
          src->get( x, y, z, Stencil_T::idx[BW] ) = vBW - sym_TE_BW + asym_TE_BW;
 
          const real_t velXMZ = velX - velZ;
          const real_t  sym_BE_TW = lambda_e_scaled * ( vBE + vTW - fac2 * velXMZ * velXMZ - t2x2 * feq_common );
-         const real_t asym_BE_TW = lambda_d_scaled * ( vBE - vTW - real_t(3.0) * t2x2 * velXMZ );
+         const real_t asym_BE_TW = lambda_d_scaled * ( vBE - vTW - 3.0_r * t2x2 * velXMZ );
          src->get( x, y, z, Stencil_T::idx[BE] ) = vBE - sym_BE_TW - asym_BE_TW;
          src->get( x, y, z, Stencil_T::idx[TW] ) = vTW - sym_BE_TW + asym_BE_TW;
 
          const real_t velYPZ = velY + velZ;
          const real_t  sym_TN_BS = lambda_e_scaled * ( vTN + vBS - fac2 * velYPZ * velYPZ - t2x2 * feq_common );
-         const real_t asym_TN_BS = lambda_d_scaled * ( vTN - vBS - real_t(3.0) * t2x2 * velYPZ );
+         const real_t asym_TN_BS = lambda_d_scaled * ( vTN - vBS - 3.0_r * t2x2 * velYPZ );
          src->get( x, y, z, Stencil_T::idx[TN] ) = vTN - sym_TN_BS - asym_TN_BS;
          src->get( x, y, z, Stencil_T::idx[BS] ) = vBS - sym_TN_BS + asym_TN_BS;
 
          const real_t velYMZ = velY - velZ;
          const real_t  sym_BN_TS = lambda_e_scaled * ( vBN + vTS - fac2 * velYMZ * velYMZ - t2x2 * feq_common );
-         const real_t asym_BN_TS = lambda_d_scaled * ( vBN - vTS - real_t(3.0) * t2x2 * velYMZ );
+         const real_t asym_BN_TS = lambda_d_scaled * ( vBN - vTS - 3.0_r * t2x2 * velYMZ );
          src->get( x, y, z, Stencil_T::idx[BN] ) = vBN - sym_BN_TS - asym_BN_TS;
          src->get( x, y, z, Stencil_T::idx[TS] ) = vTS - sym_BN_TS + asym_BN_TS;
 
@@ -1276,17 +1276,17 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
          const real_t fac1 = t1x2 * inv2csq2;
 
          const real_t  sym_N_S = lambda_e_scaled * ( vN + vS - fac1 * velY * velY - t1x2 * feq_common );
-         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - real_t(3.0) * t1x2 * velY );
+         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - 3.0_r * t1x2 * velY );
          src->get( x, y, z, Stencil_T::idx[N] ) = vN - sym_N_S - asym_N_S;
          src->get( x, y, z, Stencil_T::idx[S] ) = vS - sym_N_S + asym_N_S;
 
          const real_t  sym_E_W = lambda_e_scaled * ( vE + vW - fac1 * velX * velX - t1x2 * feq_common );
-         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - real_t(3.0) * t1x2 * velX );
+         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - 3.0_r * t1x2 * velX );
          src->get( x, y, z, Stencil_T::idx[E] ) = vE - sym_E_W - asym_E_W;
          src->get( x, y, z, Stencil_T::idx[W] ) = vW - sym_E_W + asym_E_W;
 
          const real_t  sym_T_B = lambda_e_scaled * ( vT + vB  - fac1 * velZ * velZ - t1x2 * feq_common );
-         const real_t asym_T_B = lambda_d_scaled * ( vT - vB - real_t(3.0) * t1x2 * velZ );
+         const real_t asym_T_B = lambda_d_scaled * ( vT - vB - 3.0_r * t1x2 * velZ );
          src->get( x, y, z, Stencil_T::idx[T] ) = vT - sym_T_B - asym_T_B;
          src->get( x, y, z, Stencil_T::idx[B] ) = vB - sym_T_B + asym_T_B;
 
@@ -1295,25 +1295,25 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
 
          const real_t vel_TNE_BSW = velX + velY + velZ;
          const real_t  sym_TNE_BSW = lambda_e_scaled * ( vTNE + vBSW - fac3 * vel_TNE_BSW * vel_TNE_BSW - t3x2 * feq_common );
-         const real_t asym_TNE_BSW = lambda_d_scaled * ( vTNE - vBSW - real_t(3.0) * t3x2 * vel_TNE_BSW );
+         const real_t asym_TNE_BSW = lambda_d_scaled * ( vTNE - vBSW - 3.0_r * t3x2 * vel_TNE_BSW );
          src->get( x, y, z, Stencil_T::idx[TNE] ) = vTNE - sym_TNE_BSW - asym_TNE_BSW;
          src->get( x, y, z, Stencil_T::idx[BSW] ) = vBSW - sym_TNE_BSW + asym_TNE_BSW;
 
          const real_t vel_TNW_BSE = -velX + velY + velZ;
          const real_t  sym_TNW_BSE = lambda_e_scaled * ( vTNW + vBSE - fac3 * vel_TNW_BSE * vel_TNW_BSE - t3x2 * feq_common );
-         const real_t asym_TNW_BSE = lambda_d_scaled * ( vTNW - vBSE - real_t(3.0) * t3x2 * vel_TNW_BSE );
+         const real_t asym_TNW_BSE = lambda_d_scaled * ( vTNW - vBSE - 3.0_r * t3x2 * vel_TNW_BSE );
          src->get( x, y, z, Stencil_T::idx[TNW] ) = vTNW - sym_TNW_BSE - asym_TNW_BSE;
          src->get( x, y, z, Stencil_T::idx[BSE] ) = vBSE - sym_TNW_BSE + asym_TNW_BSE;
 
          const real_t vel_TSE_BNW = velX - velY + velZ;
          const real_t  sym_TSE_BNW = lambda_e_scaled * ( vTSE + vBNW - fac3 * vel_TSE_BNW * vel_TSE_BNW - t3x2 * feq_common );
-         const real_t asym_TSE_BNW = lambda_d_scaled * ( vTSE - vBNW - real_t(3.0) * t3x2 * vel_TSE_BNW );
+         const real_t asym_TSE_BNW = lambda_d_scaled * ( vTSE - vBNW - 3.0_r * t3x2 * vel_TSE_BNW );
          src->get( x, y, z, Stencil_T::idx[TSE] ) = vTSE - sym_TSE_BNW - asym_TSE_BNW;
          src->get( x, y, z, Stencil_T::idx[BNW] ) = vBNW - sym_TSE_BNW + asym_TSE_BNW;
 
          const real_t vel_TSW_BNE = - velX - velY + velZ;
          const real_t  sym_TSW_BNE = lambda_e_scaled * ( vTSW + vBNE - fac3 * vel_TSW_BNE * vel_TSW_BNE - t3x2 * feq_common );
-         const real_t asym_TSW_BNE = lambda_d_scaled * ( vTSW - vBNE - real_t(3.0) * t3x2 * vel_TSW_BNE );
+         const real_t asym_TSW_BNE = lambda_d_scaled * ( vTSW - vBNE - 3.0_r * t3x2 * vel_TSW_BNE );
          src->get( x, y, z, Stencil_T::idx[TSW] ) = vTSW - sym_TSW_BNE - asym_TSW_BNE;
          src->get( x, y, z, Stencil_T::idx[BNE] ) = vBNE - sym_TSW_BNE + asym_TSW_BNE;
       }
@@ -1347,23 +1347,23 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
    const real_t lambda_e = src->latticeModel().collisionModel().lambda_e();
    const real_t lambda_d = src->latticeModel().collisionModel().lambda_d();
 
-   const real_t three_w1( real_t(2) / real_t(9) );
-   const real_t three_w2( real_t(1) / real_t(18) );
-   const real_t three_w3( real_t(1) / real_t(72) );
+   const real_t three_w1( 2_r / 9_r );
+   const real_t three_w2( 1_r / 18_r );
+   const real_t three_w3( 1_r / 72_r );
 
    // common prefactors for calculating the equilibrium parts
-   const real_t t0   = real_t(8.0) / real_t(27.0);                // 8/27    for C
-   const real_t t1x2 = real_t(2.0) / real_t(27.0) * real_t(2.0);  // 2/27 * 2 for N, S, W, E, T, B
-   const real_t t2x2 = real_t(1.0) / real_t(54.0) * real_t(2.0);  // 1/54 * 2 else
-   const real_t t3x2 = real_t(1.0) / real_t(216.0) * real_t(2.0); // 1/216    for TNE,BSW,TNW,BSE,TSE,BNW,TSW,BNE
+   const real_t t0   = 8.0_r / 27.0_r;                // 8/27    for C
+   const real_t t1x2 = 2.0_r / 27.0_r * 2.0_r;  // 2/27 * 2 for N, S, W, E, T, B
+   const real_t t2x2 = 1.0_r / 54.0_r * 2.0_r;  // 1/54 * 2 else
+   const real_t t3x2 = 1.0_r / 216.0_r * 2.0_r; // 1/216    for TNE,BSW,TNW,BSE,TSE,BNW,TSW,BNE
 
-   const real_t inv2csq2 = real_t(1.0) / ( real_t(2.0) * ( real_t(1.0) / real_t(3.0) ) * ( real_t(1.0) / real_t(3.0) ) ); //speed of sound related factor for equilibrium distribution function
+   const real_t inv2csq2 = 1.0_r / ( 2.0_r * ( 1.0_r / 3.0_r ) * ( 1.0_r / 3.0_r ) ); //speed of sound related factor for equilibrium distribution function
    const real_t fac1     = t1x2 * inv2csq2;
    const real_t fac2     = t2x2 * inv2csq2;
    const real_t fac3     = t3x2 * inv2csq2;
 
-   const real_t lambda_e_scaled = real_t(0.5) * lambda_e; // 0.5 times the usual value ...
-   const real_t lambda_d_scaled = real_t(0.5) * lambda_d; // ... due to the way of calculations
+   const real_t lambda_e_scaled = 0.5_r * lambda_e; // 0.5 times the usual value ...
+   const real_t lambda_d_scaled = 0.5_r * lambda_d; // ... due to the way of calculations
 
    WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ( src, numberOfGhostLayersToInclude,
 
@@ -1375,86 +1375,86 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
 
          WALBERLA_LBM_CELLWISE_SWEEP_D3Q27_DENSITY_VELOCITY_INCOMP()
 
-         this->densityVelocityOut( x, y, z, lm, Vector3<real_t>( velX, velY, velZ ), rho + real_t(1) );
+         this->densityVelocityOut( x, y, z, lm, Vector3<real_t>( velX, velY, velZ ), rho + 1_r );
 
-         const real_t feq_common = rho - real_t(1.5) * ( velX * velX + velY * velY + velZ * velZ );
+         const real_t feq_common = rho - 1.5_r * ( velX * velX + velY * velY + velZ * velZ );
 
-         dst->get( x, y, z, Stencil_T::idx[C] ) = vC * (real_t(1.0) - lambda_e) + lambda_e * t0 * feq_common;// no force term
+         dst->get( x, y, z, Stencil_T::idx[C] ) = vC * (1.0_r - lambda_e) + lambda_e * t0 * feq_common;// no force term
 
          const Vector3< real_t > & force = src->latticeModel().forceModel().force(x,y,z);
 
          const real_t velXPY = velX + velY;
          const real_t  sym_NE_SW = lambda_e_scaled * ( vNE + vSW - fac2 * velXPY * velXPY - t2x2 * feq_common );
-         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - real_t(3.0) * t2x2 * velXPY );
+         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - 3.0_r * t2x2 * velXPY );
          dst->get( x, y, z, Stencil_T::idx[NE] ) = vNE - sym_NE_SW - asym_NE_SW + three_w2 * (  force[0] + force[1] );
          dst->get( x, y, z, Stencil_T::idx[SW] ) = vSW - sym_NE_SW + asym_NE_SW - three_w2 * (  force[0] + force[1] );
 
          const real_t velXMY = velX - velY;
          const real_t  sym_SE_NW = lambda_e_scaled * ( vSE + vNW - fac2 * velXMY * velXMY - t2x2 * feq_common );
-         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - real_t(3.0) * t2x2 * velXMY );
+         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - 3.0_r * t2x2 * velXMY );
          dst->get( x, y, z, Stencil_T::idx[SE] ) = vSE - sym_SE_NW - asym_SE_NW + three_w2 * (  force[0] - force[1] );
          dst->get( x, y, z, Stencil_T::idx[NW] ) = vNW - sym_SE_NW + asym_SE_NW - three_w2 * (  force[0] - force[1] );
 
          const real_t velXPZ = velX + velZ;
          const real_t  sym_TE_BW = lambda_e_scaled * ( vTE + vBW - fac2 * velXPZ * velXPZ - t2x2 * feq_common );
-         const real_t asym_TE_BW = lambda_d_scaled * ( vTE - vBW - real_t(3.0) * t2x2 * velXPZ );
+         const real_t asym_TE_BW = lambda_d_scaled * ( vTE - vBW - 3.0_r * t2x2 * velXPZ );
          dst->get( x, y, z, Stencil_T::idx[TE] ) = vTE - sym_TE_BW - asym_TE_BW + three_w2 * (  force[0] + force[2] );
          dst->get( x, y, z, Stencil_T::idx[BW] ) = vBW - sym_TE_BW + asym_TE_BW - three_w2 * (  force[0] + force[2] );
 
          const real_t velXMZ = velX - velZ;
          const real_t  sym_BE_TW = lambda_e_scaled * ( vBE + vTW - fac2 * velXMZ * velXMZ - t2x2 * feq_common );
-         const real_t asym_BE_TW = lambda_d_scaled * ( vBE - vTW - real_t(3.0) * t2x2 * velXMZ );
+         const real_t asym_BE_TW = lambda_d_scaled * ( vBE - vTW - 3.0_r * t2x2 * velXMZ );
          dst->get( x, y, z, Stencil_T::idx[BE] ) = vBE - sym_BE_TW - asym_BE_TW + three_w2 * (  force[0] - force[2] );
          dst->get( x, y, z, Stencil_T::idx[TW] ) = vTW - sym_BE_TW + asym_BE_TW - three_w2 * (  force[0] - force[2] );
 
          const real_t velYPZ = velY + velZ;
          const real_t  sym_TN_BS = lambda_e_scaled * ( vTN + vBS - fac2 * velYPZ * velYPZ - t2x2 * feq_common );
-         const real_t asym_TN_BS = lambda_d_scaled * ( vTN - vBS - real_t(3.0) * t2x2 * velYPZ );
+         const real_t asym_TN_BS = lambda_d_scaled * ( vTN - vBS - 3.0_r * t2x2 * velYPZ );
          dst->get( x, y, z, Stencil_T::idx[TN] ) = vTN - sym_TN_BS - asym_TN_BS + three_w2 * (  force[1] + force[2] );
          dst->get( x, y, z, Stencil_T::idx[BS] ) = vBS - sym_TN_BS + asym_TN_BS - three_w2 * (  force[1] + force[2] );
 
          const real_t velYMZ = velY - velZ;
          const real_t  sym_BN_TS = lambda_e_scaled * ( vBN + vTS - fac2 * velYMZ * velYMZ - t2x2 * feq_common );
-         const real_t asym_BN_TS = lambda_d_scaled * ( vBN - vTS - real_t(3.0) * t2x2 * velYMZ );
+         const real_t asym_BN_TS = lambda_d_scaled * ( vBN - vTS - 3.0_r * t2x2 * velYMZ );
          dst->get( x, y, z, Stencil_T::idx[BN] ) = vBN - sym_BN_TS - asym_BN_TS + three_w2 * (  force[1] - force[2] );
          dst->get( x, y, z, Stencil_T::idx[TS] ) = vTS - sym_BN_TS + asym_BN_TS - three_w2 * (  force[1] - force[2] );
 
          const real_t  sym_N_S = lambda_e_scaled * ( vN + vS - fac1 * velY * velY - t1x2 * feq_common );
-         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - real_t(3.0) * t1x2 * velY );
+         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - 3.0_r * t1x2 * velY );
          dst->get( x, y, z, Stencil_T::idx[N] ) = vN - sym_N_S - asym_N_S + three_w1 * force[1];
          dst->get( x, y, z, Stencil_T::idx[S] ) = vS - sym_N_S + asym_N_S - three_w1 * force[1];
 
          const real_t  sym_E_W = lambda_e_scaled * ( vE + vW - fac1 * velX * velX - t1x2 * feq_common );
-         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - real_t(3.0) * t1x2 * velX );
+         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - 3.0_r * t1x2 * velX );
          dst->get( x, y, z, Stencil_T::idx[E] ) = vE - sym_E_W - asym_E_W + three_w1 * force[0];
          dst->get( x, y, z, Stencil_T::idx[W] ) = vW - sym_E_W + asym_E_W - three_w1 * force[0];
 
          const real_t  sym_T_B = lambda_e_scaled * ( vT + vB  - fac1 * velZ * velZ - t1x2 * feq_common );
-         const real_t asym_T_B = lambda_d_scaled * ( vT - vB - real_t(3.0) * t1x2 * velZ );
+         const real_t asym_T_B = lambda_d_scaled * ( vT - vB - 3.0_r * t1x2 * velZ );
          dst->get( x, y, z, Stencil_T::idx[T] ) = vT - sym_T_B - asym_T_B + three_w1 * force[2];
          dst->get( x, y, z, Stencil_T::idx[B] ) = vB - sym_T_B + asym_T_B - three_w1 * force[2];
 
          const real_t vel_TNE_BSW = velX + velY + velZ;
          const real_t  sym_TNE_BSW = lambda_e_scaled * ( vTNE + vBSW - fac3 * vel_TNE_BSW * vel_TNE_BSW - t3x2 * feq_common );
-         const real_t asym_TNE_BSW = lambda_d_scaled * ( vTNE - vBSW - real_t(3.0) * t3x2 * vel_TNE_BSW );
+         const real_t asym_TNE_BSW = lambda_d_scaled * ( vTNE - vBSW - 3.0_r * t3x2 * vel_TNE_BSW );
          dst->get( x, y, z, Stencil_T::idx[TNE] ) = vTNE - sym_TNE_BSW - asym_TNE_BSW + three_w3 * (  force[0] + force[1] + force[2] );
          dst->get( x, y, z, Stencil_T::idx[BSW] ) = vBSW - sym_TNE_BSW + asym_TNE_BSW - three_w3 * (  force[0] + force[1] + force[2] );
 
          const real_t vel_TNW_BSE = -velX + velY + velZ;
          const real_t  sym_TNW_BSE = lambda_e_scaled * ( vTNW + vBSE - fac3 * vel_TNW_BSE * vel_TNW_BSE - t3x2 * feq_common );
-         const real_t asym_TNW_BSE = lambda_d_scaled * ( vTNW - vBSE - real_t(3.0) * t3x2 * vel_TNW_BSE );
+         const real_t asym_TNW_BSE = lambda_d_scaled * ( vTNW - vBSE - 3.0_r * t3x2 * vel_TNW_BSE );
          dst->get( x, y, z, Stencil_T::idx[TNW] ) = vTNW - sym_TNW_BSE - asym_TNW_BSE + three_w3 * (  -force[0] + force[1] + force[2] );
          dst->get( x, y, z, Stencil_T::idx[BSE] ) = vBSE - sym_TNW_BSE + asym_TNW_BSE - three_w3 * (  -force[0] + force[1] + force[2] );
 
          const real_t vel_TSE_BNW = velX - velY + velZ;
          const real_t  sym_TSE_BNW = lambda_e_scaled * ( vTSE + vBNW - fac3 * vel_TSE_BNW * vel_TSE_BNW - t3x2 * feq_common );
-         const real_t asym_TSE_BNW = lambda_d_scaled * ( vTSE - vBNW - real_t(3.0) * t3x2 * vel_TSE_BNW );
+         const real_t asym_TSE_BNW = lambda_d_scaled * ( vTSE - vBNW - 3.0_r * t3x2 * vel_TSE_BNW );
          dst->get( x, y, z, Stencil_T::idx[TSE] ) = vTSE - sym_TSE_BNW - asym_TSE_BNW + three_w3 * (  force[0] - force[1] + force[2] );
          dst->get( x, y, z, Stencil_T::idx[BNW] ) = vBNW - sym_TSE_BNW + asym_TSE_BNW - three_w3 * (  force[0] - force[1] + force[2] );
 
          const real_t vel_TSW_BNE = - velX - velY + velZ;
          const real_t  sym_TSW_BNE = lambda_e_scaled * ( vTSW + vBNE - fac3 * vel_TSW_BNE * vel_TSW_BNE - t3x2 * feq_common );
-         const real_t asym_TSW_BNE = lambda_d_scaled * ( vTSW - vBNE - real_t(3.0) * t3x2 * vel_TSW_BNE );
+         const real_t asym_TSW_BNE = lambda_d_scaled * ( vTSW - vBNE - 3.0_r * t3x2 * vel_TSW_BNE );
          dst->get( x, y, z, Stencil_T::idx[TSW] ) = vTSW - sym_TSW_BNE - asym_TSW_BNE + three_w3 * (  -force[0] - force[1] + force[2] );
          dst->get( x, y, z, Stencil_T::idx[BNE] ) = vBNE - sym_TSW_BNE + asym_TSW_BNE - three_w3 * (  -force[0] - force[1] + force[2] );
       }
@@ -1469,24 +1469,24 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
    const real_t lambda_e = src->latticeModel().collisionModel().lambda_e();
    const real_t lambda_d = src->latticeModel().collisionModel().lambda_d();
 
-   const real_t three_w1( real_t(2) / real_t(9) );
-   const real_t three_w2( real_t(1) / real_t(18) );
-   const real_t three_w3( real_t(1) / real_t(72) );
+   const real_t three_w1( 2_r / 9_r );
+   const real_t three_w2( 1_r / 18_r );
+   const real_t three_w3( 1_r / 72_r );
 
    // common prefactors for calculating the equilibrium parts
-   const real_t t0   = real_t(8.0) / real_t(27.0);                // 8/27    for C
-   const real_t t1x2 = real_t(2.0) / real_t(27.0) * real_t(2.0);  // 2/27 * 2 for N, S, W, E, T, B
-   const real_t t2x2 = real_t(1.0) / real_t(54.0) * real_t(2.0);  // 1/54 * 2 else
-   const real_t t3x2 = real_t(1.0) / real_t(216.0) * real_t(2.0); // 1/216    for TNE,BSW,TNW,BSE,TSE,BNW,TSW,BNE
+   const real_t t0   = 8.0_r / 27.0_r;                // 8/27    for C
+   const real_t t1x2 = 2.0_r / 27.0_r * 2.0_r;  // 2/27 * 2 for N, S, W, E, T, B
+   const real_t t2x2 = 1.0_r / 54.0_r * 2.0_r;  // 1/54 * 2 else
+   const real_t t3x2 = 1.0_r / 216.0_r * 2.0_r; // 1/216    for TNE,BSW,TNW,BSE,TSE,BNW,TSW,BNE
 
-   const real_t inv2csq2 = real_t(1.0) / ( real_t(2.0) * ( real_t(1.0) / real_t(3.0) ) * ( real_t(1.0) / real_t(3.0) ) ); //speed of sound related factor for equilibrium distribution function
+   const real_t inv2csq2 = 1.0_r / ( 2.0_r * ( 1.0_r / 3.0_r ) * ( 1.0_r / 3.0_r ) ); //speed of sound related factor for equilibrium distribution function
    const real_t fac1     = t1x2 * inv2csq2;
    const real_t fac2     = t2x2 * inv2csq2;
    const real_t fac3     = t3x2 * inv2csq2;
 
    // relaxation parameter variables
-   const real_t lambda_e_scaled = real_t(0.5) * lambda_e; // 0.5 times the usual value ...
-   const real_t lambda_d_scaled = real_t(0.5) * lambda_d; // ... due to the way of calculations
+   const real_t lambda_e_scaled = 0.5_r * lambda_e; // 0.5 times the usual value ...
+   const real_t lambda_d_scaled = 0.5_r * lambda_d; // ... due to the way of calculations
 
    WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ( src, numberOfGhostLayersToInclude,
 
@@ -1498,86 +1498,86 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
 
          WALBERLA_LBM_CELLWISE_SWEEP_D3Q27_DENSITY_VELOCITY_INCOMP()
 
-         this->densityVelocityOut( x, y, z, lm, Vector3<real_t>( velX, velY, velZ ), rho + real_t(1) );
+         this->densityVelocityOut( x, y, z, lm, Vector3<real_t>( velX, velY, velZ ), rho + 1_r );
 
-         const real_t feq_common = rho - real_t(1.5) * ( velX * velX + velY * velY + velZ * velZ );
+         const real_t feq_common = rho - 1.5_r * ( velX * velX + velY * velY + velZ * velZ );
 
-         src->get( x, y, z, Stencil_T::idx[C] ) = vC * (real_t(1.0) - lambda_e) + lambda_e * t0 * feq_common; // no force term
+         src->get( x, y, z, Stencil_T::idx[C] ) = vC * (1.0_r - lambda_e) + lambda_e * t0 * feq_common; // no force term
 
          const Vector3< real_t > & force = src->latticeModel().forceModel().force(x,y,z);
 
          const real_t velXPY = velX + velY;
          const real_t  sym_NE_SW = lambda_e_scaled * ( vNE + vSW - fac2 * velXPY * velXPY - t2x2 * feq_common );
-         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - real_t(3.0) * t2x2 * velXPY );
+         const real_t asym_NE_SW = lambda_d_scaled * ( vNE - vSW - 3.0_r * t2x2 * velXPY );
          src->get( x, y, z, Stencil_T::idx[NE] ) = vNE - sym_NE_SW - asym_NE_SW + three_w2 * (  force[0] + force[1] );
          src->get( x, y, z, Stencil_T::idx[SW] ) = vSW - sym_NE_SW + asym_NE_SW - three_w2 * (  force[0] + force[1] );
 
          const real_t velXMY = velX - velY;
          const real_t  sym_SE_NW = lambda_e_scaled * ( vSE + vNW - fac2 * velXMY * velXMY - t2x2 * feq_common );
-         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - real_t(3.0) * t2x2 * velXMY );
+         const real_t asym_SE_NW = lambda_d_scaled * ( vSE - vNW - 3.0_r * t2x2 * velXMY );
          src->get( x, y, z, Stencil_T::idx[SE] ) = vSE - sym_SE_NW - asym_SE_NW + three_w2 * (  force[0] - force[1] );
          src->get( x, y, z, Stencil_T::idx[NW] ) = vNW - sym_SE_NW + asym_SE_NW - three_w2 * (  force[0] - force[1] );
 
          const real_t velXPZ = velX + velZ;
          const real_t  sym_TE_BW = lambda_e_scaled * ( vTE + vBW - fac2 * velXPZ * velXPZ - t2x2 * feq_common );
-         const real_t asym_TE_BW = lambda_d_scaled * ( vTE - vBW - real_t(3.0) * t2x2 * velXPZ );
+         const real_t asym_TE_BW = lambda_d_scaled * ( vTE - vBW - 3.0_r * t2x2 * velXPZ );
          src->get( x, y, z, Stencil_T::idx[TE] ) = vTE - sym_TE_BW - asym_TE_BW + three_w2 * (  force[0] + force[2] );
          src->get( x, y, z, Stencil_T::idx[BW] ) = vBW - sym_TE_BW + asym_TE_BW - three_w2 * (  force[0] + force[2] );
 
          const real_t velXMZ = velX - velZ;
          const real_t  sym_BE_TW = lambda_e_scaled * ( vBE + vTW - fac2 * velXMZ * velXMZ - t2x2 * feq_common );
-         const real_t asym_BE_TW = lambda_d_scaled * ( vBE - vTW - real_t(3.0) * t2x2 * velXMZ );
+         const real_t asym_BE_TW = lambda_d_scaled * ( vBE - vTW - 3.0_r * t2x2 * velXMZ );
          src->get( x, y, z, Stencil_T::idx[BE] ) = vBE - sym_BE_TW - asym_BE_TW + three_w2 * (  force[0] - force[2] );
          src->get( x, y, z, Stencil_T::idx[TW] ) = vTW - sym_BE_TW + asym_BE_TW - three_w2 * (  force[0] - force[2] );
 
          const real_t velYPZ = velY + velZ;
          const real_t  sym_TN_BS = lambda_e_scaled * ( vTN + vBS - fac2 * velYPZ * velYPZ - t2x2 * feq_common );
-         const real_t asym_TN_BS = lambda_d_scaled * ( vTN - vBS - real_t(3.0) * t2x2 * velYPZ );
+         const real_t asym_TN_BS = lambda_d_scaled * ( vTN - vBS - 3.0_r * t2x2 * velYPZ );
          src->get( x, y, z, Stencil_T::idx[TN] ) = vTN - sym_TN_BS - asym_TN_BS + three_w2 * (  force[1] + force[2] );
          src->get( x, y, z, Stencil_T::idx[BS] ) = vBS - sym_TN_BS + asym_TN_BS - three_w2 * (  force[1] + force[2] );
 
          const real_t velYMZ = velY - velZ;
          const real_t  sym_BN_TS = lambda_e_scaled * ( vBN + vTS - fac2 * velYMZ * velYMZ - t2x2 * feq_common );
-         const real_t asym_BN_TS = lambda_d_scaled * ( vBN - vTS - real_t(3.0) * t2x2 * velYMZ );
+         const real_t asym_BN_TS = lambda_d_scaled * ( vBN - vTS - 3.0_r * t2x2 * velYMZ );
          src->get( x, y, z, Stencil_T::idx[BN] ) = vBN - sym_BN_TS - asym_BN_TS + three_w2 * (  force[1] - force[2] );
          src->get( x, y, z, Stencil_T::idx[TS] ) = vTS - sym_BN_TS + asym_BN_TS - three_w2 * (  force[1] - force[2] );
 
          const real_t  sym_N_S = lambda_e_scaled * ( vN + vS - fac1 * velY * velY - t1x2 * feq_common );
-         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - real_t(3.0) * t1x2 * velY );
+         const real_t asym_N_S = lambda_d_scaled * ( vN - vS - 3.0_r * t1x2 * velY );
          src->get( x, y, z, Stencil_T::idx[N] ) = vN - sym_N_S - asym_N_S + three_w1 * force[1];
          src->get( x, y, z, Stencil_T::idx[S] ) = vS - sym_N_S + asym_N_S - three_w1 * force[1];
 
          const real_t  sym_E_W = lambda_e_scaled * ( vE + vW - fac1 * velX * velX - t1x2 * feq_common );
-         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - real_t(3.0) * t1x2 * velX );
+         const real_t asym_E_W = lambda_d_scaled * ( vE - vW - 3.0_r * t1x2 * velX );
          src->get( x, y, z, Stencil_T::idx[E] ) = vE - sym_E_W - asym_E_W + three_w1 * force[0];
          src->get( x, y, z, Stencil_T::idx[W] ) = vW - sym_E_W + asym_E_W - three_w1 * force[0];
 
          const real_t  sym_T_B = lambda_e_scaled * ( vT + vB  - fac1 * velZ * velZ - t1x2 * feq_common );
-         const real_t asym_T_B = lambda_d_scaled * ( vT - vB - real_t(3.0) * t1x2 * velZ );
+         const real_t asym_T_B = lambda_d_scaled * ( vT - vB - 3.0_r * t1x2 * velZ );
          src->get( x, y, z, Stencil_T::idx[T] ) = vT - sym_T_B - asym_T_B + three_w1 * force[2];
          src->get( x, y, z, Stencil_T::idx[B] ) = vB - sym_T_B + asym_T_B - three_w1 * force[2];
 
          const real_t vel_TNE_BSW = velX + velY + velZ;
          const real_t  sym_TNE_BSW = lambda_e_scaled * ( vTNE + vBSW - fac3 * vel_TNE_BSW * vel_TNE_BSW - t3x2 * feq_common );
-         const real_t asym_TNE_BSW = lambda_d_scaled * ( vTNE - vBSW - real_t(3.0) * t3x2 * vel_TNE_BSW );
+         const real_t asym_TNE_BSW = lambda_d_scaled * ( vTNE - vBSW - 3.0_r * t3x2 * vel_TNE_BSW );
          src->get( x, y, z, Stencil_T::idx[TNE] ) = vTNE - sym_TNE_BSW - asym_TNE_BSW + three_w3 * (  force[0] + force[1] + force[2] );
          src->get( x, y, z, Stencil_T::idx[BSW] ) = vBSW - sym_TNE_BSW + asym_TNE_BSW - three_w3 * (  force[0] + force[1] + force[2] );
 
          const real_t vel_TNW_BSE = -velX + velY + velZ;
          const real_t  sym_TNW_BSE = lambda_e_scaled * ( vTNW + vBSE - fac3 * vel_TNW_BSE * vel_TNW_BSE - t3x2 * feq_common );
-         const real_t asym_TNW_BSE = lambda_d_scaled * ( vTNW - vBSE - real_t(3.0) * t3x2 * vel_TNW_BSE );
+         const real_t asym_TNW_BSE = lambda_d_scaled * ( vTNW - vBSE - 3.0_r * t3x2 * vel_TNW_BSE );
          src->get( x, y, z, Stencil_T::idx[TNW] ) = vTNW - sym_TNW_BSE - asym_TNW_BSE + three_w3 * (  -force[0] + force[1] + force[2] );
          src->get( x, y, z, Stencil_T::idx[BSE] ) = vBSE - sym_TNW_BSE + asym_TNW_BSE - three_w3 * (  -force[0] + force[1] + force[2] );
 
          const real_t vel_TSE_BNW = velX - velY + velZ;
          const real_t  sym_TSE_BNW = lambda_e_scaled * ( vTSE + vBNW - fac3 * vel_TSE_BNW * vel_TSE_BNW - t3x2 * feq_common );
-         const real_t asym_TSE_BNW = lambda_d_scaled * ( vTSE - vBNW - real_t(3.0) * t3x2 * vel_TSE_BNW );
+         const real_t asym_TSE_BNW = lambda_d_scaled * ( vTSE - vBNW - 3.0_r * t3x2 * vel_TSE_BNW );
          src->get( x, y, z, Stencil_T::idx[TSE] ) = vTSE - sym_TSE_BNW - asym_TSE_BNW + three_w3 * (  force[0] - force[1] + force[2] );
          src->get( x, y, z, Stencil_T::idx[BNW] ) = vBNW - sym_TSE_BNW + asym_TSE_BNW - three_w3 * (  force[0] - force[1] + force[2] );
 
          const real_t vel_TSW_BNE = - velX - velY + velZ;
          const real_t  sym_TSW_BNE = lambda_e_scaled * ( vTSW + vBNE - fac3 * vel_TSW_BNE * vel_TSW_BNE - t3x2 * feq_common );
-         const real_t asym_TSW_BNE = lambda_d_scaled * ( vTSW - vBNE - real_t(3.0) * t3x2 * vel_TSW_BNE );
+         const real_t asym_TSW_BNE = lambda_d_scaled * ( vTSW - vBNE - 3.0_r * t3x2 * vel_TSW_BNE );
          src->get( x, y, z, Stencil_T::idx[TSW] ) = vTSW - sym_TSW_BNE - asym_TSW_BNE + three_w3 * (  -force[0] - force[1] + force[2] );
          src->get( x, y, z, Stencil_T::idx[BNE] ) = vBNE - sym_TSW_BNE + asym_TSW_BNE - three_w3 * (  -force[0] - force[1] + force[2] );
       }

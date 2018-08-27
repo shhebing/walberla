@@ -115,7 +115,7 @@ const FlagUID MO_CLI_Flag( "moving obstacle CLI" );
 
 static void refinementSelection( SetupBlockForest& forest, uint_t levels, const AABB& refinementBox )
 {
-   real_t dx = real_t(1); // dx on finest level
+   real_t dx = 1_r; // dx on finest level
    for( auto block = forest.begin(); block != forest.end(); ++block )
    {
       uint_t blockLevel = block->getLevel();
@@ -172,11 +172,11 @@ static shared_ptr< StructuredBlockForest > createBlockStructure( const AABB & do
       // refinement area is the complete area along the bottom plane, containing the sphere
       // this avoids refinement borders in flow direction
       refinementBox = AABB(domainAABB.xMin(), domainAABB.yMin(), domainAABB.zMin(),
-                           domainAABB.xMax(), domainAABB.yMax(), initialPosition[2] + real_t(0.5) * diameter);
+                           domainAABB.xMax(), domainAABB.yMax(), initialPosition[2] + 0.5_r * diameter);
    } else{
       // refinement area is just around the sphere
-      refinementBox = AABB(initialPosition[0] - real_t(0.5) * diameter, initialPosition[1] - real_t(0.5) * diameter, domainAABB.zMin(),
-                           initialPosition[0] + real_t(0.5) * diameter, initialPosition[1] + real_t(0.5) * diameter, initialPosition[2] + real_t(0.5) * diameter);
+      refinementBox = AABB(initialPosition[0] - 0.5_r * diameter, initialPosition[1] - 0.5_r * diameter, domainAABB.zMin(),
+                           initialPosition[0] + 0.5_r * diameter, initialPosition[1] + 0.5_r * diameter, initialPosition[2] + 0.5_r * diameter);
    }
 
    WALBERLA_LOG_INFO_ON_ROOT(" - refinement box: " << refinementBox);
@@ -189,7 +189,7 @@ static shared_ptr< StructuredBlockForest > createBlockStructure( const AABB & do
    // calculate process distribution
    const memory_t memoryLimit = math::Limits< memory_t >::inf();
 
-   sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), uint_c( MPIManager::instance()->numProcesses() ), real_t(0), memoryLimit, true );
+   sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), uint_c( MPIManager::instance()->numProcesses() ), 0_r, memoryLimit, true );
 
    WALBERLA_LOG_INFO_ON_ROOT( sforest );
 
@@ -278,8 +278,8 @@ public:
    void operator()()
    {
 
-      Vector3<real_t> force(real_t(0));
-      Vector3<real_t> torque(real_t(0));
+      Vector3<real_t> force(0_r);
+      Vector3<real_t> torque(0_r);
 
       for( auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt )
       {
@@ -446,15 +446,15 @@ int main( int argc, char **argv )
    std::string baseFolderLogging = ".";
 
    // physical setup
-   real_t diameter = real_t(20); // cells per diameter -> determines overall resolution
-   real_t normalizedWallDistance = real_t(1); // distance of the sphere center to the bottom wall, normalized by the diameter
-   real_t ReynoldsNumberShear = real_t(1); // = shearRate * wallDistance * diameter / viscosity
+   real_t diameter = 20_r; // cells per diameter -> determines overall resolution
+   real_t normalizedWallDistance = 1_r; // distance of the sphere center to the bottom wall, normalized by the diameter
+   real_t ReynoldsNumberShear = 1_r; // = shearRate * wallDistance * diameter / viscosity
 
    //numerical parameters
-   real_t minimumNonDimTimesteps = real_t(100); // minimum number of non-dimensional time steps before simulation can be terminated by convergence
+   real_t minimumNonDimTimesteps = 100_r; // minimum number of non-dimensional time steps before simulation can be terminated by convergence
    uint_t numberOfLevels = uint_t(4); // number of grid levels for static refinement ( 1 = no refinement)
-   real_t xOffsetOfSpherePosition = real_t(0); // offset in x-direction of sphere position
-   real_t yOffsetOfSpherePosition = real_t(0); // offset in y-direction of sphere position
+   real_t xOffsetOfSpherePosition = 0_r; // offset in x-direction of sphere position
+   real_t yOffsetOfSpherePosition = 0_r; // offset in y-direction of sphere position
    bool useSBB = false; // use simple bounce-back boundary condition for sphere
    bool useLargeRefinementRegion = false; // uses the whole area near the bottom plane as the finest grid, else refinement is only applied around the sphere
 
@@ -479,41 +479,41 @@ int main( int argc, char **argv )
       WALBERLA_ABORT("Unrecognized command line argument found: " << argv[i]);
    }
 
-   WALBERLA_CHECK_GREATER_EQUAL(normalizedWallDistance, real_t(0.5));
-   WALBERLA_CHECK_GREATER_EQUAL(ReynoldsNumberShear, real_t(0));
-   WALBERLA_CHECK_GREATER_EQUAL(diameter, real_t(0));
+   WALBERLA_CHECK_GREATER_EQUAL(normalizedWallDistance, 0.5_r);
+   WALBERLA_CHECK_GREATER_EQUAL(ReynoldsNumberShear, 0_r);
+   WALBERLA_CHECK_GREATER_EQUAL(diameter, 0_r);
 
    //////////////////////////
    // NUMERICAL PARAMETERS //
    //////////////////////////
 
-   const real_t domainLength = real_t(48) * diameter; //x
-   const real_t domainWidth  = real_t(16) * diameter; //y
+   const real_t domainLength = 48_r * diameter; //x
+   const real_t domainWidth  = 16_r * diameter; //y
    const real_t domainHeight = real_t( 8) * diameter; //z
 
    Vector3<uint_t> domainSize( uint_c( std::ceil(domainLength)), uint_c( std::ceil(domainWidth)), uint_c( std::ceil(domainHeight)) );
 
-   real_t wallVelocity = real_t(0.01);
-   if( zeroShearTest ) wallVelocity = real_t(0);
+   real_t wallVelocity = 0.01_r;
+   if( zeroShearTest ) wallVelocity = 0_r;
 
    const real_t wallDistance = diameter * normalizedWallDistance;
    const real_t shearRate = wallVelocity / domainHeight;
    const real_t velAtSpherePosition = shearRate * wallDistance;
-   const real_t viscosity = ( zeroShearTest ) ? real_t(0.015) : ( velAtSpherePosition * diameter / ReynoldsNumberShear );
+   const real_t viscosity = ( zeroShearTest ) ? 0.015_r : ( velAtSpherePosition * diameter / ReynoldsNumberShear );
 
-   const real_t relaxationTime = real_t(1) / lbm::collision_model::omegaFromViscosity(viscosity);
+   const real_t relaxationTime = 1_r / lbm::collision_model::omegaFromViscosity(viscosity);
 
-   const real_t densityFluid = real_t(1);
+   const real_t densityFluid = 1_r;
 
-   const real_t dx = real_t(1);
+   const real_t dx = 1_r;
 
-   const real_t physicalTimeScale = ( zeroShearTest ) ? real_t(10) : (diameter / velAtSpherePosition);
+   const real_t physicalTimeScale = ( zeroShearTest ) ? 10_r : (diameter / velAtSpherePosition);
    const uint_t minimumLBMtimesteps = uint_c(minimumNonDimTimesteps * physicalTimeScale);
 
-   const real_t omega = real_t(1) / relaxationTime;
+   const real_t omega = 1_r / relaxationTime;
    const uint_t finestLevel = numberOfLevels - uint_t(1);
-   Vector3<real_t> initialPosition( domainLength * real_t(0.5) + xOffsetOfSpherePosition,
-                                    domainWidth * real_t(0.5) + yOffsetOfSpherePosition,
+   Vector3<real_t> initialPosition( domainLength * 0.5_r + xOffsetOfSpherePosition,
+                                    domainWidth * 0.5_r + yOffsetOfSpherePosition,
                                     wallDistance );
 
    WALBERLA_LOG_INFO_ON_ROOT("Setup:");
@@ -556,7 +556,7 @@ int main( int argc, char **argv )
                                     domainSize[1] / ( coarseBlocksPerDirection[1] * levelScalingFactor ),
                                     domainSize[2] / ( coarseBlocksPerDirection[2] * levelScalingFactor ) );
 
-   AABB simulationDomain( real_t(0), real_t(0), real_t(0), real_c(domainSize[0]), real_c(domainSize[1]), real_c(domainSize[2]) );
+   AABB simulationDomain( 0_r, 0_r, 0_r, real_c(domainSize[0]), real_c(domainSize[1]), real_c(domainSize[2]) );
    auto blocks = createBlockStructure( simulationDomain, blockSizeInCells, numberOfLevels, diameter, initialPosition, useLargeRefinementRegion );
 
    //write domain decomposition to file
@@ -583,13 +583,13 @@ int main( int argc, char **argv )
    // create pe bodies
 
    // bounding planes (global)
-   const auto planeMaterial = pe::createMaterial( "myPlaneMat", real_t(8920), real_t(0), real_t(1), real_t(1), real_t(0), real_t(1), real_t(1), real_t(0), real_t(0) );
+   const auto planeMaterial = pe::createMaterial( "myPlaneMat", 8920_r, 0_r, 1_r, 1_r, 0_r, 1_r, 1_r, 0_r, 0_r );
    pe::createPlane( *globalBodyStorage, 0, Vector3<real_t>(0,0,1), Vector3<real_t>(0,0,0), planeMaterial );
    auto topPlane = pe::createPlane( *globalBodyStorage, 0, Vector3<real_t>(0,0,-1), Vector3<real_t>(0,0,domainHeight), planeMaterial );
-   topPlane->setLinearVel(wallVelocity, real_t(0), real_t(0));
+   topPlane->setLinearVel(wallVelocity, 0_r, 0_r);
 
    // add the sphere
-   pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, initialPosition, real_t(0.5) * diameter, planeMaterial );
+   pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, initialPosition, 0.5_r * diameter, planeMaterial );
 
    uint_t minBlockSizeInCells = blockSizeInCells.min();
    for( uint_t i = 0; i < uint_c(diameter / real_c(minBlockSizeInCells)) + 1; ++i)
@@ -604,7 +604,7 @@ int main( int argc, char **argv )
 
    // add PDF field
    BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (zyxf)", latticeModel,
-                                                                         Vector3< real_t >( real_t(0) ), real_t(1),
+                                                                         Vector3< real_t >( 0_r ), 1_r,
                                                                          FieldGhostLayers, field::zyxf );
    // add flag field
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field", FieldGhostLayers );
@@ -669,12 +669,12 @@ int main( int argc, char **argv )
    auto refinementTimestep = lbm::refinement::makeTimeStep< LatticeModel_T, BoundaryHandling_T >( blocks, sweep, pdfFieldID, boundaryHandlingID );
 
    // add force evaluation and logging
-   real_t normalizationFactor = ( zeroShearTest ) ? real_t(1) : ( math::M_PI / real_t(8) * densityFluid * shearRate * shearRate * wallDistance * wallDistance * diameter * diameter );
+   real_t normalizationFactor = ( zeroShearTest ) ? 1_r : ( math::M_PI / 8_r * densityFluid * shearRate * shearRate * wallDistance * wallDistance * diameter * diameter );
    std::string loggingFileName( baseFolderLogging + "/LoggingForcesNearPlane");
    loggingFileName += "_lvl" + std::to_string(numberOfLevels);
    loggingFileName += "_D" + std::to_string(uint_c(diameter));
    loggingFileName += "_Re" + std::to_string(uint_c(ReynoldsNumberShear));
-   loggingFileName += "_WD" + std::to_string(uint_c(normalizedWallDistance * real_t(1000)));
+   loggingFileName += "_WD" + std::to_string(uint_c(normalizedWallDistance * 1000_r));
    loggingFileName += ".txt";
    shared_ptr< SpherePropertyLogger > logger = walberla::make_shared< SpherePropertyLogger >( blocks, bodyStorageID,
                                                                                               loggingFileName, fileIO,
@@ -693,22 +693,22 @@ int main( int argc, char **argv )
 
    // compute reference values from literature
 
-   const real_t normalizedGapSize = normalizedWallDistance - real_t(0.5);
+   const real_t normalizedGapSize = normalizedWallDistance - 0.5_r;
 
    // drag correlation for the drag coefficient
-   const real_t standardDragCorrelation = real_t(24) / ReynoldsNumberShear * (real_t(1) + real_t(0.15) * std::pow(ReynoldsNumberShear, real_t(0.687))); // Schiller-Naumann correlation
-   const real_t dragCorrelationWithGapSizeStokes = real_t(24) / ReynoldsNumberShear * (real_t(1) + real_t(0.138) * std::exp(real_t(-2) * normalizedGapSize) + real_t(9)/( real_t(16) * (real_t(1) + real_t(2) * normalizedGapSize) ) ); // Goldman et al. (1967)
-   const real_t alphaDragS = real_t(0.15) - real_t(0.046) * ( real_t(1) - real_t(0.16) * normalizedGapSize * normalizedGapSize ) * std::exp( -real_t(0.7) *  normalizedGapSize);
-   const real_t betaDragS = real_t(0.687) + real_t(0.066)*(real_t(1) - real_t(0.76) * normalizedGapSize * normalizedGapSize) * std::exp( - std::pow( normalizedGapSize, real_t(0.9) ) );
-   const real_t dragCorrelationZeng = dragCorrelationWithGapSizeStokes * ( real_t(1) + alphaDragS * std::pow( ReynoldsNumberShear, betaDragS ) ); // Zeng et al. (2009) - Eqs. (13) and (14)
+   const real_t standardDragCorrelation = 24_r / ReynoldsNumberShear * (1_r + 0.15_r * std::pow(ReynoldsNumberShear, 0.687_r)); // Schiller-Naumann correlation
+   const real_t dragCorrelationWithGapSizeStokes = 24_r / ReynoldsNumberShear * (1_r + 0.138_r * std::exp(-2_r * normalizedGapSize) + 9_r/( 16_r * (1_r + 2_r * normalizedGapSize) ) ); // Goldman et al. (1967)
+   const real_t alphaDragS = 0.15_r - 0.046_r * ( 1_r - 0.16_r * normalizedGapSize * normalizedGapSize ) * std::exp( -0.7_r *  normalizedGapSize);
+   const real_t betaDragS = 0.687_r + 0.066_r*(1_r - 0.76_r * normalizedGapSize * normalizedGapSize) * std::exp( - std::pow( normalizedGapSize, 0.9_r ) );
+   const real_t dragCorrelationZeng = dragCorrelationWithGapSizeStokes * ( 1_r + alphaDragS * std::pow( ReynoldsNumberShear, betaDragS ) ); // Zeng et al. (2009) - Eqs. (13) and (14)
 
    // lift correlations for the lift coefficient
-   const real_t liftCorrelationZeroGapStokes = real_t(5.87); // Leighton, Acrivos (1985)
-   const real_t liftCorrelationZeroGap = real_t(3.663) / std::pow( ReynoldsNumberShear * ReynoldsNumberShear + real_t(0.1173), real_t(0.22) ); //  Zeng et al. (2009) - Eq. (19)
-   const real_t alphaLiftS = - std::exp( -real_t(0.3) + real_t(0.025) * ReynoldsNumberShear);
-   const real_t betaLiftS = real_t(0.8) + real_t(0.01) * ReynoldsNumberShear;
-   const real_t lambdaLiftS = ( real_t(1) - std::exp(-normalizedGapSize)) * std::pow( ReynoldsNumberShear / real_t(250), real_t(5) / real_t(2) );
-   const real_t liftCorrelationZeng = liftCorrelationZeroGap * std::exp( - real_t(0.5) * normalizedGapSize * std::pow( ReynoldsNumberShear / real_t(250), real_t(4)/real_t(3))) *
+   const real_t liftCorrelationZeroGapStokes = 5.87_r; // Leighton, Acrivos (1985)
+   const real_t liftCorrelationZeroGap = 3.663_r / std::pow( ReynoldsNumberShear * ReynoldsNumberShear + 0.1173_r, 0.22_r ); //  Zeng et al. (2009) - Eq. (19)
+   const real_t alphaLiftS = - std::exp( -0.3_r + 0.025_r * ReynoldsNumberShear);
+   const real_t betaLiftS = 0.8_r + 0.01_r * ReynoldsNumberShear;
+   const real_t lambdaLiftS = ( 1_r - std::exp(-normalizedGapSize)) * std::pow( ReynoldsNumberShear / 250_r, 5_r / 2_r );
+   const real_t liftCorrelationZeng = liftCorrelationZeroGap * std::exp( - 0.5_r * normalizedGapSize * std::pow( ReynoldsNumberShear / 250_r, 4_r/3_r)) *
                                       ( std::exp( alphaLiftS * std::pow( normalizedGapSize, betaLiftS ) ) - lambdaLiftS ); // Zeng et al. (2009) - Eqs. (28) and (29)
 
    ////////////////////////
@@ -717,8 +717,8 @@ int main( int argc, char **argv )
 
    WcTimingPool timeloopTiming;
 
-   const real_t relativeChangeConvergenceEps = real_t(1e-3);
-   const real_t physicalCheckingFrequency = real_t(0.00625);
+   const real_t relativeChangeConvergenceEps = 1e-3_r;
+   const real_t physicalCheckingFrequency = 0.00625_r;
    const uint_t checkingFrequency = (zeroShearTest) ? uint_t(1) : uint_c( physicalCheckingFrequency * physicalTimeScale );
 
    WALBERLA_LOG_INFO_ON_ROOT("Starting simulation with at least " << timesteps << " (coarse) time steps");

@@ -136,11 +136,11 @@ void multipleFields()
    TriangleMesh m;
    for( Field<shared_ptr<GlF>,1 >::iterator i = arr->begin(); i != arr->end(); ++i) {
       Vector3<real_t> offset(0);
-      offset[0] = i.x() ? fieldSize * real_c(0.5) : real_t(0);
-      offset[1] = i.y() ? fieldSize * real_c(0.5) : real_t(0);
-      offset[2] = i.z() ? fieldSize * real_c(0.5) : real_t(0);
+      offset[0] = i.x() ? fieldSize * real_c(0.5) : 0_r;
+      offset[1] = i.y() ? fieldSize * real_c(0.5) : 0_r;
+      offset[2] = i.z() ? fieldSize * real_c(0.5) : 0_r;
 
-      generateIsoSurface( **i, real_c(0.5), m, Vector3<real_t>(real_t(1)), uint_t(0), offset );
+      generateIsoSurface( **i, real_c(0.5), m, Vector3<real_t>(1_r), uint_t(0), offset );
    }
 
    //ofstream file1("meshWithDoubles.obj");

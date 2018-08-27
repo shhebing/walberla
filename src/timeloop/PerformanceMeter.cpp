@@ -278,8 +278,8 @@ namespace timeloop {
 
             measureIt->counts += 1;
             real_t rCounts = real_c( measureIt->counts );
-            measureIt->avgCellsPerTimeStep = (rCounts - real_t(1.0) ) / rCounts * measureIt->avgCellsPerTimeStep +
-                                                        real_t(1.0)   / rCounts * cellsLastTimeStep;
+            measureIt->avgCellsPerTimeStep = (rCounts - 1.0_r ) / rCounts * measureIt->avgCellsPerTimeStep +
+                                                        1.0_r   / rCounts * cellsLastTimeStep;
          }
       }
    }

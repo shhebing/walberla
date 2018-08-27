@@ -68,10 +68,10 @@ int main( int argc, char ** argv )
    const double remainingTimeLoggerFrequency = parameters.getParameter< double >( "remainingTimeLoggerFrequency", 3.0 ); // in seconds
 
    // create fields
-   BlockDataID forceFieldId = field::addToStorage<ForceField_T>(blocks, "Force", real_t(0.0) );
+   BlockDataID forceFieldId = field::addToStorage<ForceField_T>(blocks, "Force", 0.0_r );
 
    LatticeModel_T latticeModel = LatticeModel_T( forceFieldId, omega );
-   BlockDataID pdfFieldId = lbm::addPdfFieldToStorage( blocks, "pdf field", latticeModel, initialVelocity, real_t(1) );
+   BlockDataID pdfFieldId = lbm::addPdfFieldToStorage( blocks, "pdf field", latticeModel, initialVelocity, 1_r );
    BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field" );
 
    // create and initialize boundary handling

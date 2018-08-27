@@ -57,9 +57,9 @@ namespace walberla {
       void generateIsoSurface( const Field_T & field,
                                real_t threshold,
                                geometry::TriangleMesh & mesh,
-                               const Vector3<real_t> & dx = Vector3<real_t>( real_t(1) ),
+                               const Vector3<real_t> & dx = Vector3<real_t>( 1_r ),
                                uint_t fCoord = uint_t(0),
-                               const Vector3<real_t> & offset = Vector3<real_t>( real_t(0) ),
+                               const Vector3<real_t> & offset = Vector3<real_t>( 0_r ),
                                const CellInterval & cellInterval = CellInterval(),
                                bool calcNormals = true );
 

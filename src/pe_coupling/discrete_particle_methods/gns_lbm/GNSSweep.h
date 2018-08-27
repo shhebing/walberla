@@ -140,8 +140,8 @@ void GNSSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut
 
       if( this->filter(x,y,z) )
       {
-         const real_t fluidVolumeFraction = real_t(1) - solidVolumeFractionField->get(x,y,z); //i.e. porosity
-         const real_t invFluidVolumeFraction = real_t(1)/fluidVolumeFraction;
+         const real_t fluidVolumeFraction = 1_r - solidVolumeFractionField->get(x,y,z); //i.e. porosity
+         const real_t invFluidVolumeFraction = 1_r/fluidVolumeFraction;
 
          // stream pull
          for( auto d = Stencil_T::begin(); d != Stencil_T::end(); ++d )
@@ -163,15 +163,15 @@ void GNSSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut
          {
             const real_t wq = LatticeModel_T::w[ d.toIdx() ];
             const Vector3<real_t> c( real_c(d.cx()), real_c(d.cy()), real_c(d.cz()) );
-            const real_t forceTerm = real_t(3.0) * wq * ( real_t(1) - real_t(0.5) * omega ) *
-                     ( ( c - invFluidVolumeFraction * velocity + ( real_t(3) * invFluidVolumeFraction * ( c * velocity ) * c ) ) * extForce ); // modified Guo forcing, multiplication by rho is wrong because of units
+            const real_t forceTerm = 3.0_r * wq * ( 1_r - 0.5_r * omega ) *
+                     ( ( c - invFluidVolumeFraction * velocity + ( 3_r * invFluidVolumeFraction * ( c * velocity ) * c ) ) * extForce ); // modified Guo forcing, multiplication by rho is wrong because of units
 
             const real_t vel = c * velocity;
-            real_t feq = wq * rho * ( real_t(1) - real_t(1.5) * invFluidVolumeFraction * velocity.sqrLength() +
-                                      real_t(4.5) * invFluidVolumeFraction * vel * vel + real_t(3.0) * vel ); // modified feq
+            real_t feq = wq * rho * ( 1_r - 1.5_r * invFluidVolumeFraction * velocity.sqrLength() +
+                                      4.5_r * invFluidVolumeFraction * vel * vel + 3.0_r * vel ); // modified feq
             feq -= wq; // center PDFs around 0
 
-            dst->get( x, y, z, d.toIdx() ) = ( real_t(1.0) - omega ) * dst->get( x, y, z, d.toIdx() ) +
+            dst->get( x, y, z, d.toIdx() ) = ( 1.0_r - omega ) * dst->get( x, y, z, d.toIdx() ) +
                                              omega * feq +
                                              forceTerm;
          }
@@ -212,8 +212,8 @@ void GNSSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut
    WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ( src, numberOfGhostLayersToInclude,
    if( this->filter(x,y,z) )
    {
-      const real_t fluidVolumeFraction = real_t(1) - solidVolumeFractionField->get(x,y,z); //i.e. porosity
-      const real_t invFluidVolumeFraction = real_t(1)/fluidVolumeFraction;
+      const real_t fluidVolumeFraction = 1_r - solidVolumeFractionField->get(x,y,z); //i.e. porosity
+      const real_t invFluidVolumeFraction = 1_r/fluidVolumeFraction;
 
       Vector3<real_t> velocity;
       real_t rho = this->densityVelocityIn( velocity, src, x, y, z );
@@ -231,15 +231,15 @@ void GNSSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut
       {
          const real_t wq = LatticeModel_T::w[ d.toIdx() ];
          const Vector3<real_t> c( real_c(d.cx()), real_c(d.cy()), real_c(d.cz()) );
-         const real_t forceTerm = real_t(3.0) * wq * ( real_t(1) - real_t(0.5) * omega ) *
-                  ( ( c - invFluidVolumeFraction * velocity + ( real_t(3) * invFluidVolumeFraction * ( c * velocity ) * c ) ) * extForce ); // modified Guo forcing
+         const real_t forceTerm = 3.0_r * wq * ( 1_r - 0.5_r * omega ) *
+                  ( ( c - invFluidVolumeFraction * velocity + ( 3_r * invFluidVolumeFraction * ( c * velocity ) * c ) ) * extForce ); // modified Guo forcing
 
          const real_t vel = c * velocity;
-         real_t feq = wq * rho * ( real_t(1) - real_t(1.5) * invFluidVolumeFraction * velocity.sqrLength() +
-                                   real_t(4.5) * invFluidVolumeFraction * vel * vel + real_t(3.0) * vel ); // modified feq
+         real_t feq = wq * rho * ( 1_r - 1.5_r * invFluidVolumeFraction * velocity.sqrLength() +
+                                   4.5_r * invFluidVolumeFraction * vel * vel + 3.0_r * vel ); // modified feq
          feq -= wq; // center PDFs around 0
 
-         src->get( x, y, z, d.toIdx() ) = ( real_t(1.0) - omega ) * src->get( x, y, z, d.toIdx() ) +
+         src->get( x, y, z, d.toIdx() ) = ( 1.0_r - omega ) * src->get( x, y, z, d.toIdx() ) +
                                           omega * feq +
                                           forceTerm;
       }

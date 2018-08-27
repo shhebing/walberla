@@ -66,7 +66,7 @@ void Restrict< Stencil_T >::operator()( IBlock * const block ) const
       else
       {
          WALBERLA_ASSERT_EQUAL(z, 0);
-         coarse->get(x,y,z) = real_t(0);
+         coarse->get(x,y,z) = 0_r;
       }
 
       coarse->get(x,y,z) +=   fine->get(fx  , fy  , fz  ) + fine->get(fx+1, fy  , fz  )
@@ -85,12 +85,12 @@ void ProlongateAndCorrect< Stencil_T >::operator()( IBlock * const block ) const
    WALBERLA_FOR_ALL_CELLS_XYZ( fine,
       if( Stencil_T::D == uint_t(3) )
       {
-         fine->get(x,y,z) +=  real_t(0.125) * coarse->get(x/2,y/2,z/2);
+         fine->get(x,y,z) +=  0.125_r * coarse->get(x/2,y/2,z/2);
       }
       else
       {
          WALBERLA_ASSERT_EQUAL(z, 0);
-         fine->get(x,y,z) +=  real_t(0.25) * coarse->get(x/2,y/2,z);
+         fine->get(x,y,z) +=  0.25_r * coarse->get(x/2,y/2,z);
       }
    );
 }
@@ -157,7 +157,7 @@ void ComputeResidualFixedStencil< Stencil_T >::operator()( IBlock * const block 
 template< typename Stencil_T >
 void CoarsenStencilFieldsDCA<Stencil_T >::operator()( const std::vector<BlockDataID> & stencilFieldId ) const
 {
-   const real_t scalingFactor = real_t(1)/real_c(2<< (operatorOrder_-1) ); // scaling by ( 1/h^operatorOrder )^lvl
+   const real_t scalingFactor = 1_r/real_c(2<< (operatorOrder_-1) ); // scaling by ( 1/h^operatorOrder )^lvl
 
    WALBERLA_ASSERT_EQUAL(numLvl_, stencilFieldId.size(), "This function can only be called when operating with stencil fields!");
 
@@ -203,7 +203,7 @@ void CoarsenStencilFieldsGCA< stencil::D3Q7 >::operator()( const std::vector<Blo
           for(Array3D::index z=0; z<2; ++z) {
             for(Array3D::index y=0; y<2; ++y) {
                for(Array3D::index x=0; x<2; ++x) {
-                  r[x][y][z] = real_t(1);
+                  r[x][y][z] = 1_r;
                }
             }
          }
@@ -212,7 +212,7 @@ void CoarsenStencilFieldsGCA< stencil::D3Q7 >::operator()( const std::vector<Blo
          for(Array3D::index k=0; k<7; ++k) {
             for(Array3D::index j=0; j<7; ++j) {
                for(Array3D::index i=0; i<7; ++i) {
-                  p[i][j][k] = real_t(0);
+                  p[i][j][k] = 0_r;
                }
             }
          }
@@ -221,7 +221,7 @@ void CoarsenStencilFieldsGCA< stencil::D3Q7 >::operator()( const std::vector<Blo
          for(Array3D::index k=0; k<2; ++k) {
             for(Array3D::index j=0; j<2; ++j) {
                for(Array3D::index i=0; i<2; ++i) {
-                  p[i+2][j+2][k+2] = real_t(0.125)/overrelaxFact_;   // Factor 0.125 such that same prolongation operator for DCA and GCA
+                  p[i+2][j+2][k+2] = 0.125_r/overrelaxFact_;   // Factor 0.125 such that same prolongation operator for DCA and GCA
                }
             }
          }
@@ -238,14 +238,14 @@ void CoarsenStencilFieldsGCA< stencil::D3Q7 >::operator()( const std::vector<Blo
             for(Array3D::index k=0; k<7; ++k)
                for(Array3D::index j=0; j<7; ++j)
                   for(Array3D::index i=0; i<7; ++i)
-                     ap[i][j][k] = real_t(0);
+                     ap[i][j][k] = 0_r;
 
 
             // Tested for spatially varying stencils! //
             for(Array3D::index k=1; k<5; ++k)
                for(Array3D::index j=1; j<5; ++j)
                   for(Array3D::index i=1; i<5; ++i) {
-                     ap[i][j][k] = real_t(0);
+                     ap[i][j][k] = 0_r;
                      for(auto d = stencil::D3Q7::begin(); d != stencil::D3Q7::end(); ++d ){
                         ap[i][j][k] += p[ i+d.cx() ] [ j+d.cy() ] [k+d.cz() ] * fine->get( fx+cell_idx_c(i%2), fy+cell_idx_c(j%2), fz+cell_idx_c(k%2), d.toIdx() ); // contains elements of one row of coarse grid matrix
                      }

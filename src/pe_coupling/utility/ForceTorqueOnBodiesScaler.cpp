@@ -29,8 +29,8 @@ namespace pe_coupling {
 
 void ForceTorqueOnBodiesScaler::operator()()
 {
-   Vector3<real_t> force(real_t(0));
-   Vector3<real_t> torque(real_t(0));
+   Vector3<real_t> force(0_r);
+   Vector3<real_t> torque(0_r);
    for( auto blockIt = blockStorage_->begin(); blockIt != blockStorage_->end(); ++blockIt )
    {
       for( auto bodyIt = pe::BodyIterator::begin( *blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )

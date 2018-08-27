@@ -61,7 +61,7 @@ public:
    {
       ++averagingCounter_;
 
-      const real_t averagingFactor = real_t(1)/real_c(averagingCounter_);
+      const real_t averagingFactor = 1_r/real_c(averagingCounter_);
 
 
       for( auto blockIt = blockStorage_->begin(); blockIt != blockStorage_->end(); ++blockIt )

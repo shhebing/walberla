@@ -51,13 +51,13 @@ void SphereIntersectsTest()
    WALBERLA_LOG_INFO("RAY -> SPHERE");
    
    WALBERLA_CHECK(intersects(&sp1, ray1, t, n));
-   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(6));
-   WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(0));
-   WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(-1));
-   WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0));
+   WALBERLA_CHECK_FLOAT_EQUAL(t, 6_r);
+   WALBERLA_CHECK_FLOAT_EQUAL(n[0], 0_r);
+   WALBERLA_CHECK_FLOAT_EQUAL(n[1], -1_r);
+   WALBERLA_CHECK_FLOAT_EQUAL(n[2], 0_r);
    
    // ray tangential
-   Ray ray2(Vec3(3,-5,3), Vec3(0,7.5,real_t(std::sqrt(real_t(15))/real_t(2))).getNormalized());
+   Ray ray2(Vec3(3,-5,3), Vec3(0,7.5,real_t(std::sqrt(15_r)/2_r)).getNormalized());
    WALBERLA_CHECK(intersects(&sp1, ray2, t, n));
    
    // sphere behind ray origin
@@ -67,13 +67,13 @@ void SphereIntersectsTest()
    // sphere around ray origin
    Sphere sp3(123, 1, Vec3(3,-5,3), Vec3(0,0,0), Quat(), 2, iron, false, true, false);
    WALBERLA_CHECK(intersects(&sp3, ray1, t, n));
-   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(2));
+   WALBERLA_CHECK_FLOAT_EQUAL(t, 2_r);
 }
 
 void PlaneIntersectsTest() {
    MaterialID iron = Material::find("iron");
    // plane with center 3,3,3 and parallel to y-z plane
-   Plane pl1(1, 1, Vec3(3, 3, 3), Vec3(1, 0, 0), real_t(1.0), iron);
+   Plane pl1(1, 1, Vec3(3, 3, 3), Vec3(1, 0, 0), 1.0_r, iron);
    
    Ray ray1(Vec3(-5,3,3), Vec3(1,0,0));
    real_t t;
@@ -81,43 +81,43 @@ void PlaneIntersectsTest() {
    
    WALBERLA_LOG_INFO("RAY -> PLANE");
    WALBERLA_CHECK(intersects(&pl1, ray1, t, n), "ray through center did not hit");
-   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(8), "distance between ray and plane is incorrect");
+   WALBERLA_CHECK_FLOAT_EQUAL(t, 8_r, "distance between ray and plane is incorrect");
    
    Ray ray2(Vec3(-5,3,3), Vec3(1,0,-1).getNormalized());
    WALBERLA_CHECK(intersects(&pl1, ray2, t, n), "ray towards random point on plane didn't hit");
-   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(sqrt(real_t(128))), "distance between ray and plane is incorrect");
-   WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(-1), "incorrect normal calculated");
-   WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(0), "incorrect normal calculated");
-   WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0), "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(sqrt(128_r)), "distance between ray and plane is incorrect");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[0], -1_r, "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[1], 0_r, "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[2], 0_r, "incorrect normal calculated");
    
-   Plane pl1neg(1, 1, Vec3(3, 3, 3), Vec3(-1, 0, 0), real_t(1.0), iron);
+   Plane pl1neg(1, 1, Vec3(3, 3, 3), Vec3(-1, 0, 0), 1.0_r, iron);
    WALBERLA_CHECK(intersects(&pl1neg, ray2, t, n), "ray towards random point on plane didn't hit");
-   WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(-1), "incorrect normal calculated");
-   WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(0), "incorrect normal calculated");
-   WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0), "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[0], -1_r, "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[1], 0_r, "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[2], 0_r, "incorrect normal calculated");
    
    Ray ray3(Vec3(-5,3,3), Vec3(-1,0,0).getNormalized());
-   Plane pl5(1, 1, Vec3(-7, 3, 3), Vec3(1, 0, 0), real_t(1.0), iron);
+   Plane pl5(1, 1, Vec3(-7, 3, 3), Vec3(1, 0, 0), 1.0_r, iron);
    WALBERLA_CHECK(intersects(&pl5, ray3, t, n), "ray towards random point on plane didn't hit");
-   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(2), "distance between ray and plane is incorrect");
-   WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(1), "incorrect normal calculated");
-   WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(0), "incorrect normal calculated");
-   WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0), "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(t, 2_r, "distance between ray and plane is incorrect");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[0], 1_r, "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[1], 0_r, "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[2], 0_r, "incorrect normal calculated");
    
    // plane with center 3,3,3 and parallel to x-z plane
-   Plane pl2(1, 1, Vec3(3, 3, 3), Vec3(0, 1, 0), real_t(1.0), iron);
+   Plane pl2(1, 1, Vec3(3, 3, 3), Vec3(0, 1, 0), 1.0_r, iron);
    WALBERLA_CHECK(!intersects(&pl2, ray1, t, n), "ray parallel to plane shouldnt hit");
    
    // plane with center -10,3,3 and parallel to y-z plane
-   Plane pl4(1, 1, Vec3(-10, 3, 3), Vec3(1, 0, 0), real_t(1.0), iron);
+   Plane pl4(1, 1, Vec3(-10, 3, 3), Vec3(1, 0, 0), 1.0_r, iron);
    WALBERLA_CHECK(!intersects(&pl4, ray1, t, n), "ray hit plane behind origin");
    
-   Plane pl6(1, 1, Vec3(3, 3, 0), Vec3(-1, 0, 0), real_t(1.0), iron);
+   Plane pl6(1, 1, Vec3(3, 3, 0), Vec3(-1, 0, 0), 1.0_r, iron);
    Ray ray4(Vec3(0,0,5), Vec3(1, 0, -1).getNormalized());
    WALBERLA_CHECK(intersects(&pl6, ray4, t, n), "ray didnt hit");
-   WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(-1), "incorrect normal calculated");
-   WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(0), "incorrect normal calculated");
-   WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0), "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[0], -1_r, "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[1], 0_r, "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[2], 0_r, "incorrect normal calculated");
 }
 
 void BoxIntersectsTest() {
@@ -133,47 +133,47 @@ void BoxIntersectsTest() {
    
    Box box2(128, 5, Vec3(0, -2, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
    WALBERLA_CHECK(intersects(&box2, ray1, t, n));
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(8), real_t(1e-7));
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, 8_r, 1e-7_r);
    
    Box box3(128, 5, Vec3(0, 5, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
    WALBERLA_CHECK(intersects(&box3, ray1, t, n));
-   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(5));
+   WALBERLA_CHECK_FLOAT_EQUAL(t, 5_r);
    
    Ray ray6(Vec3(-8,5,0), Vec3(1,0,0));
    WALBERLA_CHECK(intersects(&box3, ray6, t, n));
-   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(3));
-   WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(-1), "incorrect normal calculated");
-   WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(0), "incorrect normal calculated");
-   WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0), "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(t, 3_r);
+   WALBERLA_CHECK_FLOAT_EQUAL(n[0], -1_r, "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[1], 0_r, "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[2], 0_r, "incorrect normal calculated");
    
    Ray ray7(Vec3(8,5,0), Vec3(-1,0,0));
    WALBERLA_CHECK(intersects(&box3, ray7, t, n));
-   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(3));
-   WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(1), "incorrect normal calculated");
-   WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(0), "incorrect normal calculated");
-   WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0), "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(t, 3_r);
+   WALBERLA_CHECK_FLOAT_EQUAL(n[0], 1_r, "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[1], 0_r, "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[2], 0_r, "incorrect normal calculated");
    
    // ray origin within box
    Ray ray2(Vec3(-2,0,0), Vec3(1,0,1).getNormalized());
    WALBERLA_CHECK(intersects(&box3, ray2, t, n));
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(7.0710), real_t(1e-4));
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, 7.0710_r, 1e-4_r);
    
-   Ray ray3(Vec3(3,-5,3), Vec3(2, real_t(-1.5), real_t(0.5)).getNormalized());
+   Ray ray3(Vec3(3,-5,3), Vec3(2, -1.5_r, 0.5_r).getNormalized());
    Box box4(128, 5, Vec3(0, 8, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
    WALBERLA_CHECK(!intersects(&box4, ray3, t, n));
    
-   Ray ray4(Vec3(3,-5,3), Vec3(-2, 3, real_t(0.5)).getNormalized());
+   Ray ray4(Vec3(3,-5,3), Vec3(-2, 3, 0.5_r).getNormalized());
    WALBERLA_CHECK(intersects(&box4, ray4, t, n));
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(9.7068), real_t(1e-4));
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, 9.7068_r, 1e-4_r);
    
    Box box5(128, 5, Vec3(4, 0, 0), Vec3(0, 0, 0), Quat(), Vec3(4, 4, 4), iron, false, true, false);
    box5.rotate(0,0,math::M_PI/4);
    Ray ray5(Vec3(0,1.5,0), Vec3(1,0,0));
    WALBERLA_CHECK(intersects(&box5, ray5, t, n));
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(2.67157), real_t(1e-4));
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(n[0], real_t(-0.707107), real_t(1e-5), "incorrect normal calculated");
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(n[1], real_t(0.707107), real_t(1e-5), "incorrect normal calculated");
-   WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0), "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, 2.67157_r, 1e-4_r);
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(n[0], -0.707107_r, 1e-5_r, "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(n[1], 0.707107_r, 1e-5_r, "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[2], 0_r, "incorrect normal calculated");
 }
 
 void AABBIntersectsTest() {
@@ -186,14 +186,14 @@ void AABBIntersectsTest() {
              10,10,10);
    
    WALBERLA_CHECK(intersects(aabb, ray1, t));
-   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(5));
+   WALBERLA_CHECK_FLOAT_EQUAL(t, 5_r);
    
    WALBERLA_CHECK(intersects(aabb, ray1, t, 1.0));
-   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(4));
+   WALBERLA_CHECK_FLOAT_EQUAL(t, 4_r);
    
    Ray ray2(Vec3(-5,5,10.5), Vec3(1,0,0)); // ray shooting over aabb, but within padding passed to intersects
    WALBERLA_CHECK(intersects(aabb, ray1, t, 1.0));
-   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(4));
+   WALBERLA_CHECK_FLOAT_EQUAL(t, 4_r);
 }
 
 void CapsuleIntersectsTest() {
@@ -201,24 +201,24 @@ void CapsuleIntersectsTest() {
    real_t t;
    Vec3 n;
    
-   Capsule cp1(0, 0, Vec3(2,3,3), Vec3(0,0,0), Quat(), real_t(2), real_t(2), iron, false, true, false);
+   Capsule cp1(0, 0, Vec3(2,3,3), Vec3(0,0,0), Quat(), 2_r, 2_r, iron, false, true, false);
    
    // ray through the center
    Ray ray1(Vec3(3,-5,3), Vec3(0,1,0));
    WALBERLA_LOG_INFO("RAY -> CAPSULE");
    
    WALBERLA_CHECK(intersects(&cp1, ray1, t, n));
-   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(6));
-   WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(0));
-   WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(-1));
-   WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0));
+   WALBERLA_CHECK_FLOAT_EQUAL(t, 6_r);
+   WALBERLA_CHECK_FLOAT_EQUAL(n[0], 0_r);
+   WALBERLA_CHECK_FLOAT_EQUAL(n[1], -1_r);
+   WALBERLA_CHECK_FLOAT_EQUAL(n[2], 0_r);
    
    Ray ray2(Vec3(-5,3,3), Vec3(1,0,0));
    WALBERLA_CHECK(intersects(&cp1, ray2, t, n));
-   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(4));
-   WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(-1));
-   WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(0));
-   WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0));
+   WALBERLA_CHECK_FLOAT_EQUAL(t, 4_r);
+   WALBERLA_CHECK_FLOAT_EQUAL(n[0], -1_r);
+   WALBERLA_CHECK_FLOAT_EQUAL(n[1], 0_r);
+   WALBERLA_CHECK_FLOAT_EQUAL(n[2], 0_r);
 }
 
 void EllipsoidTest() {
@@ -232,27 +232,27 @@ void EllipsoidTest() {
    
    Ray ray1(Vec3(-2,3,3), Vec3(1,0,0).getNormalized());
    WALBERLA_CHECK(intersects(&el1, ray1, t, n));
-   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(2));
-   WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(-1));
-   WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(0));
-   WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0));
+   WALBERLA_CHECK_FLOAT_EQUAL(t, 2_r);
+   WALBERLA_CHECK_FLOAT_EQUAL(n[0], -1_r);
+   WALBERLA_CHECK_FLOAT_EQUAL(n[1], 0_r);
+   WALBERLA_CHECK_FLOAT_EQUAL(n[2], 0_r);
 
    Ray ray2(Vec3(2,3,0), Vec3(0,0,-1).getNormalized());
    WALBERLA_CHECK(!intersects(&el1, ray2, t, n));
    
    Ray ray3(Vec3(2,3,5), Vec3(0,0,-1).getNormalized());
    WALBERLA_CHECK(intersects(&el1, ray3, t, n));
-   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(1));
-   WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(0));
-   WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(0));
-   WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(1));
+   WALBERLA_CHECK_FLOAT_EQUAL(t, 1_r);
+   WALBERLA_CHECK_FLOAT_EQUAL(n[0], 0_r);
+   WALBERLA_CHECK_FLOAT_EQUAL(n[1], 0_r);
+   WALBERLA_CHECK_FLOAT_EQUAL(n[2], 1_r);
 
-   Ray ray4(Vec3(-2,real_t(2),real_t(2)), Vec3(1,real_t(0),real_t(0.5)).getNormalized());
+   Ray ray4(Vec3(-2,2_r,2_r), Vec3(1,0_r,0.5_r).getNormalized());
    WALBERLA_CHECK(intersects(&el1, ray4, t, n));
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(2.36809), real_t(1e-5));
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(n[0], real_t(-0.78193), real_t(1e-5));
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(n[1], real_t(-0.62324), real_t(1e-5));
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(n[2], real_t(0.012265), real_t(1e-5));
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, 2.36809_r, 1e-5_r);
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(n[0], -0.78193_r, 1e-5_r);
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(n[1], -0.62324_r, 1e-5_r);
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(n[2], 0.012265_r, 1e-5_r);
 }
 
 ShadingParameters customBodyToShadingParams(const BodyID body) {
@@ -279,13 +279,13 @@ void RaytracerTest(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RAYTRAC
    Lighting lighting(Vec3(0, 5, 8), // 8, 5, 9.5 gut für ebenen, 0,5,8
                      Color(1, 1, 1), //diffuse
                      Color(1, 1, 1), //specular
-                     Color(real_t(0.4), real_t(0.4), real_t(0.4))); //ambient
+                     Color(0.4_r, 0.4_r, 0.4_r)); //ambient
    Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
                        size_t(640), size_t(480),
-                       real_t(49.13), antiAliasFactor,
+                       49.13_r, antiAliasFactor,
                        Vec3(-5,5,5), Vec3(-1,5,5), Vec3(0,0,1), //-5,5,5; -1,5,5
                        lighting,
-                       Color(real_t(0.2), real_t(0.2), real_t(0.2)),
+                       Color(0.2_r, 0.2_r, 0.2_r),
                        customBodyToShadingParams);
    
    MaterialID iron = Material::find("iron");
@@ -305,24 +305,24 @@ void RaytracerTest(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RAYTRAC
    
    createPlane(*globalBodyStorage, 0, Vec3(-1,1,1), Vec3(8,2,2), iron); // tilted plane in right bottom back corner
    
-   createSphere(*globalBodyStorage, *forest, storageID, 2, Vec3(6,real_t(9.5),real_t(9.5)), real_t(0.5));
-   createSphere(*globalBodyStorage, *forest, storageID, 3, Vec3(4,real_t(5.5),5), real_t(1));
-   createSphere(*globalBodyStorage, *forest, storageID, 6, Vec3(3,real_t(8.5),5), real_t(1));
-   BoxID box = createBox(*globalBodyStorage, *forest, storageID, 7, Vec3(5,real_t(6.5),5), Vec3(2,4,3));
+   createSphere(*globalBodyStorage, *forest, storageID, 2, Vec3(6,9.5_r,9.5_r), 0.5_r);
+   createSphere(*globalBodyStorage, *forest, storageID, 3, Vec3(4,5.5_r,5), 1_r);
+   createSphere(*globalBodyStorage, *forest, storageID, 6, Vec3(3,8.5_r,5), 1_r);
+   BoxID box = createBox(*globalBodyStorage, *forest, storageID, 7, Vec3(5,6.5_r,5), Vec3(2,4,3));
    if (box != nullptr) box->rotate(0,math::M_PI/4,math::M_PI/4);
    createBox(*globalBodyStorage, *forest, storageID, 8, Vec3(5,1,8), Vec3(2,2,2));
    // Test scene v1 end
    
    // Test scene v2 additions start
    createBox(*globalBodyStorage, *forest, storageID, 9, Vec3(9,9,5), Vec3(1,1,10));
-   createCapsule(*globalBodyStorage, *forest, storageID, 10, Vec3(3, 9, 1), real_t(0.5), real_t(7), iron);
-   CapsuleID capsule = createCapsule(*globalBodyStorage, *forest, storageID, 11, Vec3(7, real_t(3.5), real_t(7.5)), real_t(1), real_t(2), iron);
+   createCapsule(*globalBodyStorage, *forest, storageID, 10, Vec3(3, 9, 1), 0.5_r, 7_r, iron);
+   CapsuleID capsule = createCapsule(*globalBodyStorage, *forest, storageID, 11, Vec3(7, 3.5_r, 7.5_r), 1_r, 2_r, iron);
    if (capsule != nullptr) capsule->rotate(0,math::M_PI/3,math::M_PI/4-math::M_PI/8);
    // Test scene v2 end
    
    // Test scene v3 additions start
-   EllipsoidID ellipsoid = createEllipsoid(*globalBodyStorage, *forest, storageID, 12, Vec3(6,2,real_t(2.5)), Vec3(3,2,real_t(1.2)));
-   ellipsoid->rotate(0, math::M_PI/real_t(6), 0);
+   EllipsoidID ellipsoid = createEllipsoid(*globalBodyStorage, *forest, storageID, 12, Vec3(6,2,2.5_r), Vec3(3,2,1.2_r));
+   ellipsoid->rotate(0, math::M_PI/6_r, 0);
    // Test scene v3 end
    
    //raytracer.setTBufferOutputDirectory("tbuffer");
@@ -385,13 +385,13 @@ void RaytracerSpheresTestScene(Raytracer::Algorithm raytracingAlgorithm = Raytra
    Lighting lighting(Vec3(0, 5, 8), // 8, 5, 9.5 gut für ebenen, 0,5,8
                      Color(1, 1, 1), //diffuse
                      Color(1, 1, 1), //specular
-                     Color(real_t(0.4), real_t(0.4), real_t(0.4))); //ambient
+                     Color(0.4_r, 0.4_r, 0.4_r)); //ambient
    Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
                        size_t(640), size_t(480),
-                       real_t(49.13), antiAliasFactor,
+                       49.13_r, antiAliasFactor,
                        Vec3(-5,5,5), Vec3(-1,5,5), Vec3(0,0,1), //-5,5,5; -1,5,5
                        lighting,
-                       Color(real_t(0.2),real_t(0.2),real_t(0.2)),
+                       Color(0.2_r,0.2_r,0.2_r),
                        customSpheresBodyToShadingParams);
    
    MaterialID iron = Material::find("iron");
@@ -406,7 +406,7 @@ void RaytracerSpheresTestScene(Raytracer::Algorithm raytracingAlgorithm = Raytra
    walberla::id_t id=0;
    for (int j=0; j<4; j++) {
       for (int i=0; i<4; i++) {
-         createSphere(*globalBodyStorage, *forest, storageID, id, Vec3(6,real_c(i+1)*real_t(2),real_c(j+1)*real_t(2)), real_t(0.9));
+         createSphere(*globalBodyStorage, *forest, storageID, id, Vec3(6,real_c(i+1)*2_r,real_c(j+1)*2_r), 0.9_r);
          id++;
       }
    }
@@ -428,9 +428,9 @@ ShadingParameters customHashGridsBodyToShadingParams(const BodyID body) {
 
 void HashGridsTest(Raytracer::Algorithm raytracingAlgorithm, walberla::uint8_t antiAliasFactor,
                    size_t boxes, size_t capsules, size_t spheres, size_t numberOfViews = 1,
-                   real_t boxLenMin = real_t(0.1), real_t boxLenMax = real_t(0.2), bool boxRotation = false,
-                   real_t capRadiusMin = real_t(0.1), real_t capRadiusMax = real_t(0.2), real_t capLenMin = real_t(0.1), real_t capLenMax = real_t(0.3),
-                   real_t sphereRadiusMin = real_t(0.1), real_t sphereRadiusMax = real_t(0.3)) {
+                   real_t boxLenMin = 0.1_r, real_t boxLenMax = 0.2_r, bool boxRotation = false,
+                   real_t capRadiusMin = 0.1_r, real_t capRadiusMax = 0.2_r, real_t capLenMin = 0.1_r, real_t capLenMax = 0.3_r,
+                   real_t sphereRadiusMin = 0.1_r, real_t sphereRadiusMax = 0.3_r) {
    WALBERLA_LOG_INFO("Generating " << boxes << " boxes, " << capsules << " capsules and " << spheres << " spheres");
    
    using namespace walberla::pe::ccd;
@@ -459,7 +459,7 @@ void HashGridsTest(Raytracer::Algorithm raytracingAlgorithm, walberla::uint8_t a
       BoxID box_ = createBox(*globalBodyStorage, *forest, storageID, id, Vec3(x, y, z), Vec3(len, len, len));
       WALBERLA_CHECK(box_ != nullptr);
       if (boxRotation) {
-         box_->rotate(0, math::realRandom(real_t(0), real_t(1))*math::M_PI, math::realRandom(real_t(0), real_t(1))*math::M_PI);
+         box_->rotate(0, math::realRandom(0_r, 1_r)*math::M_PI, math::realRandom(0_r, 1_r)*math::M_PI);
       }
       bodies.push_back(box_);
       bodySIDs.push_back(box_->getSystemID());
@@ -474,7 +474,7 @@ void HashGridsTest(Raytracer::Algorithm raytracingAlgorithm, walberla::uint8_t a
       walberla::id_t id = walberla::id_t(boxes+i);
       CapsuleID capsule = createCapsule(*globalBodyStorage, *forest, storageID, id, Vec3(x, y, z), radius, len);
       WALBERLA_CHECK(capsule != nullptr);
-      capsule->rotate(0, math::realRandom(real_t(0), real_t(1))*math::M_PI, math::realRandom(real_t(0), real_t(1))*math::M_PI);
+      capsule->rotate(0, math::realRandom(0_r, 1_r)*math::M_PI, math::realRandom(0_r, 1_r)*math::M_PI);
       bodies.push_back(capsule);
       bodySIDs.push_back(capsule->getSystemID());
    }
@@ -513,51 +513,51 @@ void HashGridsTest(Raytracer::Algorithm raytracingAlgorithm, walberla::uint8_t a
    std::vector<std::tuple<Vec3, Vec3, Vec3>> viewVectors;
    
    // y up, in negative z direction
-   viewVectors.emplace_back(Vec3(2, real_t(2.1), 7),
-                                     Vec3(real_t(2.1), 2, 4),
+   viewVectors.emplace_back(Vec3(2, 2.1_r, 7),
+                                     Vec3(2.1_r, 2, 4),
                                      Vec3(0,1,0));
    // y up, in positive z direction
    viewVectors.emplace_back(Vec3(2, 2, -3),
-                                     Vec3(2, real_t(2.1), real_t(0.1)),
+                                     Vec3(2, 2.1_r, 0.1_r),
                                      Vec3(0,1,0));
    // x up, in positive z direction
    viewVectors.emplace_back(Vec3(2, 2, -3),
-                                     Vec3(2, real_t(2.1), real_t(0.1)),
+                                     Vec3(2, 2.1_r, 0.1_r),
                                      Vec3(1,0,0));
    // y and x up, in positive z direction
    viewVectors.emplace_back(Vec3(2, 2, -3),
-                                     Vec3(2, real_t(2.1), real_t(0.1)),
+                                     Vec3(2, 2.1_r, 0.1_r),
                                      Vec3(1,1,0));
    // y and x up, in negative z direction
    viewVectors.emplace_back(Vec3(2, 2, 6.5),
-                                     Vec3(real_t(2.1), real_t(2.1), 4),
-                                     Vec3(real_t(0.5),1,0));
+                                     Vec3(2.1_r, 2.1_r, 4),
+                                     Vec3(0.5_r,1,0));
    // z up, in positive x direction
-   viewVectors.emplace_back(Vec3(-3, 2, real_t(1.9)),
-                                     Vec3(0, real_t(2.1), 2),
+   viewVectors.emplace_back(Vec3(-3, 2, 1.9_r),
+                                     Vec3(0, 2.1_r, 2),
                                      Vec3(0,0,1));
    // z up, in negative x direction
-   viewVectors.emplace_back(Vec3(7, 2, real_t(1.9)),
-                                     Vec3(4, real_t(2.1), 2),
+   viewVectors.emplace_back(Vec3(7, 2, 1.9_r),
+                                     Vec3(4, 2.1_r, 2),
                                      Vec3(0,0,1));
    // z and y up, in negative x direction
-   viewVectors.emplace_back(Vec3(7, 2, real_t(1.9)),
-                                     Vec3(4, real_t(2.1), 2),
+   viewVectors.emplace_back(Vec3(7, 2, 1.9_r),
+                                     Vec3(4, 2.1_r, 2),
                                      Vec3(0,1,1));
    // z and x up, in negative y direction
-   viewVectors.emplace_back(Vec3(2, 6, real_t(1.9)),
-                                     Vec3(real_t(2.3), 4, 2),
+   viewVectors.emplace_back(Vec3(2, 6, 1.9_r),
+                                     Vec3(2.3_r, 4, 2),
                                      Vec3(1,0,1));
    // z up, in positive y direction
-   viewVectors.emplace_back(Vec3(2, real_t(-3.6), real_t(1.9)),
-                                     Vec3(real_t(2.3), 0, real_t(2.1)),
+   viewVectors.emplace_back(Vec3(2, -3.6_r, 1.9_r),
+                                     Vec3(2.3_r, 0, 2.1_r),
                                      Vec3(0,0,1));
    
-   Lighting lighting0(Vec3(forestAABB.xSize()/real_t(2)+1, forestAABB.ySize()/real_t(2),
-                           real_t(2)*forestAABB.zMax()+2), // 8, 5, 9.5 gut für ebenen, 0,5,8
+   Lighting lighting0(Vec3(forestAABB.xSize()/2_r+1, forestAABB.ySize()/2_r,
+                           2_r*forestAABB.zMax()+2), // 8, 5, 9.5 gut für ebenen, 0,5,8
                       Color(1, 1, 1), //diffuse
                       Color(1, 1, 1), //specular
-                      Color(real_t(0.4), real_t(0.4), real_t(0.4))); //ambient
+                      Color(0.4_r, 0.4_r, 0.4_r)); //ambient
    tt.stop("Setup");
 
    size_t i = 0;
@@ -568,12 +568,12 @@ void HashGridsTest(Raytracer::Algorithm raytracingAlgorithm, walberla::uint8_t a
       
       Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
                            size_t(640), size_t(480),
-                           real_t(49.13), antiAliasFactor,
+                           49.13_r, antiAliasFactor,
                            std::get<0>(vector),
                            std::get<1>(vector),
                            std::get<2>(vector),
                            lighting0,
-                           Color(real_t(0.2),real_t(0.2),real_t(0.2)),
+                           Color(0.2_r,0.2_r,0.2_r),
                            customHashGridsBodyToShadingParams);
       raytracer.setImageOutputEnabled(true);
       raytracer.setFilenameTimestepWidth(12);
@@ -607,16 +607,16 @@ void raytraceArtifactsForest(Raytracer::Algorithm raytracingAlgorithm, walberla:
    Lighting lighting(cameraPosition,
                      Color(1, 1, 1), //diffuse
                      Color(1, 1, 1), //specular
-                     Color(real_t(0.4), real_t(0.4), real_t(0.4))); //ambient
+                     Color(0.4_r, 0.4_r, 0.4_r)); //ambient
    
    Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
                        size_t(640), size_t(480),
-                       real_t(49.13), antiAliasFactor,
+                       49.13_r, antiAliasFactor,
                        cameraPosition,
                        lookAtPoint,
                        upVector,
                        lighting,
-                       Color(real_t(0.2),real_t(0.2),real_t(0.2)),
+                       Color(0.2_r,0.2_r,0.2_r),
                        customArtifactsBodyToShadingParams);
    raytracer.setImageOutputEnabled(true);
    raytracer.setFilenameTimestepWidth(timestepWidth);
@@ -631,7 +631,7 @@ void raytraceArtifactsForest(Raytracer::Algorithm raytracingAlgorithm, walberla:
 }
 
 void HashGridsArtifactsTest(Raytracer::Algorithm raytracingAlgorithm, walberla::uint8_t antiAliasFactor,
-                            size_t boxes, real_t boxLenMin = real_t(0.1), real_t boxLenMax = real_t(0.2)) {
+                            size_t boxes, real_t boxLenMin = 0.1_r, real_t boxLenMax = 0.2_r) {
    WALBERLA_LOG_INFO_ON_ROOT("HashGrids Artifacts Test - In negative Z direction");
    
    WALBERLA_LOG_INFO(" Generating " << boxes << " boxes");
@@ -646,19 +646,19 @@ void HashGridsArtifactsTest(Raytracer::Algorithm raytracingAlgorithm, walberla::
    // generate bodies for test
    for (size_t i = 0; i < boxes; i++) {
       real_t len = math::realRandom(boxLenMin, boxLenMax); //0.2 0.5
-      real_t x_min = math::realRandom(forestAABB.xMin()+len/real_t(2), forestAABB.xMax());
-      real_t y_min = math::realRandom(forestAABB.yMin()+len/real_t(2), forestAABB.yMax());
-      real_t z_min = math::realRandom(forestAABB.zMin()+len/real_t(2), forestAABB.zMax());
+      real_t x_min = math::realRandom(forestAABB.xMin()+len/2_r, forestAABB.xMax());
+      real_t y_min = math::realRandom(forestAABB.yMin()+len/2_r, forestAABB.yMax());
+      real_t z_min = math::realRandom(forestAABB.zMin()+len/2_r, forestAABB.zMax());
       if (i%5 == 0) {
-         x_min = forestAABB.xMax() - math::realRandom(len/real_t(2), len);
+         x_min = forestAABB.xMax() - math::realRandom(len/2_r, len);
       } else if (i%5 == 1){
-         x_min = forestAABB.xMin() + math::realRandom(real_t(0), len/real_t(2));
+         x_min = forestAABB.xMin() + math::realRandom(0_r, len/2_r);
       } else if (i%5 == 2){
-         y_min = forestAABB.yMax() - math::realRandom(len/real_t(2), len);
+         y_min = forestAABB.yMax() - math::realRandom(len/2_r, len);
       } else if (i%5 == 3){
-         y_min = forestAABB.yMin() + math::realRandom(real_t(0), len/real_t(2));
+         y_min = forestAABB.yMin() + math::realRandom(0_r, len/2_r);
       } else if (i%5 == 4){
-         z_min = forestAABB.zMin() + math::realRandom(real_t(0), len/real_t(2));
+         z_min = forestAABB.zMin() + math::realRandom(0_r, len/2_r);
       }
       walberla::id_t id = walberla::id_t(i);
       BoxID box_ = createBox(*globalBodyStorage, *forest, storageID, id, Vec3(x_min, y_min, z_min), Vec3(len, len, len));
@@ -672,7 +672,7 @@ void HashGridsArtifactsTest(Raytracer::Algorithm raytracingAlgorithm, walberla::
 }
 
 void HashGridsFromNegativeArtifactsTest(Raytracer::Algorithm raytracingAlgorithm, walberla::uint8_t antiAliasFactor,
-                                        size_t boxes, real_t boxLenMin = real_t(0.1), real_t boxLenMax = real_t(0.2)) {
+                                        size_t boxes, real_t boxLenMin = 0.1_r, real_t boxLenMax = 0.2_r) {
    WALBERLA_LOG_INFO_ON_ROOT("HashGrids Artifacts Test - In positive Z direction");
    
    WALBERLA_LOG_INFO_ON_ROOT(" Generating " << boxes << " boxes");
@@ -688,20 +688,20 @@ void HashGridsFromNegativeArtifactsTest(Raytracer::Algorithm raytracingAlgorithm
    std::vector<BodyID> bodies;
    for (size_t i = 0; i < boxes; i++) {
       real_t len = math::realRandom(boxLenMin, boxLenMax); //0.2 0.5
-      real_t x_min = math::realRandom(forestAABB.xMin()+len/real_t(2), forestAABB.xMax());
-      real_t y_min = math::realRandom(forestAABB.yMin()+len/real_t(2), forestAABB.yMax());
-      real_t z_min = math::realRandom(forestAABB.zMin()+len/real_t(2), forestAABB.zMax());
+      real_t x_min = math::realRandom(forestAABB.xMin()+len/2_r, forestAABB.xMax());
+      real_t y_min = math::realRandom(forestAABB.yMin()+len/2_r, forestAABB.yMax());
+      real_t z_min = math::realRandom(forestAABB.zMin()+len/2_r, forestAABB.zMax());
       
       if (i%5 == 0) {
-         x_min = forestAABB.xMax() - math::realRandom(len/real_t(2), len);
+         x_min = forestAABB.xMax() - math::realRandom(len/2_r, len);
       } else if (i%5 == 1){
-         x_min = forestAABB.xMin() + math::realRandom(real_t(0), len/real_t(2));
+         x_min = forestAABB.xMin() + math::realRandom(0_r, len/2_r);
       } else if (i%5 == 2){
-         y_min = forestAABB.yMax() - math::realRandom(len/real_t(2), len);
+         y_min = forestAABB.yMax() - math::realRandom(len/2_r, len);
       } else if (i%5 == 3){
-         y_min = forestAABB.yMin() + math::realRandom(real_t(0), len/real_t(2));
+         y_min = forestAABB.yMin() + math::realRandom(0_r, len/2_r);
       } else if (i%5 == 4){
-         z_min = forestAABB.zMax() - math::realRandom(len/real_t(2), len);
+         z_min = forestAABB.zMax() - math::realRandom(len/2_r, len);
       }
       
       //real_t z_min = len+0.1;
@@ -717,7 +717,7 @@ void HashGridsFromNegativeArtifactsTest(Raytracer::Algorithm raytracingAlgorithm
 }
 
 void HashGridsFromNegativeXArtifactsTest(Raytracer::Algorithm raytracingAlgorithm, walberla::uint8_t antiAliasFactor,
-                                         size_t boxes, real_t boxLenMin = real_t(0.1), real_t boxLenMax = real_t(0.2)) {
+                                         size_t boxes, real_t boxLenMin = 0.1_r, real_t boxLenMax = 0.2_r) {
    WALBERLA_LOG_INFO_ON_ROOT("HashGrids Artifacts Test - In positive X direction");
    WALBERLA_LOG_INFO_ON_ROOT(" Generating " << boxes << " boxes");
    
@@ -731,20 +731,20 @@ void HashGridsFromNegativeXArtifactsTest(Raytracer::Algorithm raytracingAlgorith
    // generate bodies for test
    for (size_t i = 0; i < boxes; i++) {
       real_t len = math::realRandom(boxLenMin, boxLenMax); //0.2 0.5
-      real_t x_min = math::realRandom(forestAABB.xMin()+len/real_t(2), forestAABB.xMax());
-      real_t y_min = math::realRandom(forestAABB.yMin()+len/real_t(2), forestAABB.yMax());
-      real_t z_min = math::realRandom(forestAABB.zMin()+len/real_t(2), forestAABB.zMax());
+      real_t x_min = math::realRandom(forestAABB.xMin()+len/2_r, forestAABB.xMax());
+      real_t y_min = math::realRandom(forestAABB.yMin()+len/2_r, forestAABB.yMax());
+      real_t z_min = math::realRandom(forestAABB.zMin()+len/2_r, forestAABB.zMax());
       
       if (i%5 == 0) {
-         z_min = forestAABB.zMax() - math::realRandom(len/real_t(2), len);
+         z_min = forestAABB.zMax() - math::realRandom(len/2_r, len);
       } else if (i%5 == 1){
-         z_min = forestAABB.zMin() + math::realRandom(real_t(0), len/real_t(2));
+         z_min = forestAABB.zMin() + math::realRandom(0_r, len/2_r);
       } else if (i%5 == 2){
-         y_min = forestAABB.yMax() - math::realRandom(len/real_t(2), len);
+         y_min = forestAABB.yMax() - math::realRandom(len/2_r, len);
       } else if (i%5 == 3){
-         y_min = forestAABB.yMin() + math::realRandom(real_t(0), len/real_t(2));
+         y_min = forestAABB.yMin() + math::realRandom(0_r, len/2_r);
       } else if (i%5 == 4){
-         x_min = forestAABB.xMax() - math::realRandom(len/real_t(2), len);
+         x_min = forestAABB.xMax() - math::realRandom(len/2_r, len);
       }
       
       //real_t z_min = len+0.1;
@@ -778,11 +778,11 @@ void HashGridsTestScene(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RA
    
    // create bodies
    size_t id = 0;
-   real_t len = real_t(0.6);
+   real_t len = 0.6_r;
    
    real_t x_min = 0, y_min = 0;
-   len = real_t(1.2);
-   real_t gap = real_t(0.4);
+   len = 1.2_r;
+   real_t gap = 0.4_r;
    
    // cubes on z = 0 plane
    for (int i = 0; ; ++i) {
@@ -844,18 +844,18 @@ void HashGridsTestScene(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RA
    Lighting lighting(Vec3(1,2,15),
                      Color(1, 1, 1), //diffuse
                      Color(1, 1, 1), //specular
-                     Color(real_t(0.4), real_t(0.4), real_t(0.4))); //ambient
+                     Color(0.4_r, 0.4_r, 0.4_r)); //ambient
    
    int i = 0;
    for (auto& vector: viewVectors) {
       Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
                           size_t(640), size_t(480),
-                          real_t(49.13), antiAliasFactor,
+                          49.13_r, antiAliasFactor,
                           std::get<0>(vector),
                           std::get<1>(vector),
                           std::get<2>(vector),
                           lighting,
-                          Color(real_t(0.2),real_t(0.2),real_t(0.2)));
+                          Color(0.2_r,0.2_r,0.2_r));
       
       raytracer.setRaytracingAlgorithm(raytracingAlgorithm);
       raytracer.setImageOutputEnabled(true);
@@ -900,12 +900,12 @@ int main( int argc, char** argv )
       HashGridsTest(algorithm, antiAliasFactor,
                     60, 60, 3,
                     1,
-                    real_t(0.1), real_t(0.3), true,
-                    real_t(0.1), real_t(0.2), real_t(0.1), real_t(0.2),
-                    real_t(0.5), real_t(0.6));
-      HashGridsArtifactsTest(algorithm, antiAliasFactor, 750, real_t(0.2), real_t(0.3));
-      HashGridsFromNegativeArtifactsTest(algorithm, antiAliasFactor, 750, real_t(0.2), real_t(0.3));
-      HashGridsFromNegativeXArtifactsTest(algorithm, antiAliasFactor, 750, real_t(0.2), real_t(0.3));
+                    0.1_r, 0.3_r, true,
+                    0.1_r, 0.2_r, 0.1_r, 0.2_r,
+                    0.5_r, 0.6_r);
+      HashGridsArtifactsTest(algorithm, antiAliasFactor, 750, 0.2_r, 0.3_r);
+      HashGridsFromNegativeArtifactsTest(algorithm, antiAliasFactor, 750, 0.2_r, 0.3_r);
+      HashGridsFromNegativeXArtifactsTest(algorithm, antiAliasFactor, 750, 0.2_r, 0.3_r);
    }
    
    return EXIT_SUCCESS;

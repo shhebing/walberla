@@ -55,7 +55,7 @@ public:
    LubricationForceEvaluator ( const shared_ptr<StructuredBlockStorage> & blockStorage,
                                const shared_ptr<pe::BodyStorage> & globalBodyStorage, const BlockDataID & bodyStorageID,
                                real_t dynamicViscosity,
-                               real_t cutOffDistance = real_t(2) / real_t(3), real_t minimalGapSize = real_t(1e-5) )
+                               real_t cutOffDistance = 2_r / 3_r, real_t minimalGapSize = 1e-5_r )
       : blockStorage_ ( blockStorage )
       , globalBodyStorage_( globalBodyStorage )
       , bodyStorageID_( bodyStorageID )
@@ -149,7 +149,7 @@ void LubricationForceEvaluator::treatLubricationSphrSphr( const pe::SphereID sph
 
    real_t gap = pe::getSurfaceDistance( sphereI, sphereJ );
 
-   if ( gap > cutOffDistance_ || gap < real_t(0) )
+   if ( gap > cutOffDistance_ || gap < 0_r )
    {
       WALBERLA_LOG_DETAIL("gap " << gap << " larger than cutOff " << cutOffDistance_ << " - ignoring pair");
       return;
@@ -166,7 +166,7 @@ void LubricationForceEvaluator::treatLubricationSphrSphr( const pe::SphereID sph
    pe::Vec3 fLub(0);
 
    // compute (global) coordinate between spheres' centers of gravity
-   pe::Vec3 midPoint( (posSphereI + posSphereJ ) * real_t(0.5) );
+   pe::Vec3 midPoint( (posSphereI + posSphereJ ) * 0.5_r );
 
    // Let process on which midPoint lies do the lubrication correction
    // or the local process of sphereI if sphereJ is global
@@ -187,7 +187,7 @@ void LubricationForceEvaluator::treatLubricationSphrPlane( const pe::SphereID sp
 
    real_t gap = pe::getSurfaceDistance( sphereI, planeJ );
 
-   if ( gap > cutOffDistance_ || gap < real_t(0) )
+   if ( gap > cutOffDistance_ || gap < 0_r )
    {
       WALBERLA_LOG_DETAIL("gap " << gap << " larger than cutOff " << cutOffDistance_ << " - ignoring pair");
       return;
@@ -215,35 +215,35 @@ pe::Vec3 LubricationForceEvaluator::compLubricationSphrSphr( real_t gap, const p
    const pe::Vec3 &tmpVec = posSphereJ - posSphereI;
    const pe::Vec3 &rIJ    = tmpVec.getNormalized();
 
-   real_t diameterSphereI = real_t(2) * sphereI->getRadius();
-   real_t diameterSphereJ = real_t(2) * sphereJ->getRadius();
+   real_t diameterSphereI = 2_r * sphereI->getRadius();
+   real_t diameterSphereJ = 2_r * sphereJ->getRadius();
 
    pe::Vec3 velDiff(sphereI->getLinearVel() - sphereJ->getLinearVel());
 
    real_t length = velDiff * rIJ;
 
-   real_t d = real_t(2) * diameterSphereI * diameterSphereJ / ( diameterSphereI + diameterSphereJ );
+   real_t d = 2_r * diameterSphereI * diameterSphereJ / ( diameterSphereI + diameterSphereJ );
    real_t h = gap;
    real_t r = d + h;
-   real_t a_sq = ( real_t(3) * dynamicViscosity_ * walberla::math::PI * d / real_t(2) ) * ( d / ( real_t(4) * h ) + ( real_t(18) / real_t(40) ) * std::log( d / ( real_t(2) * h ) ) +
-                                                                                            ( real_t(9)/real_t(84) ) * ( h / d ) * std::log( d/( real_t(2)*h ) ) );
-   real_t a_sh = ( dynamicViscosity_ * walberla::math::PI * d / real_t(2) ) * std::log( d / ( real_t(2) * h ) ) * ( d + h ) * ( d + h ) / real_t(4);
-   pe::Vec3 fLub( - a_sq * length * rIJ - a_sh * ( real_t(2) / r ) * ( real_t(2) / r ) * ( velDiff - length * rIJ ) );
+   real_t a_sq = ( 3_r * dynamicViscosity_ * walberla::math::PI * d / 2_r ) * ( d / ( 4_r * h ) + ( 18_r / 40_r ) * std::log( d / ( 2_r * h ) ) +
+                                                                                            ( 9_r/84_r ) * ( h / d ) * std::log( d/( 2_r*h ) ) );
+   real_t a_sh = ( dynamicViscosity_ * walberla::math::PI * d / 2_r ) * std::log( d / ( 2_r * h ) ) * ( d + h ) * ( d + h ) / 4_r;
+   pe::Vec3 fLub( - a_sq * length * rIJ - a_sh * ( 2_r / r ) * ( 2_r / r ) * ( velDiff - length * rIJ ) );
 
    WALBERLA_LOG_DETAIL_SECTION()
    {
       std::stringstream ss;
       ss << "Sphere I: \n uid:" << sphereI->getID() << "\n";
       ss << "vel: "  << sphereI->getLinearVel() << "\n";
-      ss << "rad: "  << diameterSphereI * real_t(0.5) << "\n";
+      ss << "rad: "  << diameterSphereI * 0.5_r << "\n";
       ss << "pos: "  << posSphereI << "\n\n";
 
       ss << "Sphere J: \n uid:" << sphereJ->getID() << "\n";
       ss << "vel: "  << sphereJ->getLinearVel() << "\n";
-      ss << "rad: "  << diameterSphereJ * real_t(0.5) << "\n";
+      ss << "rad: "  << diameterSphereJ * 0.5_r << "\n";
       ss << "pos: "  << posSphereJ << "\n\n";
 
-      real_t distance = gap + diameterSphereI * real_t(0.5) + diameterSphereJ * real_t(0.5);
+      real_t distance = gap + diameterSphereI * 0.5_r + diameterSphereJ * 0.5_r;
       ss << "distance: "  << distance << "\n";
       ss << "viscosity: " << dynamicViscosity_ << "\n";
 
@@ -271,13 +271,13 @@ pe::Vec3 LubricationForceEvaluator::compLubricationSphrPlane( real_t gap, const 
    real_t length = sphereI->getLinearVel() *  rIJ;
 
    pe::Vec3 v1 = sphereI->getLinearVel();
-   real_t d = real_t(4) * radiusSphereI;
+   real_t d = 4_r * radiusSphereI;
    real_t h = gap;
    real_t r = d + h;
-   real_t a_sq = ( real_t(3) * dynamicViscosity_ * walberla::math::PI * d / real_t(2) ) * ( d / ( real_t(4) * h ) + ( real_t(18) / real_t(40) ) * std::log( d / ( real_t(2) * h ) ) +
-                                                                                            ( real_t(9)/real_t(84) ) * ( h / d ) * std::log( d/( real_t(2)*h ) ) );
-   real_t a_sh = ( dynamicViscosity_ * walberla::math::PI * d / real_t(2) ) * std::log( d / ( real_t(2) * h ) ) * ( d + h ) * ( d + h ) / real_t(4);
-   pe::Vec3 fLub( - a_sq * length * rIJ - a_sh * ( real_t(2) / r ) * ( real_t(2) / r ) * ( v1 - length * rIJ ) );
+   real_t a_sq = ( 3_r * dynamicViscosity_ * walberla::math::PI * d / 2_r ) * ( d / ( 4_r * h ) + ( 18_r / 40_r ) * std::log( d / ( 2_r * h ) ) +
+                                                                                            ( 9_r/84_r ) * ( h / d ) * std::log( d/( 2_r*h ) ) );
+   real_t a_sh = ( dynamicViscosity_ * walberla::math::PI * d / 2_r ) * std::log( d / ( 2_r * h ) ) * ( d + h ) * ( d + h ) / 4_r;
+   pe::Vec3 fLub( - a_sq * length * rIJ - a_sh * ( 2_r / r ) * ( 2_r / r ) * ( v1 - length * rIJ ) );
 
    WALBERLA_LOG_DETAIL_SECTION() {
       std::stringstream ss;

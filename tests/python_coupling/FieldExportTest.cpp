@@ -59,7 +59,7 @@ int main( int argc, char ** argv )
    pythonManager->addExporterFunction( blockforest::exportModuleToPython<Stencils> );
 
 
-   shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid( 1,1,1, 20,20,1, real_t(1.0), false, true,true,true );
+   shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid( 1,1,1, 20,20,1, 1.0_r, false, true,true,true );
 
    auto sca2FieldID = field::addToStorage< GhostLayerField<int,2> >( blocks, "sca2Field", int(0), field::fzyx, 1 );
    auto sca3FieldID = field::addToStorage< GhostLayerField<int,3> >( blocks, "sca3Field", int(0), field::fzyx, 1 );

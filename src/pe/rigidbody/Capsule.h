@@ -268,7 +268,7 @@ inline real_t  Capsule::calcDensity( real_t  radius, real_t  length, real_t  mas
 inline Vec3 Capsule::support( const Vec3& d ) const
 {
    auto len = d.sqrLength();
-   if (math::equal(len, real_t(0)))
+   if (math::equal(len, 0_r))
       return Vec3(0,0,0);
 
    Vec3 dnorm = d / sqrt(len);
@@ -293,7 +293,7 @@ inline Vec3 Capsule::support( const Vec3& d ) const
 inline Vec3 Capsule::supportContactThreshold( const Vec3& d ) const
 {
    auto len = d.sqrLength();
-   if (math::equal(len, real_t(0)))
+   if (math::equal(len, 0_r))
       return Vec3(0,0,0);
 
    return support(d) + d*contactThreshold;

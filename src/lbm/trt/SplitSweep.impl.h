@@ -112,17 +112,17 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
    const real_t lambda_d =  src->latticeModel().collisionModel().lambda_d();
 
    // common prefactors for calculating the equilibrium parts
-   const real_t t0   = real_t(1.0) / real_t(3.0);                 // 1/3      for C
-   const real_t t1x2 = real_t(1.0) / real_t(18.0) * real_t(2.0);  // 1/18 * 2 for N, S, W, E, T, B
-   const real_t t2x2 = real_t(1.0) / real_t(36.0) * real_t(2.0);  // 1/36 * 2 else
+   const real_t t0   = 1.0_r / 3.0_r;                 // 1/3      for C
+   const real_t t1x2 = 1.0_r / 18.0_r * 2.0_r;  // 1/18 * 2 for N, S, W, E, T, B
+   const real_t t2x2 = 1.0_r / 36.0_r * 2.0_r;  // 1/36 * 2 else
 
-   const real_t inv2csq2 = real_t(1.0) / ( real_t(2.0) * ( real_t(1.0) / real_t(3.0) ) * ( real_t(1.0) / real_t(3.0) ) ); //speed of sound related factor for equilibrium distribution function
+   const real_t inv2csq2 = 1.0_r / ( 2.0_r * ( 1.0_r / 3.0_r ) * ( 1.0_r / 3.0_r ) ); //speed of sound related factor for equilibrium distribution function
    const real_t fac1     = t1x2 * inv2csq2;
    const real_t fac2     = t2x2 * inv2csq2;
 
    // relaxation parameter variables
-   const real_t lambda_e_scaled = real_t(0.5) * lambda_e; // 0.5 times the usual value ...
-   const real_t lambda_d_scaled = real_t(0.5) * lambda_d; // ... due to the way of calculations
+   const real_t lambda_e_scaled = 0.5_r * lambda_e; // 0.5 times the usual value ...
+   const real_t lambda_d_scaled = 0.5_r * lambda_d; // ... due to the way of calculations
 
    // loop constants
 
@@ -184,9 +184,9 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
                velY[x] = velY_trm + pNE[x] - pS[x]  - pSW[x] - pSE[x] - pTS[x] - pBS[x];
                velZ[x] = velZ_trm + pTN[x] + pTE[x] - pB[x]  - pBN[x] - pBS[x] - pBW[x] - pBE[x];
 
-               feq_common[x] = rho - real_t(1.5) * ( velX[x] * velX[x] + velY[x] * velY[x] + velZ[x] * velZ[x] );
+               feq_common[x] = rho - 1.5_r * ( velX[x] * velX[x] + velY[x] * velY[x] + velZ[x] * velZ[x] );
 
-               dC[x] = pC[x] * (real_t(1.0) - lambda_e) + lambda_e * t0 * feq_common[x];
+               dC[x] = pC[x] * (1.0_r - lambda_e) + lambda_e * t0 * feq_common[x];
 
                perform_lbm[x] = true;
             }
@@ -202,7 +202,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             {
                const real_t velXPY = velX[x] + velY[x];
                const real_t  sym_NE_SW = lambda_e_scaled * ( pNE[x] + pSW[x] - fac2 * velXPY * velXPY - t2x2 * feq_common[x] );
-               const real_t asym_NE_SW = lambda_d_scaled * ( pNE[x] - pSW[x] - real_t(3.0) * t2x2 * velXPY );
+               const real_t asym_NE_SW = lambda_d_scaled * ( pNE[x] - pSW[x] - 3.0_r * t2x2 * velXPY );
 
                dNE[x] = pNE[x] - sym_NE_SW - asym_NE_SW;
                dSW[x] = pSW[x] - sym_NE_SW + asym_NE_SW;
@@ -218,7 +218,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             {
                const real_t velXMY = velX[x] - velY[x];
                const real_t  sym_SE_NW = lambda_e_scaled * ( pSE[x] + pNW[x] - fac2 * velXMY * velXMY - t2x2 * feq_common[x] );
-               const real_t asym_SE_NW = lambda_d_scaled * ( pSE[x] - pNW[x] - real_t(3.0) * t2x2 * velXMY );
+               const real_t asym_SE_NW = lambda_d_scaled * ( pSE[x] - pNW[x] - 3.0_r * t2x2 * velXMY );
 
                dSE[x] = pSE[x] - sym_SE_NW - asym_SE_NW;
                dNW[x] = pNW[x] - sym_SE_NW + asym_SE_NW;
@@ -234,7 +234,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             {
                const real_t velXPZ = velX[x] + velZ[x];
                const real_t  sym_TE_BW = lambda_e_scaled * ( pTE[x] + pBW[x] - fac2 * velXPZ * velXPZ - t2x2 * feq_common[x] );
-               const real_t asym_TE_BW = lambda_d_scaled * ( pTE[x] - pBW[x] - real_t(3.0) * t2x2 * velXPZ );
+               const real_t asym_TE_BW = lambda_d_scaled * ( pTE[x] - pBW[x] - 3.0_r * t2x2 * velXPZ );
 
                dTE[x] = pTE[x] - sym_TE_BW - asym_TE_BW;
                dBW[x] = pBW[x] - sym_TE_BW + asym_TE_BW;
@@ -250,7 +250,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             {
                const real_t velXMZ = velX[x] - velZ[x];
                const real_t  sym_BE_TW = lambda_e_scaled * ( pBE[x] + pTW[x] - fac2 * velXMZ * velXMZ - t2x2 * feq_common[x] );
-               const real_t asym_BE_TW = lambda_d_scaled * ( pBE[x] - pTW[x] - real_t(3.0) * t2x2 * velXMZ );
+               const real_t asym_BE_TW = lambda_d_scaled * ( pBE[x] - pTW[x] - 3.0_r * t2x2 * velXMZ );
 
                dBE[x] = pBE[x] - sym_BE_TW - asym_BE_TW;
                dTW[x] = pTW[x] - sym_BE_TW + asym_BE_TW;
@@ -266,7 +266,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             {
                const real_t velYPZ = velY[x] + velZ[x];
                const real_t  sym_TN_BS = lambda_e_scaled * ( pTN[x] + pBS[x] - fac2 * velYPZ * velYPZ - t2x2 * feq_common[x] );
-               const real_t asym_TN_BS = lambda_d_scaled * ( pTN[x] - pBS[x] - real_t(3.0) * t2x2 * velYPZ );
+               const real_t asym_TN_BS = lambda_d_scaled * ( pTN[x] - pBS[x] - 3.0_r * t2x2 * velYPZ );
 
                dTN[x] = pTN[x] - sym_TN_BS - asym_TN_BS;
                dBS[x] = pBS[x] - sym_TN_BS + asym_TN_BS;
@@ -282,7 +282,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             {
                const real_t velYMZ = velY[x] - velZ[x];
                const real_t  sym_BN_TS = lambda_e_scaled * ( pBN[x] + pTS[x] - fac2 * velYMZ * velYMZ - t2x2 * feq_common[x] );
-               const real_t asym_BN_TS = lambda_d_scaled * ( pBN[x] - pTS[x] - real_t(3.0) * t2x2 * velYMZ );
+               const real_t asym_BN_TS = lambda_d_scaled * ( pBN[x] - pTS[x] - 3.0_r * t2x2 * velYMZ );
 
                dBN[x] = pBN[x] - sym_BN_TS - asym_BN_TS;
                dTS[x] = pTS[x] - sym_BN_TS + asym_BN_TS;
@@ -297,7 +297,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             if( perform_lbm[x] )
             {
                const real_t  sym_N_S = lambda_e_scaled * ( pN[x] + pS[x] - fac1 * velY[x] * velY[x] - t1x2 * feq_common[x] );
-               const real_t asym_N_S = lambda_d_scaled * ( pN[x] - pS[x] - real_t(3.0) * t1x2 * velY[x] );
+               const real_t asym_N_S = lambda_d_scaled * ( pN[x] - pS[x] - 3.0_r * t1x2 * velY[x] );
 
                dN[x] = pN[x] - sym_N_S - asym_N_S;
                dS[x] = pS[x] - sym_N_S + asym_N_S;
@@ -312,7 +312,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             if( perform_lbm[x] )
             {
                const real_t  sym_E_W = lambda_e_scaled * ( pE[x] + pW[x] - fac1 * velX[x] * velX[x] - t1x2 * feq_common[x] );
-               const real_t asym_E_W = lambda_d_scaled * ( pE[x] - pW[x] - real_t(3.0) * t1x2 * velX[x] );
+               const real_t asym_E_W = lambda_d_scaled * ( pE[x] - pW[x] - 3.0_r * t1x2 * velX[x] );
 
                dE[x] = pE[x] - sym_E_W - asym_E_W;
                dW[x] = pW[x] - sym_E_W + asym_E_W;
@@ -327,7 +327,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             if( perform_lbm[x] )
             {
                const real_t  sym_T_B = lambda_e_scaled * ( pT[x] + pB[x] - fac1 * velZ[x] * velZ[x] - t1x2 * feq_common[x] );
-               const real_t asym_T_B = lambda_d_scaled * ( pT[x] - pB[x] - real_t(3.0) * t1x2 * velZ[x] );
+               const real_t asym_T_B = lambda_d_scaled * ( pT[x] - pB[x] - 3.0_r * t1x2 * velZ[x] );
 
                dT[x] = pT[x] - sym_T_B - asym_T_B;
                dB[x] = pB[x] - sym_T_B + asym_T_B;
@@ -376,9 +376,9 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
                velY[x] = velY_trm + dd_tmp_NE - dd_tmp_S  - dd_tmp_SW - dd_tmp_SE - dd_tmp_TS - dd_tmp_BS;
                velZ[x] = velZ_trm + dd_tmp_TN + dd_tmp_TE - dd_tmp_B  - dd_tmp_BN - dd_tmp_BS - dd_tmp_BW - dd_tmp_BE;
 
-               feq_common[x] = rho - real_t(1.5) * ( velX[x] * velX[x] + velY[x] * velY[x] + velZ[x] * velZ[x] );
+               feq_common[x] = rho - 1.5_r * ( velX[x] * velX[x] + velY[x] * velY[x] + velZ[x] * velZ[x] );
 
-               dst->get( x, y, z, Stencil::idx[C] ) = dd_tmp_C * (real_t(1.0) - lambda_e) + lambda_e * t0 * feq_common[x];
+               dst->get( x, y, z, Stencil::idx[C] ) = dd_tmp_C * (1.0_r - lambda_e) + lambda_e * t0 * feq_common[x];
 
                perform_lbm[x] = true;
             }
@@ -394,7 +394,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
 
                const real_t velXPY = velX[x] + velY[x];
                const real_t  sym_NE_SW = lambda_e_scaled * ( dd_tmp_NE + dd_tmp_SW - fac2 * velXPY * velXPY - t2x2 * feq_common[x] );
-               const real_t asym_NE_SW = lambda_d_scaled * ( dd_tmp_NE - dd_tmp_SW - real_t(3.0) * t2x2 * velXPY );
+               const real_t asym_NE_SW = lambda_d_scaled * ( dd_tmp_NE - dd_tmp_SW - 3.0_r * t2x2 * velXPY );
 
                dst->get( x, y, z, Stencil::idx[NE] ) = dd_tmp_NE - sym_NE_SW - asym_NE_SW;
                dst->get( x, y, z, Stencil::idx[SW] ) = dd_tmp_SW - sym_NE_SW + asym_NE_SW;
@@ -410,7 +410,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
 
                const real_t velXMY = velX[x] - velY[x];
                const real_t  sym_SE_NW = lambda_e_scaled * ( dd_tmp_SE + dd_tmp_NW - fac2 * velXMY * velXMY - t2x2 * feq_common[x] );
-               const real_t asym_SE_NW = lambda_d_scaled * ( dd_tmp_SE - dd_tmp_NW - real_t(3.0) * t2x2 * velXMY );
+               const real_t asym_SE_NW = lambda_d_scaled * ( dd_tmp_SE - dd_tmp_NW - 3.0_r * t2x2 * velXMY );
 
                dst->get( x, y, z, Stencil::idx[SE] ) = dd_tmp_SE - sym_SE_NW - asym_SE_NW;
                dst->get( x, y, z, Stencil::idx[NW] ) = dd_tmp_NW - sym_SE_NW + asym_SE_NW;
@@ -426,7 +426,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
 
                const real_t velXPZ = velX[x] + velZ[x];
                const real_t  sym_TE_BW = lambda_e_scaled * ( dd_tmp_TE + dd_tmp_BW - fac2 * velXPZ * velXPZ - t2x2 * feq_common[x] );
-               const real_t asym_TE_BW = lambda_d_scaled * ( dd_tmp_TE - dd_tmp_BW - real_t(3.0) * t2x2 * velXPZ );
+               const real_t asym_TE_BW = lambda_d_scaled * ( dd_tmp_TE - dd_tmp_BW - 3.0_r * t2x2 * velXPZ );
 
                dst->get( x, y, z, Stencil::idx[TE] ) = dd_tmp_TE - sym_TE_BW - asym_TE_BW;
                dst->get( x, y, z, Stencil::idx[BW] ) = dd_tmp_BW - sym_TE_BW + asym_TE_BW;
@@ -442,7 +442,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
 
                const real_t velXMZ = velX[x] - velZ[x];
                const real_t  sym_BE_TW = lambda_e_scaled * ( dd_tmp_BE + dd_tmp_TW - fac2 * velXMZ * velXMZ - t2x2 * feq_common[x] );
-               const real_t asym_BE_TW = lambda_d_scaled * ( dd_tmp_BE - dd_tmp_TW - real_t(3.0) * t2x2 * velXMZ );
+               const real_t asym_BE_TW = lambda_d_scaled * ( dd_tmp_BE - dd_tmp_TW - 3.0_r * t2x2 * velXMZ );
 
                dst->get( x, y, z, Stencil::idx[BE] ) = dd_tmp_BE - sym_BE_TW - asym_BE_TW;
                dst->get( x, y, z, Stencil::idx[TW] ) = dd_tmp_TW - sym_BE_TW + asym_BE_TW;
@@ -458,7 +458,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
 
                const real_t velYPZ = velY[x] + velZ[x];
                const real_t  sym_TN_BS = lambda_e_scaled * ( dd_tmp_TN + dd_tmp_BS - fac2 * velYPZ * velYPZ - t2x2 * feq_common[x] );
-               const real_t asym_TN_BS = lambda_d_scaled * ( dd_tmp_TN - dd_tmp_BS - real_t(3.0) * t2x2 * velYPZ );
+               const real_t asym_TN_BS = lambda_d_scaled * ( dd_tmp_TN - dd_tmp_BS - 3.0_r * t2x2 * velYPZ );
 
                dst->get( x, y, z, Stencil::idx[TN] ) = dd_tmp_TN - sym_TN_BS - asym_TN_BS;
                dst->get( x, y, z, Stencil::idx[BS] ) = dd_tmp_BS - sym_TN_BS + asym_TN_BS;
@@ -474,7 +474,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
 
                const real_t velYMZ = velY[x] - velZ[x];
                const real_t  sym_BN_TS = lambda_e_scaled * ( dd_tmp_BN + dd_tmp_TS - fac2 * velYMZ * velYMZ - t2x2 * feq_common[x] );
-               const real_t asym_BN_TS = lambda_d_scaled * ( dd_tmp_BN - dd_tmp_TS - real_t(3.0) * t2x2 * velYMZ );
+               const real_t asym_BN_TS = lambda_d_scaled * ( dd_tmp_BN - dd_tmp_TS - 3.0_r * t2x2 * velYMZ );
 
                dst->get( x, y, z, Stencil::idx[BN] ) = dd_tmp_BN - sym_BN_TS - asym_BN_TS;
                dst->get( x, y, z, Stencil::idx[TS] ) = dd_tmp_TS - sym_BN_TS + asym_BN_TS;
@@ -489,7 +489,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
                const real_t dd_tmp_S  = src->get(x, y+1, z, Stencil::idx[S]);
 
                const real_t  sym_N_S = lambda_e_scaled * ( dd_tmp_N + dd_tmp_S - fac1 * velY[x] * velY[x] - t1x2 * feq_common[x] );
-               const real_t asym_N_S = lambda_d_scaled * ( dd_tmp_N - dd_tmp_S - real_t(3.0) * t1x2 * velY[x] );
+               const real_t asym_N_S = lambda_d_scaled * ( dd_tmp_N - dd_tmp_S - 3.0_r * t1x2 * velY[x] );
 
                dst->get( x, y, z, Stencil::idx[N] ) = dd_tmp_N - sym_N_S - asym_N_S;
                dst->get( x, y, z, Stencil::idx[S] ) = dd_tmp_S - sym_N_S + asym_N_S;
@@ -504,7 +504,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
                const real_t dd_tmp_W  = src->get(x+1, y, z, Stencil::idx[W]);
 
                const real_t  sym_E_W = lambda_e_scaled * ( dd_tmp_E + dd_tmp_W - fac1 * velX[x] * velX[x] - t1x2 * feq_common[x] );
-               const real_t asym_E_W = lambda_d_scaled * ( dd_tmp_E - dd_tmp_W - real_t(3.0) * t1x2 * velX[x] );
+               const real_t asym_E_W = lambda_d_scaled * ( dd_tmp_E - dd_tmp_W - 3.0_r * t1x2 * velX[x] );
 
                dst->get( x, y, z, Stencil::idx[E] ) = dd_tmp_E - sym_E_W - asym_E_W;
                dst->get( x, y, z, Stencil::idx[W] ) = dd_tmp_W - sym_E_W + asym_E_W;
@@ -519,7 +519,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
                const real_t dd_tmp_B  = src->get(x, y, z+1, Stencil::idx[B]);
 
                const real_t  sym_T_B = lambda_e_scaled * ( dd_tmp_T + dd_tmp_B - fac1 * velZ[x] * velZ[x] - t1x2 * feq_common[x] );
-               const real_t asym_T_B = lambda_d_scaled * ( dd_tmp_T - dd_tmp_B - real_t(3.0) * t1x2 * velZ[x] );
+               const real_t asym_T_B = lambda_d_scaled * ( dd_tmp_T - dd_tmp_B - 3.0_r * t1x2 * velZ[x] );
 
                dst->get( x, y, z, Stencil::idx[T] ) = dd_tmp_T - sym_T_B - asym_T_B;
                dst->get( x, y, z, Stencil::idx[B] ) = dd_tmp_B - sym_T_B + asym_T_B;
@@ -589,17 +589,17 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
    const real_t lambda_d =  src->latticeModel().collisionModel().lambda_d();
 
    // common prefactors for calculating the equilibrium parts
-   const real_t t0   = real_t(1.0) / real_t(3.0);                 // 1/3      for C
-   const real_t t1x2 = real_t(1.0) / real_t(18.0) * real_t(2.0);  // 1/18 * 2 for N, S, W, E, T, B
-   const real_t t2x2 = real_t(1.0) / real_t(36.0) * real_t(2.0);  // 1/36 * 2 else
+   const real_t t0   = 1.0_r / 3.0_r;                 // 1/3      for C
+   const real_t t1x2 = 1.0_r / 18.0_r * 2.0_r;  // 1/18 * 2 for N, S, W, E, T, B
+   const real_t t2x2 = 1.0_r / 36.0_r * 2.0_r;  // 1/36 * 2 else
 
-   const real_t inv2csq2 = real_t(1.0) / ( real_t(2.0) * ( real_t(1.0) / real_t(3.0) ) * ( real_t(1.0) / real_t(3.0) ) ); //speed of sound related factor for equilibrium distribution function
+   const real_t inv2csq2 = 1.0_r / ( 2.0_r * ( 1.0_r / 3.0_r ) * ( 1.0_r / 3.0_r ) ); //speed of sound related factor for equilibrium distribution function
    const real_t fac1     = t1x2 * inv2csq2;
    const real_t fac2     = t2x2 * inv2csq2;
 
    // relaxation parameter variables
-   const real_t lambda_e_scaled = real_t(0.5) * lambda_e; // 0.5 times the usual value ...
-   const real_t lambda_d_scaled = real_t(0.5) * lambda_d; // ... due to the way of calculations
+   const real_t lambda_e_scaled = 0.5_r * lambda_e; // 0.5 times the usual value ...
+   const real_t lambda_d_scaled = 0.5_r * lambda_d; // ... due to the way of calculations
 
    // loop constants
 
@@ -659,9 +659,9 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
                velY[x] = velY_trm + pNE[x] - pS[x]  - pSW[x] - pSE[x] - pTS[x] - pBS[x];
                velZ[x] = velZ_trm + pTN[x] + pTE[x] - pB[x]  - pBN[x] - pBS[x] - pBW[x] - pBE[x];
 
-               feq_common[x] = rho - real_t(1.5) * ( velX[x] * velX[x] + velY[x] * velY[x] + velZ[x] * velZ[x] );
+               feq_common[x] = rho - 1.5_r * ( velX[x] * velX[x] + velY[x] * velY[x] + velZ[x] * velZ[x] );
 
-               pC[x] = pC[x] * (real_t(1.0) - lambda_e) + lambda_e * t0 * feq_common[x];
+               pC[x] = pC[x] * (1.0_r - lambda_e) + lambda_e * t0 * feq_common[x];
 
                perform_lbm[x] = true;
             }
@@ -674,7 +674,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             {
                const real_t velXPY = velX[x] + velY[x];
                const real_t  sym_NE_SW = lambda_e_scaled * ( pNE[x] + pSW[x] - fac2 * velXPY * velXPY - t2x2 * feq_common[x] );
-               const real_t asym_NE_SW = lambda_d_scaled * ( pNE[x] - pSW[x] - real_t(3.0) * t2x2 * velXPY );
+               const real_t asym_NE_SW = lambda_d_scaled * ( pNE[x] - pSW[x] - 3.0_r * t2x2 * velXPY );
 
                pNE[x] = pNE[x] - sym_NE_SW - asym_NE_SW;
                pSW[x] = pSW[x] - sym_NE_SW + asym_NE_SW;
@@ -687,7 +687,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             {
                const real_t velXMY = velX[x] - velY[x];
                const real_t  sym_SE_NW = lambda_e_scaled * ( pSE[x] + pNW[x] - fac2 * velXMY * velXMY - t2x2 * feq_common[x] );
-               const real_t asym_SE_NW = lambda_d_scaled * ( pSE[x] - pNW[x] - real_t(3.0) * t2x2 * velXMY );
+               const real_t asym_SE_NW = lambda_d_scaled * ( pSE[x] - pNW[x] - 3.0_r * t2x2 * velXMY );
 
                pSE[x] = pSE[x] - sym_SE_NW - asym_SE_NW;
                pNW[x] = pNW[x] - sym_SE_NW + asym_SE_NW;
@@ -700,7 +700,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             {
                const real_t velXPZ = velX[x] + velZ[x];
                const real_t  sym_TE_BW = lambda_e_scaled * ( pTE[x] + pBW[x] - fac2 * velXPZ * velXPZ - t2x2 * feq_common[x] );
-               const real_t asym_TE_BW = lambda_d_scaled * ( pTE[x] - pBW[x] - real_t(3.0) * t2x2 * velXPZ );
+               const real_t asym_TE_BW = lambda_d_scaled * ( pTE[x] - pBW[x] - 3.0_r * t2x2 * velXPZ );
 
                pTE[x] = pTE[x] - sym_TE_BW - asym_TE_BW;
                pBW[x] = pBW[x] - sym_TE_BW + asym_TE_BW;
@@ -713,7 +713,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             {
                const real_t velXMZ = velX[x] - velZ[x];
                const real_t  sym_BE_TW = lambda_e_scaled * ( pBE[x] + pTW[x] - fac2 * velXMZ * velXMZ - t2x2 * feq_common[x] );
-               const real_t asym_BE_TW = lambda_d_scaled * ( pBE[x] - pTW[x] - real_t(3.0) * t2x2 * velXMZ );
+               const real_t asym_BE_TW = lambda_d_scaled * ( pBE[x] - pTW[x] - 3.0_r * t2x2 * velXMZ );
 
                pBE[x] = pBE[x] - sym_BE_TW - asym_BE_TW;
                pTW[x] = pTW[x] - sym_BE_TW + asym_BE_TW;
@@ -726,7 +726,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             {
                const real_t velYPZ = velY[x] + velZ[x];
                const real_t  sym_TN_BS = lambda_e_scaled * ( pTN[x] + pBS[x] - fac2 * velYPZ * velYPZ - t2x2 * feq_common[x] );
-               const real_t asym_TN_BS = lambda_d_scaled * ( pTN[x] - pBS[x] - real_t(3.0) * t2x2 * velYPZ );
+               const real_t asym_TN_BS = lambda_d_scaled * ( pTN[x] - pBS[x] - 3.0_r * t2x2 * velYPZ );
 
                pTN[x] = pTN[x] - sym_TN_BS - asym_TN_BS;
                pBS[x] = pBS[x] - sym_TN_BS + asym_TN_BS;
@@ -739,7 +739,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             {
                const real_t velYMZ = velY[x] - velZ[x];
                const real_t  sym_BN_TS = lambda_e_scaled * ( pBN[x] + pTS[x] - fac2 * velYMZ * velYMZ - t2x2 * feq_common[x] );
-               const real_t asym_BN_TS = lambda_d_scaled * ( pBN[x] - pTS[x] - real_t(3.0) * t2x2 * velYMZ );
+               const real_t asym_BN_TS = lambda_d_scaled * ( pBN[x] - pTS[x] - 3.0_r * t2x2 * velYMZ );
 
                pBN[x] = pBN[x] - sym_BN_TS - asym_BN_TS;
                pTS[x] = pTS[x] - sym_BN_TS + asym_BN_TS;
@@ -751,7 +751,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             if( perform_lbm[x] )
             {
                const real_t  sym_N_S = lambda_e_scaled * ( pN[x] + pS[x] - fac1 * velY[x] * velY[x] - t1x2 * feq_common[x] );
-               const real_t asym_N_S = lambda_d_scaled * ( pN[x] - pS[x] - real_t(3.0) * t1x2 * velY[x] );
+               const real_t asym_N_S = lambda_d_scaled * ( pN[x] - pS[x] - 3.0_r * t1x2 * velY[x] );
 
                pN[x] = pN[x] - sym_N_S - asym_N_S;
                pS[x] = pS[x] - sym_N_S + asym_N_S;
@@ -763,7 +763,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             if( perform_lbm[x] )
             {
                const real_t  sym_E_W = lambda_e_scaled * ( pE[x] + pW[x] - fac1 * velX[x] * velX[x] - t1x2 * feq_common[x] );
-               const real_t asym_E_W = lambda_d_scaled * ( pE[x] - pW[x] - real_t(3.0) * t1x2 * velX[x] );
+               const real_t asym_E_W = lambda_d_scaled * ( pE[x] - pW[x] - 3.0_r * t1x2 * velX[x] );
 
                pE[x] = pE[x] - sym_E_W - asym_E_W;
                pW[x] = pW[x] - sym_E_W + asym_E_W;
@@ -775,7 +775,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             if( perform_lbm[x] )
             {
                const real_t  sym_T_B = lambda_e_scaled * ( pT[x] + pB[x] - fac1 * velZ[x] * velZ[x] - t1x2 * feq_common[x] );
-               const real_t asym_T_B = lambda_d_scaled * ( pT[x] - pB[x] - real_t(3.0) * t1x2 * velZ[x] );
+               const real_t asym_T_B = lambda_d_scaled * ( pT[x] - pB[x] - 3.0_r * t1x2 * velZ[x] );
 
                pT[x] = pT[x] - sym_T_B - asym_T_B;
                pB[x] = pB[x] - sym_T_B + asym_T_B;
@@ -824,9 +824,9 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
                velY[x] = velY_trm + dd_tmp_NE - dd_tmp_S  - dd_tmp_SW - dd_tmp_SE - dd_tmp_TS - dd_tmp_BS;
                velZ[x] = velZ_trm + dd_tmp_TN + dd_tmp_TE - dd_tmp_B  - dd_tmp_BN - dd_tmp_BS - dd_tmp_BW - dd_tmp_BE;
 
-               feq_common[x] = rho - real_t(1.5) * ( velX[x] * velX[x] + velY[x] * velY[x] + velZ[x] * velZ[x] );
+               feq_common[x] = rho - 1.5_r * ( velX[x] * velX[x] + velY[x] * velY[x] + velZ[x] * velZ[x] );
 
-               src->get( x, y, z, Stencil::idx[C] ) = dd_tmp_C * (real_t(1.0) - lambda_e) + lambda_e * t0 * feq_common[x];
+               src->get( x, y, z, Stencil::idx[C] ) = dd_tmp_C * (1.0_r - lambda_e) + lambda_e * t0 * feq_common[x];
 
                perform_lbm[x] = true;
             }
@@ -842,7 +842,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
 
                const real_t velXPY = velX[x] + velY[x];
                const real_t  sym_NE_SW = lambda_e_scaled * ( dd_tmp_NE + dd_tmp_SW - fac2 * velXPY * velXPY - t2x2 * feq_common[x] );
-               const real_t asym_NE_SW = lambda_d_scaled * ( dd_tmp_NE - dd_tmp_SW - real_t(3.0) * t2x2 * velXPY );
+               const real_t asym_NE_SW = lambda_d_scaled * ( dd_tmp_NE - dd_tmp_SW - 3.0_r * t2x2 * velXPY );
 
                src->get( x, y, z, Stencil::idx[NE] ) = dd_tmp_NE - sym_NE_SW - asym_NE_SW;
                src->get( x, y, z, Stencil::idx[SW] ) = dd_tmp_SW - sym_NE_SW + asym_NE_SW;
@@ -858,7 +858,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
 
                const real_t velXMY = velX[x] - velY[x];
                const real_t  sym_SE_NW = lambda_e_scaled * ( dd_tmp_SE + dd_tmp_NW - fac2 * velXMY * velXMY - t2x2 * feq_common[x] );
-               const real_t asym_SE_NW = lambda_d_scaled * ( dd_tmp_SE - dd_tmp_NW - real_t(3.0) * t2x2 * velXMY );
+               const real_t asym_SE_NW = lambda_d_scaled * ( dd_tmp_SE - dd_tmp_NW - 3.0_r * t2x2 * velXMY );
 
                src->get( x, y, z, Stencil::idx[SE] ) = dd_tmp_SE - sym_SE_NW - asym_SE_NW;
                src->get( x, y, z, Stencil::idx[NW] ) = dd_tmp_NW - sym_SE_NW + asym_SE_NW;
@@ -874,7 +874,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
 
                const real_t velXPZ = velX[x] + velZ[x];
                const real_t  sym_TE_BW = lambda_e_scaled * ( dd_tmp_TE + dd_tmp_BW - fac2 * velXPZ * velXPZ - t2x2 * feq_common[x] );
-               const real_t asym_TE_BW = lambda_d_scaled * ( dd_tmp_TE - dd_tmp_BW - real_t(3.0) * t2x2 * velXPZ );
+               const real_t asym_TE_BW = lambda_d_scaled * ( dd_tmp_TE - dd_tmp_BW - 3.0_r * t2x2 * velXPZ );
 
                src->get( x, y, z, Stencil::idx[TE] ) = dd_tmp_TE - sym_TE_BW - asym_TE_BW;
                src->get( x, y, z, Stencil::idx[BW] ) = dd_tmp_BW - sym_TE_BW + asym_TE_BW;
@@ -890,7 +890,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
 
                const real_t velXMZ = velX[x] - velZ[x];
                const real_t  sym_BE_TW = lambda_e_scaled * ( dd_tmp_BE + dd_tmp_TW - fac2 * velXMZ * velXMZ - t2x2 * feq_common[x] );
-               const real_t asym_BE_TW = lambda_d_scaled * ( dd_tmp_BE - dd_tmp_TW - real_t(3.0) * t2x2 * velXMZ );
+               const real_t asym_BE_TW = lambda_d_scaled * ( dd_tmp_BE - dd_tmp_TW - 3.0_r * t2x2 * velXMZ );
 
                src->get( x, y, z, Stencil::idx[BE] ) = dd_tmp_BE - sym_BE_TW - asym_BE_TW;
                src->get( x, y, z, Stencil::idx[TW] ) = dd_tmp_TW - sym_BE_TW + asym_BE_TW;
@@ -906,7 +906,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
 
                const real_t velYPZ = velY[x] + velZ[x];
                const real_t  sym_TN_BS = lambda_e_scaled * ( dd_tmp_TN + dd_tmp_BS - fac2 * velYPZ * velYPZ - t2x2 * feq_common[x] );
-               const real_t asym_TN_BS = lambda_d_scaled * ( dd_tmp_TN - dd_tmp_BS - real_t(3.0) * t2x2 * velYPZ );
+               const real_t asym_TN_BS = lambda_d_scaled * ( dd_tmp_TN - dd_tmp_BS - 3.0_r * t2x2 * velYPZ );
 
                src->get( x, y, z, Stencil::idx[TN] ) = dd_tmp_TN - sym_TN_BS - asym_TN_BS;
                src->get( x, y, z, Stencil::idx[BS] ) = dd_tmp_BS - sym_TN_BS + asym_TN_BS;
@@ -922,7 +922,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
 
                const real_t velYMZ = velY[x] - velZ[x];
                const real_t  sym_BN_TS = lambda_e_scaled * ( dd_tmp_BN + dd_tmp_TS - fac2 * velYMZ * velYMZ - t2x2 * feq_common[x] );
-               const real_t asym_BN_TS = lambda_d_scaled * ( dd_tmp_BN - dd_tmp_TS - real_t(3.0) * t2x2 * velYMZ );
+               const real_t asym_BN_TS = lambda_d_scaled * ( dd_tmp_BN - dd_tmp_TS - 3.0_r * t2x2 * velYMZ );
 
                src->get( x, y, z, Stencil::idx[BN] ) = dd_tmp_BN - sym_BN_TS - asym_BN_TS;
                src->get( x, y, z, Stencil::idx[TS] ) = dd_tmp_TS - sym_BN_TS + asym_BN_TS;
@@ -937,7 +937,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
                const real_t dd_tmp_S  = src->get( x, y, z, Stencil::idx[S]);
 
                const real_t  sym_N_S = lambda_e_scaled * ( dd_tmp_N + dd_tmp_S - fac1 * velY[x] * velY[x] - t1x2 * feq_common[x] );
-               const real_t asym_N_S = lambda_d_scaled * ( dd_tmp_N - dd_tmp_S - real_t(3.0) * t1x2 * velY[x] );
+               const real_t asym_N_S = lambda_d_scaled * ( dd_tmp_N - dd_tmp_S - 3.0_r * t1x2 * velY[x] );
 
                src->get( x, y, z, Stencil::idx[N] ) = dd_tmp_N - sym_N_S - asym_N_S;
                src->get( x, y, z, Stencil::idx[S] ) = dd_tmp_S - sym_N_S + asym_N_S;
@@ -952,7 +952,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
                const real_t dd_tmp_W  = src->get( x, y, z, Stencil::idx[W]);
 
                const real_t  sym_E_W = lambda_e_scaled * ( dd_tmp_E + dd_tmp_W - fac1 * velX[x] * velX[x] - t1x2 * feq_common[x] );
-               const real_t asym_E_W = lambda_d_scaled * ( dd_tmp_E - dd_tmp_W - real_t(3.0) * t1x2 * velX[x] );
+               const real_t asym_E_W = lambda_d_scaled * ( dd_tmp_E - dd_tmp_W - 3.0_r * t1x2 * velX[x] );
 
                src->get( x, y, z, Stencil::idx[E] ) = dd_tmp_E - sym_E_W - asym_E_W;
                src->get( x, y, z, Stencil::idx[W] ) = dd_tmp_W - sym_E_W + asym_E_W;
@@ -967,7 +967,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
                const real_t dd_tmp_B  = src->get( x, y, z, Stencil::idx[B]);
 
                const real_t  sym_T_B = lambda_e_scaled * ( dd_tmp_T + dd_tmp_B - fac1 * velZ[x] * velZ[x] - t1x2 * feq_common[x] );
-               const real_t asym_T_B = lambda_d_scaled * ( dd_tmp_T - dd_tmp_B - real_t(3.0) * t1x2 * velZ[x] );
+               const real_t asym_T_B = lambda_d_scaled * ( dd_tmp_T - dd_tmp_B - 3.0_r * t1x2 * velZ[x] );
 
                src->get( x, y, z, Stencil::idx[T] ) = dd_tmp_T - sym_T_B - asym_T_B;
                src->get( x, y, z, Stencil::idx[B] ) = dd_tmp_B - sym_T_B + asym_T_B;
@@ -1054,15 +1054,15 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
    const real_t lambda_d =  src->latticeModel().collisionModel().lambda_d();
 
    // common prefactors for calculating the equilibrium parts
-   const real_t t0_0   = real_t(1.0) / real_t(3.0);                 // 1/3      for C
-   const real_t t1x2_0 = real_t(1.0) / real_t(18.0) * real_t(2.0);  // 1/18 * 2 for N, S, W, E, T, B
-   const real_t t2x2_0 = real_t(1.0) / real_t(36.0) * real_t(2.0);  // 1/36 * 2 else
+   const real_t t0_0   = 1.0_r / 3.0_r;                 // 1/3      for C
+   const real_t t1x2_0 = 1.0_r / 18.0_r * 2.0_r;  // 1/18 * 2 for N, S, W, E, T, B
+   const real_t t2x2_0 = 1.0_r / 36.0_r * 2.0_r;  // 1/36 * 2 else
 
-   const real_t inv2csq2 = real_t(1.0) / ( real_t(2.0) * ( real_t(1.0) / real_t(3.0) ) * ( real_t(1.0) / real_t(3.0) ) ); //speed of sound related factor for equilibrium distribution function
+   const real_t inv2csq2 = 1.0_r / ( 2.0_r * ( 1.0_r / 3.0_r ) * ( 1.0_r / 3.0_r ) ); //speed of sound related factor for equilibrium distribution function
 
    // relaxation parameter variables
-   const real_t lambda_e_scaled = real_t(0.5) * lambda_e; // 0.5 times the usual value ...
-   const real_t lambda_d_scaled = real_t(0.5) * lambda_d; // ... due to the way of calculations
+   const real_t lambda_e_scaled = 0.5_r * lambda_e; // 0.5 times the usual value ...
+   const real_t lambda_d_scaled = 0.5_r * lambda_d; // ... due to the way of calculations
 
    // loop constants
 
@@ -1124,7 +1124,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
                const real_t velZ_trm = pT[x] + pTS[x] + pTW[x];
 
                const real_t rho = pC[x] + pS[x] + pW[x] + pB[x] + pSW[x] + pBS[x] + pBW[x] + velX_trm + velY_trm + velZ_trm;
-               const real_t invRho = real_t(1.0) / rho;
+               const real_t invRho = 1.0_r / rho;
 
                velX[x] = invRho * ( velX_trm - pW[x]  - pNW[x] - pSW[x] - pTW[x] - pBW[x] );
                velY[x] = invRho * ( velY_trm + pNE[x] - pS[x]  - pSW[x] - pSE[x] - pTS[x] - pBS[x] );
@@ -1135,9 +1135,9 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
                fac1[x] = t1x2_0 * rho * inv2csq2;
                fac2[x] = t2x2_0 * rho * inv2csq2;
 
-               feq_common[x] = real_t(1.0) - real_t(1.5) * ( velX[x] * velX[x] + velY[x] * velY[x] + velZ[x] * velZ[x] );
+               feq_common[x] = 1.0_r - 1.5_r * ( velX[x] * velX[x] + velY[x] * velY[x] + velZ[x] * velZ[x] );
 
-               dC[x] = pC[x] * (real_t(1.0) - lambda_e) + lambda_e * t0_0 * rho * feq_common[x];
+               dC[x] = pC[x] * (1.0_r - lambda_e) + lambda_e * t0_0 * rho * feq_common[x];
 
                perform_lbm[x] = true;
             }
@@ -1153,7 +1153,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             {
                const real_t velXPY = velX[x] + velY[x];
                const real_t  sym_NE_SW = lambda_e_scaled * ( pNE[x] + pSW[x] - fac2[x] * velXPY * velXPY - t2x2[x] * feq_common[x] );
-               const real_t asym_NE_SW = lambda_d_scaled * ( pNE[x] - pSW[x] - real_t(3.0) * t2x2[x] * velXPY );
+               const real_t asym_NE_SW = lambda_d_scaled * ( pNE[x] - pSW[x] - 3.0_r * t2x2[x] * velXPY );
 
                dNE[x] = pNE[x] - sym_NE_SW - asym_NE_SW;
                dSW[x] = pSW[x] - sym_NE_SW + asym_NE_SW;
@@ -1169,7 +1169,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             {
                const real_t velXMY = velX[x] - velY[x];
                const real_t  sym_SE_NW = lambda_e_scaled * ( pSE[x] + pNW[x] - fac2[x] * velXMY * velXMY - t2x2[x] * feq_common[x] );
-               const real_t asym_SE_NW = lambda_d_scaled * ( pSE[x] - pNW[x] - real_t(3.0) * t2x2[x] * velXMY );
+               const real_t asym_SE_NW = lambda_d_scaled * ( pSE[x] - pNW[x] - 3.0_r * t2x2[x] * velXMY );
 
                dSE[x] = pSE[x] - sym_SE_NW - asym_SE_NW;
                dNW[x] = pNW[x] - sym_SE_NW + asym_SE_NW;
@@ -1185,7 +1185,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             {
                const real_t velXPZ = velX[x] + velZ[x];
                const real_t  sym_TE_BW = lambda_e_scaled * ( pTE[x] + pBW[x] - fac2[x] * velXPZ * velXPZ - t2x2[x] * feq_common[x] );
-               const real_t asym_TE_BW = lambda_d_scaled * ( pTE[x] - pBW[x] - real_t(3.0) * t2x2[x] * velXPZ );
+               const real_t asym_TE_BW = lambda_d_scaled * ( pTE[x] - pBW[x] - 3.0_r * t2x2[x] * velXPZ );
 
                dTE[x] = pTE[x] - sym_TE_BW - asym_TE_BW;
                dBW[x] = pBW[x] - sym_TE_BW + asym_TE_BW;
@@ -1201,7 +1201,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             {
                const real_t velXMZ = velX[x] - velZ[x];
                const real_t  sym_BE_TW = lambda_e_scaled * ( pBE[x] + pTW[x] - fac2[x] * velXMZ * velXMZ - t2x2[x] * feq_common[x] );
-               const real_t asym_BE_TW = lambda_d_scaled * ( pBE[x] - pTW[x] - real_t(3.0) * t2x2[x] * velXMZ );
+               const real_t asym_BE_TW = lambda_d_scaled * ( pBE[x] - pTW[x] - 3.0_r * t2x2[x] * velXMZ );
 
                dBE[x] = pBE[x] - sym_BE_TW - asym_BE_TW;
                dTW[x] = pTW[x] - sym_BE_TW + asym_BE_TW;
@@ -1217,7 +1217,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             {
                const real_t velYPZ = velY[x] + velZ[x];
                const real_t  sym_TN_BS = lambda_e_scaled * ( pTN[x] + pBS[x] - fac2[x] * velYPZ * velYPZ - t2x2[x] * feq_common[x] );
-               const real_t asym_TN_BS = lambda_d_scaled * ( pTN[x] - pBS[x] - real_t(3.0) * t2x2[x] * velYPZ );
+               const real_t asym_TN_BS = lambda_d_scaled * ( pTN[x] - pBS[x] - 3.0_r * t2x2[x] * velYPZ );
 
                dTN[x] = pTN[x] - sym_TN_BS - asym_TN_BS;
                dBS[x] = pBS[x] - sym_TN_BS + asym_TN_BS;
@@ -1233,7 +1233,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             {
                const real_t velYMZ = velY[x] - velZ[x];
                const real_t  sym_BN_TS = lambda_e_scaled * ( pBN[x] + pTS[x] - fac2[x] * velYMZ * velYMZ - t2x2[x] * feq_common[x] );
-               const real_t asym_BN_TS = lambda_d_scaled * ( pBN[x] - pTS[x] - real_t(3.0) * t2x2[x] * velYMZ );
+               const real_t asym_BN_TS = lambda_d_scaled * ( pBN[x] - pTS[x] - 3.0_r * t2x2[x] * velYMZ );
 
                dBN[x] = pBN[x] - sym_BN_TS - asym_BN_TS;
                dTS[x] = pTS[x] - sym_BN_TS + asym_BN_TS;
@@ -1248,7 +1248,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             if( perform_lbm[x] )
             {
                const real_t  sym_N_S = lambda_e_scaled * ( pN[x] + pS[x] - fac1[x] * velY[x] * velY[x] - t1x2[x] * feq_common[x] );
-               const real_t asym_N_S = lambda_d_scaled * ( pN[x] - pS[x] - real_t(3.0) * t1x2[x] * velY[x] );
+               const real_t asym_N_S = lambda_d_scaled * ( pN[x] - pS[x] - 3.0_r * t1x2[x] * velY[x] );
 
                dN[x] = pN[x] - sym_N_S - asym_N_S;
                dS[x] = pS[x] - sym_N_S + asym_N_S;
@@ -1263,7 +1263,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             if( perform_lbm[x] )
             {
                const real_t  sym_E_W = lambda_e_scaled * ( pE[x] + pW[x] - fac1[x] * velX[x] * velX[x] - t1x2[x] * feq_common[x] );
-               const real_t asym_E_W = lambda_d_scaled * ( pE[x] - pW[x] - real_t(3.0) * t1x2[x] * velX[x] );
+               const real_t asym_E_W = lambda_d_scaled * ( pE[x] - pW[x] - 3.0_r * t1x2[x] * velX[x] );
 
                dE[x] = pE[x] - sym_E_W - asym_E_W;
                dW[x] = pW[x] - sym_E_W + asym_E_W;
@@ -1278,7 +1278,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             if( perform_lbm[x] )
             {
                const real_t  sym_T_B = lambda_e_scaled * ( pT[x] + pB[x] - fac1[x] * velZ[x] * velZ[x] - t1x2[x] * feq_common[x] );
-               const real_t asym_T_B = lambda_d_scaled * ( pT[x] - pB[x] - real_t(3.0) * t1x2[x] * velZ[x] );
+               const real_t asym_T_B = lambda_d_scaled * ( pT[x] - pB[x] - 3.0_r * t1x2[x] * velZ[x] );
 
                dT[x] = pT[x] - sym_T_B - asym_T_B;
                dB[x] = pB[x] - sym_T_B + asym_T_B;
@@ -1322,7 +1322,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
                const real_t velZ_trm = dd_tmp_T + dd_tmp_TS + dd_tmp_TW;
 
                const real_t rho = dd_tmp_C + dd_tmp_S + dd_tmp_W + dd_tmp_B + dd_tmp_SW + dd_tmp_BS + dd_tmp_BW + velX_trm + velY_trm + velZ_trm;
-               const real_t invRho = real_t(1.0) / rho;
+               const real_t invRho = 1.0_r / rho;
 
                velX[x] = invRho * ( velX_trm - dd_tmp_W  - dd_tmp_NW - dd_tmp_SW - dd_tmp_TW - dd_tmp_BW );
                velY[x] = invRho * ( velY_trm + dd_tmp_NE - dd_tmp_S  - dd_tmp_SW - dd_tmp_SE - dd_tmp_TS - dd_tmp_BS );
@@ -1333,9 +1333,9 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
                fac1[x] = t1x2_0 * rho * inv2csq2;
                fac2[x] = t2x2_0 * rho * inv2csq2;
 
-               feq_common[x] = real_t(1.0) - real_t(1.5) * ( velX[x] * velX[x] + velY[x] * velY[x] + velZ[x] * velZ[x] );
+               feq_common[x] = 1.0_r - 1.5_r * ( velX[x] * velX[x] + velY[x] * velY[x] + velZ[x] * velZ[x] );
 
-               dst->get( x, y, z, Stencil::idx[C] ) = dd_tmp_C * (real_t(1.0) - lambda_e) + lambda_e * t0_0 * rho * feq_common[x];
+               dst->get( x, y, z, Stencil::idx[C] ) = dd_tmp_C * (1.0_r - lambda_e) + lambda_e * t0_0 * rho * feq_common[x];
 
                perform_lbm[x] = true;
             }
@@ -1351,7 +1351,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
 
                const real_t velXPY = velX[x] + velY[x];
                const real_t  sym_NE_SW = lambda_e_scaled * ( dd_tmp_NE + dd_tmp_SW - fac2[x] * velXPY * velXPY - t2x2[x] * feq_common[x] );
-               const real_t asym_NE_SW = lambda_d_scaled * ( dd_tmp_NE - dd_tmp_SW - real_t(3.0) * t2x2[x] * velXPY );
+               const real_t asym_NE_SW = lambda_d_scaled * ( dd_tmp_NE - dd_tmp_SW - 3.0_r * t2x2[x] * velXPY );
 
                dst->get( x, y, z, Stencil::idx[NE] ) = dd_tmp_NE - sym_NE_SW - asym_NE_SW;
                dst->get( x, y, z, Stencil::idx[SW] ) = dd_tmp_SW - sym_NE_SW + asym_NE_SW;
@@ -1367,7 +1367,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
 
                const real_t velXMY = velX[x] - velY[x];
                const real_t  sym_SE_NW = lambda_e_scaled * ( dd_tmp_SE + dd_tmp_NW - fac2[x] * velXMY * velXMY - t2x2[x] * feq_common[x] );
-               const real_t asym_SE_NW = lambda_d_scaled * ( dd_tmp_SE - dd_tmp_NW - real_t(3.0) * t2x2[x] * velXMY );
+               const real_t asym_SE_NW = lambda_d_scaled * ( dd_tmp_SE - dd_tmp_NW - 3.0_r * t2x2[x] * velXMY );
 
                dst->get( x, y, z, Stencil::idx[SE] ) = dd_tmp_SE - sym_SE_NW - asym_SE_NW;
                dst->get( x, y, z, Stencil::idx[NW] ) = dd_tmp_NW - sym_SE_NW + asym_SE_NW;
@@ -1383,7 +1383,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
 
                const real_t velXPZ = velX[x] + velZ[x];
                const real_t  sym_TE_BW = lambda_e_scaled * ( dd_tmp_TE + dd_tmp_BW - fac2[x] * velXPZ * velXPZ - t2x2[x] * feq_common[x] );
-               const real_t asym_TE_BW = lambda_d_scaled * ( dd_tmp_TE - dd_tmp_BW - real_t(3.0) * t2x2[x] * velXPZ );
+               const real_t asym_TE_BW = lambda_d_scaled * ( dd_tmp_TE - dd_tmp_BW - 3.0_r * t2x2[x] * velXPZ );
 
                dst->get( x, y, z, Stencil::idx[TE] ) = dd_tmp_TE - sym_TE_BW - asym_TE_BW;
                dst->get( x, y, z, Stencil::idx[BW] ) = dd_tmp_BW - sym_TE_BW + asym_TE_BW;
@@ -1399,7 +1399,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
 
                const real_t velXMZ = velX[x] - velZ[x];
                const real_t  sym_BE_TW = lambda_e_scaled * ( dd_tmp_BE + dd_tmp_TW - fac2[x] * velXMZ * velXMZ - t2x2[x] * feq_common[x] );
-               const real_t asym_BE_TW = lambda_d_scaled * ( dd_tmp_BE - dd_tmp_TW - real_t(3.0) * t2x2[x] * velXMZ );
+               const real_t asym_BE_TW = lambda_d_scaled * ( dd_tmp_BE - dd_tmp_TW - 3.0_r * t2x2[x] * velXMZ );
 
                dst->get( x, y, z, Stencil::idx[BE] ) = dd_tmp_BE - sym_BE_TW - asym_BE_TW;
                dst->get( x, y, z, Stencil::idx[TW] ) = dd_tmp_TW - sym_BE_TW + asym_BE_TW;
@@ -1415,7 +1415,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
 
                const real_t velYPZ = velY[x] + velZ[x];
                const real_t  sym_TN_BS = lambda_e_scaled * ( dd_tmp_TN + dd_tmp_BS - fac2[x] * velYPZ * velYPZ - t2x2[x] * feq_common[x] );
-               const real_t asym_TN_BS = lambda_d_scaled * ( dd_tmp_TN - dd_tmp_BS - real_t(3.0) * t2x2[x] * velYPZ );
+               const real_t asym_TN_BS = lambda_d_scaled * ( dd_tmp_TN - dd_tmp_BS - 3.0_r * t2x2[x] * velYPZ );
 
                dst->get( x, y, z, Stencil::idx[TN] ) = dd_tmp_TN - sym_TN_BS - asym_TN_BS;
                dst->get( x, y, z, Stencil::idx[BS] ) = dd_tmp_BS - sym_TN_BS + asym_TN_BS;
@@ -1431,7 +1431,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
 
                const real_t velYMZ = velY[x] - velZ[x];
                const real_t  sym_BN_TS = lambda_e_scaled * ( dd_tmp_BN + dd_tmp_TS - fac2[x] * velYMZ * velYMZ - t2x2[x] * feq_common[x] );
-               const real_t asym_BN_TS = lambda_d_scaled * ( dd_tmp_BN - dd_tmp_TS - real_t(3.0) * t2x2[x] * velYMZ );
+               const real_t asym_BN_TS = lambda_d_scaled * ( dd_tmp_BN - dd_tmp_TS - 3.0_r * t2x2[x] * velYMZ );
 
                dst->get( x, y, z, Stencil::idx[BN] ) = dd_tmp_BN - sym_BN_TS - asym_BN_TS;
                dst->get( x, y, z, Stencil::idx[TS] ) = dd_tmp_TS - sym_BN_TS + asym_BN_TS;
@@ -1446,7 +1446,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
                const real_t dd_tmp_S  = src->get(x, y+1, z, Stencil::idx[S]);
 
                const real_t  sym_N_S = lambda_e_scaled * ( dd_tmp_N + dd_tmp_S - fac1[x] * velY[x] * velY[x] - t1x2[x] * feq_common[x] );
-               const real_t asym_N_S = lambda_d_scaled * ( dd_tmp_N - dd_tmp_S - real_t(3.0) * t1x2[x] * velY[x] );
+               const real_t asym_N_S = lambda_d_scaled * ( dd_tmp_N - dd_tmp_S - 3.0_r * t1x2[x] * velY[x] );
 
                dst->get( x, y, z, Stencil::idx[N] ) = dd_tmp_N - sym_N_S - asym_N_S;
                dst->get( x, y, z, Stencil::idx[S] ) = dd_tmp_S - sym_N_S + asym_N_S;
@@ -1461,7 +1461,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
                const real_t dd_tmp_W  = src->get(x+1, y, z, Stencil::idx[W]);
 
                const real_t  sym_E_W = lambda_e_scaled * ( dd_tmp_E + dd_tmp_W - fac1[x] * velX[x] * velX[x] - t1x2[x] * feq_common[x] );
-               const real_t asym_E_W = lambda_d_scaled * ( dd_tmp_E - dd_tmp_W - real_t(3.0) * t1x2[x] * velX[x] );
+               const real_t asym_E_W = lambda_d_scaled * ( dd_tmp_E - dd_tmp_W - 3.0_r * t1x2[x] * velX[x] );
 
                dst->get( x, y, z, Stencil::idx[E] ) = dd_tmp_E - sym_E_W - asym_E_W;
                dst->get( x, y, z, Stencil::idx[W] ) = dd_tmp_W - sym_E_W + asym_E_W;
@@ -1476,7 +1476,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
                const real_t dd_tmp_B  = src->get(x, y, z+1, Stencil::idx[B]);
 
                const real_t  sym_T_B = lambda_e_scaled * ( dd_tmp_T + dd_tmp_B - fac1[x] * velZ[x] * velZ[x] - t1x2[x] * feq_common[x] );
-               const real_t asym_T_B = lambda_d_scaled * ( dd_tmp_T - dd_tmp_B - real_t(3.0) * t1x2[x] * velZ[x] );
+               const real_t asym_T_B = lambda_d_scaled * ( dd_tmp_T - dd_tmp_B - 3.0_r * t1x2[x] * velZ[x] );
 
                dst->get( x, y, z, Stencil::idx[T] ) = dd_tmp_T - sym_T_B - asym_T_B;
                dst->get( x, y, z, Stencil::idx[B] ) = dd_tmp_B - sym_T_B + asym_T_B;
@@ -1550,15 +1550,15 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
    const real_t lambda_d =  src->latticeModel().collisionModel().lambda_d();
 
    // common prefactors for calculating the equilibrium parts
-   const real_t t0_0   = real_t(1.0) / real_t(3.0);                 // 1/3      for C
-   const real_t t1x2_0 = real_t(1.0) / real_t(18.0) * real_t(2.0);  // 1/18 * 2 for N, S, W, E, T, B
-   const real_t t2x2_0 = real_t(1.0) / real_t(36.0) * real_t(2.0);  // 1/36 * 2 else
+   const real_t t0_0   = 1.0_r / 3.0_r;                 // 1/3      for C
+   const real_t t1x2_0 = 1.0_r / 18.0_r * 2.0_r;  // 1/18 * 2 for N, S, W, E, T, B
+   const real_t t2x2_0 = 1.0_r / 36.0_r * 2.0_r;  // 1/36 * 2 else
 
-   const real_t inv2csq2 = real_t(1.0) / ( real_t(2.0) * ( real_t(1.0) / real_t(3.0) ) * ( real_t(1.0) / real_t(3.0) ) ); //speed of sound related factor for equilibrium distribution function
+   const real_t inv2csq2 = 1.0_r / ( 2.0_r * ( 1.0_r / 3.0_r ) * ( 1.0_r / 3.0_r ) ); //speed of sound related factor for equilibrium distribution function
 
    // relaxation parameter variables
-   const real_t lambda_e_scaled = real_t(0.5) * lambda_e; // 0.5 times the usual value ...
-   const real_t lambda_d_scaled = real_t(0.5) * lambda_d; // ... due to the way of calculations
+   const real_t lambda_e_scaled = 0.5_r * lambda_e; // 0.5 times the usual value ...
+   const real_t lambda_d_scaled = 0.5_r * lambda_d; // ... due to the way of calculations
 
    // loop constants
 
@@ -1618,7 +1618,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
                const real_t velZ_trm = pT[x] + pTS[x] + pTW[x];
 
                const real_t rho = pC[x] + pS[x] + pW[x] + pB[x] + pSW[x] + pBS[x] + pBW[x] + velX_trm + velY_trm + velZ_trm;
-               const real_t invRho = real_t(1.0) / rho;
+               const real_t invRho = 1.0_r / rho;
 
                velX[x] = invRho * ( velX_trm - pW[x]  - pNW[x] - pSW[x] - pTW[x] - pBW[x] );
                velY[x] = invRho * ( velY_trm + pNE[x] - pS[x]  - pSW[x] - pSE[x] - pTS[x] - pBS[x] );
@@ -1629,9 +1629,9 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
                fac1[x] = t1x2_0 * rho * inv2csq2;
                fac2[x] = t2x2_0 * rho * inv2csq2;
 
-               feq_common[x] = real_t(1.0) - real_t(1.5) * ( velX[x] * velX[x] + velY[x] * velY[x] + velZ[x] * velZ[x] );
+               feq_common[x] = 1.0_r - 1.5_r * ( velX[x] * velX[x] + velY[x] * velY[x] + velZ[x] * velZ[x] );
 
-               pC[x] = pC[x] * (real_t(1.0) - lambda_e) + lambda_e * t0_0 * rho * feq_common[x];
+               pC[x] = pC[x] * (1.0_r - lambda_e) + lambda_e * t0_0 * rho * feq_common[x];
 
                perform_lbm[x] = true;
             }
@@ -1644,7 +1644,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             {
                const real_t velXPY = velX[x] + velY[x];
                const real_t  sym_NE_SW = lambda_e_scaled * ( pNE[x] + pSW[x] - fac2[x] * velXPY * velXPY - t2x2[x] * feq_common[x] );
-               const real_t asym_NE_SW = lambda_d_scaled * ( pNE[x] - pSW[x] - real_t(3.0) * t2x2[x] * velXPY );
+               const real_t asym_NE_SW = lambda_d_scaled * ( pNE[x] - pSW[x] - 3.0_r * t2x2[x] * velXPY );
 
                pNE[x] = pNE[x] - sym_NE_SW - asym_NE_SW;
                pSW[x] = pSW[x] - sym_NE_SW + asym_NE_SW;
@@ -1657,7 +1657,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             {
                const real_t velXMY = velX[x] - velY[x];
                const real_t  sym_SE_NW = lambda_e_scaled * ( pSE[x] + pNW[x] - fac2[x] * velXMY * velXMY - t2x2[x] * feq_common[x] );
-               const real_t asym_SE_NW = lambda_d_scaled * ( pSE[x] - pNW[x] - real_t(3.0) * t2x2[x] * velXMY );
+               const real_t asym_SE_NW = lambda_d_scaled * ( pSE[x] - pNW[x] - 3.0_r * t2x2[x] * velXMY );
 
                pSE[x] = pSE[x] - sym_SE_NW - asym_SE_NW;
                pNW[x] = pNW[x] - sym_SE_NW + asym_SE_NW;
@@ -1670,7 +1670,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             {
                const real_t velXPZ = velX[x] + velZ[x];
                const real_t  sym_TE_BW = lambda_e_scaled * ( pTE[x] + pBW[x] - fac2[x] * velXPZ * velXPZ - t2x2[x] * feq_common[x] );
-               const real_t asym_TE_BW = lambda_d_scaled * ( pTE[x] - pBW[x] - real_t(3.0) * t2x2[x] * velXPZ );
+               const real_t asym_TE_BW = lambda_d_scaled * ( pTE[x] - pBW[x] - 3.0_r * t2x2[x] * velXPZ );
 
                pTE[x] = pTE[x] - sym_TE_BW - asym_TE_BW;
                pBW[x] = pBW[x] - sym_TE_BW + asym_TE_BW;
@@ -1683,7 +1683,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             {
                const real_t velXMZ = velX[x] - velZ[x];
                const real_t  sym_BE_TW = lambda_e_scaled * ( pBE[x] + pTW[x] - fac2[x] * velXMZ * velXMZ - t2x2[x] * feq_common[x] );
-               const real_t asym_BE_TW = lambda_d_scaled * ( pBE[x] - pTW[x] - real_t(3.0) * t2x2[x] * velXMZ );
+               const real_t asym_BE_TW = lambda_d_scaled * ( pBE[x] - pTW[x] - 3.0_r * t2x2[x] * velXMZ );
 
                pBE[x] = pBE[x] - sym_BE_TW - asym_BE_TW;
                pTW[x] = pTW[x] - sym_BE_TW + asym_BE_TW;
@@ -1696,7 +1696,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             {
                const real_t velYPZ = velY[x] + velZ[x];
                const real_t  sym_TN_BS = lambda_e_scaled * ( pTN[x] + pBS[x] - fac2[x] * velYPZ * velYPZ - t2x2[x] * feq_common[x] );
-               const real_t asym_TN_BS = lambda_d_scaled * ( pTN[x] - pBS[x] - real_t(3.0) * t2x2[x] * velYPZ );
+               const real_t asym_TN_BS = lambda_d_scaled * ( pTN[x] - pBS[x] - 3.0_r * t2x2[x] * velYPZ );
 
                pTN[x] = pTN[x] - sym_TN_BS - asym_TN_BS;
                pBS[x] = pBS[x] - sym_TN_BS + asym_TN_BS;
@@ -1709,7 +1709,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             {
                const real_t velYMZ = velY[x] - velZ[x];
                const real_t  sym_BN_TS = lambda_e_scaled * ( pBN[x] + pTS[x] - fac2[x] * velYMZ * velYMZ - t2x2[x] * feq_common[x] );
-               const real_t asym_BN_TS = lambda_d_scaled * ( pBN[x] - pTS[x] - real_t(3.0) * t2x2[x] * velYMZ );
+               const real_t asym_BN_TS = lambda_d_scaled * ( pBN[x] - pTS[x] - 3.0_r * t2x2[x] * velYMZ );
 
                pBN[x] = pBN[x] - sym_BN_TS - asym_BN_TS;
                pTS[x] = pTS[x] - sym_BN_TS + asym_BN_TS;
@@ -1721,7 +1721,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             if( perform_lbm[x] )
             {
                const real_t  sym_N_S = lambda_e_scaled * ( pN[x] + pS[x] - fac1[x] * velY[x] * velY[x] - t1x2[x] * feq_common[x] );
-               const real_t asym_N_S = lambda_d_scaled * ( pN[x] - pS[x] - real_t(3.0) * t1x2[x] * velY[x] );
+               const real_t asym_N_S = lambda_d_scaled * ( pN[x] - pS[x] - 3.0_r * t1x2[x] * velY[x] );
 
                pN[x] = pN[x] - sym_N_S - asym_N_S;
                pS[x] = pS[x] - sym_N_S + asym_N_S;
@@ -1733,7 +1733,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             if( perform_lbm[x] )
             {
                const real_t  sym_E_W = lambda_e_scaled * ( pE[x] + pW[x] - fac1[x] * velX[x] * velX[x] - t1x2[x] * feq_common[x] );
-               const real_t asym_E_W = lambda_d_scaled * ( pE[x] - pW[x] - real_t(3.0) * t1x2[x] * velX[x] );
+               const real_t asym_E_W = lambda_d_scaled * ( pE[x] - pW[x] - 3.0_r * t1x2[x] * velX[x] );
 
                pE[x] = pE[x] - sym_E_W - asym_E_W;
                pW[x] = pW[x] - sym_E_W + asym_E_W;
@@ -1745,7 +1745,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
             if( perform_lbm[x] )
             {
                const real_t  sym_T_B = lambda_e_scaled * ( pT[x] + pB[x] - fac1[x] * velZ[x] * velZ[x] - t1x2[x] * feq_common[x] );
-               const real_t asym_T_B = lambda_d_scaled * ( pT[x] - pB[x] - real_t(3.0) * t1x2[x] * velZ[x] );
+               const real_t asym_T_B = lambda_d_scaled * ( pT[x] - pB[x] - 3.0_r * t1x2[x] * velZ[x] );
 
                pT[x] = pT[x] - sym_T_B - asym_T_B;
                pB[x] = pB[x] - sym_T_B + asym_T_B;
@@ -1789,7 +1789,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
                const real_t velZ_trm = dd_tmp_T + dd_tmp_TS + dd_tmp_TW;
 
                const real_t rho = dd_tmp_C + dd_tmp_S + dd_tmp_W + dd_tmp_B + dd_tmp_SW + dd_tmp_BS + dd_tmp_BW + velX_trm + velY_trm + velZ_trm;
-               const real_t invRho = real_t(1.0) / rho;
+               const real_t invRho = 1.0_r / rho;
 
                velX[x] = invRho * ( velX_trm - dd_tmp_W  - dd_tmp_NW - dd_tmp_SW - dd_tmp_TW - dd_tmp_BW );
                velY[x] = invRho * ( velY_trm + dd_tmp_NE - dd_tmp_S  - dd_tmp_SW - dd_tmp_SE - dd_tmp_TS - dd_tmp_BS );
@@ -1800,9 +1800,9 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
                fac1[x] = t1x2_0 * rho * inv2csq2;
                fac2[x] = t2x2_0 * rho * inv2csq2;
 
-               feq_common[x] = real_t(1.0) - real_t(1.5) * ( velX[x] * velX[x] + velY[x] * velY[x] + velZ[x] * velZ[x] );
+               feq_common[x] = 1.0_r - 1.5_r * ( velX[x] * velX[x] + velY[x] * velY[x] + velZ[x] * velZ[x] );
 
-               src->get( x, y, z, Stencil::idx[C] ) = dd_tmp_C * (real_t(1.0) - lambda_e) + lambda_e * t0_0 * rho * feq_common[x];
+               src->get( x, y, z, Stencil::idx[C] ) = dd_tmp_C * (1.0_r - lambda_e) + lambda_e * t0_0 * rho * feq_common[x];
 
                perform_lbm[x] = true;
             }
@@ -1818,7 +1818,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
 
                const real_t velXPY = velX[x] + velY[x];
                const real_t  sym_NE_SW = lambda_e_scaled * ( dd_tmp_NE + dd_tmp_SW - fac2[x] * velXPY * velXPY - t2x2[x] * feq_common[x] );
-               const real_t asym_NE_SW = lambda_d_scaled * ( dd_tmp_NE - dd_tmp_SW - real_t(3.0) * t2x2[x] * velXPY );
+               const real_t asym_NE_SW = lambda_d_scaled * ( dd_tmp_NE - dd_tmp_SW - 3.0_r * t2x2[x] * velXPY );
 
                src->get( x, y, z, Stencil::idx[NE] ) = dd_tmp_NE - sym_NE_SW - asym_NE_SW;
                src->get( x, y, z, Stencil::idx[SW] ) = dd_tmp_SW - sym_NE_SW + asym_NE_SW;
@@ -1834,7 +1834,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
 
                const real_t velXMY = velX[x] - velY[x];
                const real_t  sym_SE_NW = lambda_e_scaled * ( dd_tmp_SE + dd_tmp_NW - fac2[x] * velXMY * velXMY - t2x2[x] * feq_common[x] );
-               const real_t asym_SE_NW = lambda_d_scaled * ( dd_tmp_SE - dd_tmp_NW - real_t(3.0) * t2x2[x] * velXMY );
+               const real_t asym_SE_NW = lambda_d_scaled * ( dd_tmp_SE - dd_tmp_NW - 3.0_r * t2x2[x] * velXMY );
 
                src->get( x, y, z, Stencil::idx[SE] ) = dd_tmp_SE - sym_SE_NW - asym_SE_NW;
                src->get( x, y, z, Stencil::idx[NW] ) = dd_tmp_NW - sym_SE_NW + asym_SE_NW;
@@ -1850,7 +1850,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
 
                const real_t velXPZ = velX[x] + velZ[x];
                const real_t  sym_TE_BW = lambda_e_scaled * ( dd_tmp_TE + dd_tmp_BW - fac2[x] * velXPZ * velXPZ - t2x2[x] * feq_common[x] );
-               const real_t asym_TE_BW = lambda_d_scaled * ( dd_tmp_TE - dd_tmp_BW - real_t(3.0) * t2x2[x] * velXPZ );
+               const real_t asym_TE_BW = lambda_d_scaled * ( dd_tmp_TE - dd_tmp_BW - 3.0_r * t2x2[x] * velXPZ );
 
                src->get( x, y, z, Stencil::idx[TE] ) = dd_tmp_TE - sym_TE_BW - asym_TE_BW;
                src->get( x, y, z, Stencil::idx[BW] ) = dd_tmp_BW - sym_TE_BW + asym_TE_BW;
@@ -1866,7 +1866,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
 
                const real_t velXMZ = velX[x] - velZ[x];
                const real_t  sym_BE_TW = lambda_e_scaled * ( dd_tmp_BE + dd_tmp_TW - fac2[x] * velXMZ * velXMZ - t2x2[x] * feq_common[x] );
-               const real_t asym_BE_TW = lambda_d_scaled * ( dd_tmp_BE - dd_tmp_TW - real_t(3.0) * t2x2[x] * velXMZ );
+               const real_t asym_BE_TW = lambda_d_scaled * ( dd_tmp_BE - dd_tmp_TW - 3.0_r * t2x2[x] * velXMZ );
 
                src->get( x, y, z, Stencil::idx[BE] ) = dd_tmp_BE - sym_BE_TW - asym_BE_TW;
                src->get( x, y, z, Stencil::idx[TW] ) = dd_tmp_TW - sym_BE_TW + asym_BE_TW;
@@ -1882,7 +1882,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
 
                const real_t velYPZ = velY[x] + velZ[x];
                const real_t  sym_TN_BS = lambda_e_scaled * ( dd_tmp_TN + dd_tmp_BS - fac2[x] * velYPZ * velYPZ - t2x2[x] * feq_common[x] );
-               const real_t asym_TN_BS = lambda_d_scaled * ( dd_tmp_TN - dd_tmp_BS - real_t(3.0) * t2x2[x] * velYPZ );
+               const real_t asym_TN_BS = lambda_d_scaled * ( dd_tmp_TN - dd_tmp_BS - 3.0_r * t2x2[x] * velYPZ );
 
                src->get( x, y, z, Stencil::idx[TN] ) = dd_tmp_TN - sym_TN_BS - asym_TN_BS;
                src->get( x, y, z, Stencil::idx[BS] ) = dd_tmp_BS - sym_TN_BS + asym_TN_BS;
@@ -1898,7 +1898,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
 
                const real_t velYMZ = velY[x] - velZ[x];
                const real_t  sym_BN_TS = lambda_e_scaled * ( dd_tmp_BN + dd_tmp_TS - fac2[x] * velYMZ * velYMZ - t2x2[x] * feq_common[x] );
-               const real_t asym_BN_TS = lambda_d_scaled * ( dd_tmp_BN - dd_tmp_TS - real_t(3.0) * t2x2[x] * velYMZ );
+               const real_t asym_BN_TS = lambda_d_scaled * ( dd_tmp_BN - dd_tmp_TS - 3.0_r * t2x2[x] * velYMZ );
 
                src->get( x, y, z, Stencil::idx[BN] ) = dd_tmp_BN - sym_BN_TS - asym_BN_TS;
                src->get( x, y, z, Stencil::idx[TS] ) = dd_tmp_TS - sym_BN_TS + asym_BN_TS;
@@ -1913,7 +1913,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
                const real_t dd_tmp_S  = src->get( x, y, z, Stencil::idx[S]);
 
                const real_t  sym_N_S = lambda_e_scaled * ( dd_tmp_N + dd_tmp_S - fac1[x] * velY[x] * velY[x] - t1x2[x] * feq_common[x] );
-               const real_t asym_N_S = lambda_d_scaled * ( dd_tmp_N - dd_tmp_S - real_t(3.0) * t1x2[x] * velY[x] );
+               const real_t asym_N_S = lambda_d_scaled * ( dd_tmp_N - dd_tmp_S - 3.0_r * t1x2[x] * velY[x] );
 
                src->get( x, y, z, Stencil::idx[N] ) = dd_tmp_N - sym_N_S - asym_N_S;
                src->get( x, y, z, Stencil::idx[S] ) = dd_tmp_S - sym_N_S + asym_N_S;
@@ -1928,7 +1928,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
                const real_t dd_tmp_W  = src->get( x, y, z, Stencil::idx[W]);
 
                const real_t  sym_E_W = lambda_e_scaled * ( dd_tmp_E + dd_tmp_W - fac1[x] * velX[x] * velX[x] - t1x2[x] * feq_common[x] );
-               const real_t asym_E_W = lambda_d_scaled * ( dd_tmp_E - dd_tmp_W - real_t(3.0) * t1x2[x] * velX[x] );
+               const real_t asym_E_W = lambda_d_scaled * ( dd_tmp_E - dd_tmp_W - 3.0_r * t1x2[x] * velX[x] );
 
                src->get( x, y, z, Stencil::idx[E] ) = dd_tmp_E - sym_E_W - asym_E_W;
                src->get( x, y, z, Stencil::idx[W] ) = dd_tmp_W - sym_E_W + asym_E_W;
@@ -1943,7 +1943,7 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename boost::enable_if< boost::
                const real_t dd_tmp_B  = src->get( x, y, z, Stencil::idx[B]);
 
                const real_t  sym_T_B = lambda_e_scaled * ( dd_tmp_T + dd_tmp_B - fac1[x] * velZ[x] * velZ[x] - t1x2[x] * feq_common[x] );
-               const real_t asym_T_B = lambda_d_scaled * ( dd_tmp_T - dd_tmp_B - real_t(3.0) * t1x2[x] * velZ[x] );
+               const real_t asym_T_B = lambda_d_scaled * ( dd_tmp_T - dd_tmp_B - 3.0_r * t1x2[x] * velZ[x] );
 
                src->get( x, y, z, Stencil::idx[T] ) = dd_tmp_T - sym_T_B - asym_T_B;
                src->get( x, y, z, Stencil::idx[B] ) = dd_tmp_B - sym_T_B + asym_T_B;

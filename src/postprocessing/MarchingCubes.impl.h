@@ -38,7 +38,7 @@ using geometry::TriangleMesh;
 template<typename Field_T>
 static inline Vector3<real_t> calcNormal(const Field_T & f, cell_idx_t i, cell_idx_t j, cell_idx_t k, uint_t fCoord )
 {
-   Vector3<real_t> ret( real_t(0) );
+   Vector3<real_t> ret( 0_r );
 
    if ( f.nrOfGhostLayers() >= 2 )
    {
@@ -399,7 +399,7 @@ void generateIsoSurface_internal( const Field_T & f, real_t threshold,
 
    for( auto i = f.beginSliceXYZ(targetInterval); i != f.end(); ++i )
    {
-      const RealVec3 offset (- real_t(0.5)*dx[0],-real_t(0.5)*dx[1],-real_t(0.5)*dx[2]);
+      const RealVec3 offset (- 0.5_r*dx[0],-0.5_r*dx[1],-0.5_r*dx[2]);
       RealVec3 curPos = offset + i.x() * ex +  i.y() * ey + i.z() * ez;
 
       real_t value [8];
@@ -479,7 +479,7 @@ void generateIsoSurface_internal( const Field_T & f, real_t threshold,
             {
                TriangleMesh::normal_t normal    = calcNormal(f, i.x() + cubieOffsetX[e1],
                                                                 i.y() + cubieOffsetY[e1],
-                                                                i.z() + cubieOffsetZ[e1], fCoord ) * (real_t(1) - mu)
+                                                                i.z() + cubieOffsetZ[e1], fCoord ) * (1_r - mu)
                                                 + calcNormal(f, i.x() + cubieOffsetX[e2],
                                                                 i.y() + cubieOffsetY[e2],
                                                                 i.z() + cubieOffsetZ[e2], fCoord) * (mu);

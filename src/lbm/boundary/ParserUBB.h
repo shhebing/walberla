@@ -265,7 +265,7 @@ template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternal
 inline ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce>::ParserUBB( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField * const pdfField,
                                                                                    FlagField<flag_t> * const flagField, const shared_ptr< TimeTracker > & timeTracker,
                                                                                    const uint_t level, const AABB & aabb )
-   : Boundary<flag_t>( boundaryUID ), uid_( uid ), pdfField_( pdfField ), timeTracker_( timeTracker ), time_( real_t(0) ), level_( level )
+   : Boundary<flag_t>( boundaryUID ), uid_( uid ), pdfField_( pdfField ), timeTracker_( timeTracker ), time_( 0_r ), level_( level )
 {
    WALBERLA_ASSERT_NOT_NULLPTR( pdfField_ );
    dx_[0] = aabb.xSize() / real_c( pdfField_->xSize() );
@@ -503,7 +503,7 @@ inline void ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce>::Par
       }
       else
       {
-         const auto vel = AdaptVelocityToExternalForce ? lbm::internal::AdaptVelocityToForce<LatticeModel_T>::get( x, y, z, pdfField_->latticeModel(), velocity, real_t(1) ) :
+         const auto vel = AdaptVelocityToExternalForce ? lbm::internal::AdaptVelocityToForce<LatticeModel_T>::get( x, y, z, pdfField_->latticeModel(), velocity, 1_r ) :
                                                          velocity;
 
          pdfField_->get( nx, ny, nz, Stencil::invDirIdx(dir) ) = pdfField_->get( x, y, z, Stencil::idx[dir] ) -

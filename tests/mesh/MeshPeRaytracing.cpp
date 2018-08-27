@@ -43,13 +43,13 @@ int CpRayIntersectionTest(const int resolution = 10)
    using namespace walberla::pe::raytracing;
 
    std::vector<Vector3<real_t>> points;
-   points.emplace_back( real_t(-1), real_t(-1), real_t(-1) );
-   points.emplace_back( real_t(-1), real_t(-1), real_t( 1) );
-   points.emplace_back( real_t(-1), real_t( 1), real_t(-1) );
-   points.emplace_back( real_t(-1), real_t( 1), real_t( 1) );
-   points.emplace_back( real_t( 1), real_t(-1), real_t(-1) );
-   points.emplace_back( real_t( 1), real_t(-1), real_t( 1) );
-   points.emplace_back( real_t( 1), real_t( 1), real_t(-1) );
+   points.emplace_back( -1_r, -1_r, -1_r );
+   points.emplace_back( -1_r, -1_r, real_t( 1) );
+   points.emplace_back( -1_r, real_t( 1), -1_r );
+   points.emplace_back( -1_r, real_t( 1), real_t( 1) );
+   points.emplace_back( real_t( 1), -1_r, -1_r );
+   points.emplace_back( real_t( 1), -1_r, real_t( 1) );
+   points.emplace_back( real_t( 1), real_t( 1), -1_r );
    points.emplace_back( real_t( 1), real_t( 1), real_t( 1) );
 
    shared_ptr< TriangleMesh > mesh = make_shared<TriangleMesh>();
@@ -59,11 +59,11 @@ int CpRayIntersectionTest(const int resolution = 10)
    const Vec3 center(1,2,3);
 
    ConvexPolyhedron cp(0, 0, center, Vec3(0,0,0), Quat(), *mesh, Material::find("iron"), false, true, true);
-   cp.rotate(real_t(1), real_t(2), real_t(3));
+   cp.rotate(1_r, 2_r, 3_r);
    Box bx(0, 0, center, Vec3(0,0,0), Quat(), Vec3(2,2,2), Material::find("iron"), false, true, true);
-   bx.rotate(real_t(1), real_t(2), real_t(3));
+   bx.rotate(1_r, 2_r, 3_r);
 
-   real_t dx = real_t(1.0) / static_cast<real_t>(resolution);
+   real_t dx = 1.0_r / static_cast<real_t>(resolution);
    //rays pointed at center of body
    for (int x = 0; x < resolution; ++x)
    {
@@ -72,11 +72,11 @@ int CpRayIntersectionTest(const int resolution = 10)
       for (int y = 0; y < resolution; ++y)
       {
          const real_t rand2 = real_c(y) * dx;
-         real_t theta = real_t(2) * M_PI * rand1;
-         real_t phi = std::acos(real_t(1) - real_t(2) * rand2);
+         real_t theta = 2_r * M_PI * rand1;
+         real_t phi = std::acos(1_r - 2_r * rand2);
          Vec3 dir(std::sin(phi) * std::cos(theta), std::sin(phi) * std::sin(theta), std::cos(phi));
 
-         Ray ray( center + dir*real_t(5), -dir);
+         Ray ray( center + dir*5_r, -dir);
          real_t bx_t, cp_t;
          Vec3   bx_n, cp_n;
          WALBERLA_CHECK( intersects(&bx, ray, bx_t, bx_n) );
@@ -94,11 +94,11 @@ int CpRayIntersectionTest(const int resolution = 10)
       for (int y = 0; y < resolution; ++y)
       {
          const real_t rand2 = real_c(y) * dx;
-         real_t theta = real_t(2) * M_PI * rand1;
-         real_t phi = std::acos(real_t(1) - real_t(2) * rand2);
+         real_t theta = 2_r * M_PI * rand1;
+         real_t phi = std::acos(1_r - 2_r * rand2);
          Vec3 dir(std::sin(phi) * std::cos(theta), std::sin(phi) * std::sin(theta), std::cos(phi));
 
-         Ray ray( Vec3(real_t(5),real_t(5),real_t(5)), -dir);
+         Ray ray( Vec3(5_r,5_r,5_r), -dir);
          real_t bx_t, cp_t;
          Vec3   bx_n, cp_n;
          const bool bx_intersects = intersects(&bx, ray, bx_t, bx_n);

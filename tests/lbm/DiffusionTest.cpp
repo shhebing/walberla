@@ -105,13 +105,13 @@ BlockDataID createAdvDiffPdfField( shared_ptr<StructuredBlockStorage> blockStora
 template< >
 BlockDataID createAdvDiffPdfField<AdvDiffLatticeModel_Corr>( shared_ptr<StructuredBlockStorage> blockStorage, const BlockDataID & oldMomDensity, real_t omega ){
    AdvDiffLatticeModel_Corr advDiffLatticeModel = AdvDiffLatticeModel_Corr( lbm::collision_model::SRT( omega ), lbm::force_model::Correction<VectorField>( oldMomDensity ) );
-   return lbm::addPdfFieldToStorage( blockStorage, "PDF field", advDiffLatticeModel, vec3_t(), real_t(0) );
+   return lbm::addPdfFieldToStorage( blockStorage, "PDF field", advDiffLatticeModel, vec3_t(), 0_r );
 }
 
 template< >
 BlockDataID createAdvDiffPdfField<AdvDiffLatticeModel_None>( shared_ptr<StructuredBlockStorage> blockStorage, const BlockDataID &, real_t omega ){
    AdvDiffLatticeModel_None advDiffLatticeModel = AdvDiffLatticeModel_None( lbm::collision_model::SRT( omega ) );
-   return lbm::addPdfFieldToStorage( blockStorage, "PDF field", advDiffLatticeModel, vec3_t(), real_t(0) );
+   return lbm::addPdfFieldToStorage( blockStorage, "PDF field", advDiffLatticeModel, vec3_t(), 0_r );
 }
 //********************************************************************************************************************************
 
@@ -178,8 +178,8 @@ int run( int argc, char **argv )
 #endif
 
    // --- physical default values --- //
-   const real_t size[] = { real_t(1), real_t(1), real_t(1) };
-   const real_t v      = real_t(1);
+   const real_t size[] = { 1_r, 1_r, 1_r };
+   const real_t v      = 1_r;
 
    real_t time = real_t( 0.2   );
    real_t err  = real_t( 0     );
@@ -226,8 +226,8 @@ int run( int argc, char **argv )
    if(!quiet) WALBERLA_LOG_RESULT( "Simulate " << cells[dim] << " cells in " << timesteps << " timesteps " );
 
    const real_t D     = d * dt / dx / dx;
-   const real_t tau   = real_t(3) * D + real_c(0.5);
-   const real_t omega = real_t(1) / tau;
+   const real_t tau   = 3_r * D + real_c(0.5);
+   const real_t omega = 1_r / tau;
 
    vec3_t u;
    u[dim] = u_in;
@@ -236,8 +236,8 @@ int run( int argc, char **argv )
    if(!quiet) WALBERLA_LOG_RESULT( " -> u   = " << u   );
    if(!quiet) WALBERLA_LOG_RESULT( " -> tau = " << tau );
 
-   const real_t tperiod = real_t(2) * math::PI / real_c( timesteps  );
-   const real_t cperiod = real_t(2) * math::PI / real_c( cells[dim] );
+   const real_t tperiod = 2_r * math::PI / real_c( timesteps  );
+   const real_t cperiod = 2_r * math::PI / real_c( cells[dim] );
 
    // --- create blockstorage --- //
    auto blockStorage = blockforest::createUniformBlockGrid(
@@ -257,9 +257,9 @@ int run( int argc, char **argv )
    BlockDataID flagFieldID = blockStorage->template addStructuredBlockData<MyFlagField>( &flagFieldCreationFunction, "Flag field" );
 
    // --- additional sweep variables --- //
-   real_t E_mean_ ( real_t(0)  );
+   real_t E_mean_ ( 0_r  );
    uint_t timestep( uint_t(0u) );
-   real_t cosi(real_t(0)), sisi(real_t(0)), sexp(real_t(0));
+   real_t cosi(0_r), sisi(0_r), sexp(0_r);
 
    // --- data init --- //
    for( auto block = blockStorage->begin(); block != blockStorage->end(); ++block ){
@@ -325,7 +325,7 @@ int run( int argc, char **argv )
    }
 
    E_mean_ /= real_c(timesteps) * real_c(cells[dim]);
-   if( err > real_t(0) && E_mean_ > err ){
+   if( err > 0_r && E_mean_ > err ){
       WALBERLA_ABORT( "E_mean = " << E_mean_ << " > " << err );
    } else {
       if(!quiet) WALBERLA_LOG_RESULT( "E^2 = " << E_mean_ << " E^1 = " << sqrt(E_mean_) );

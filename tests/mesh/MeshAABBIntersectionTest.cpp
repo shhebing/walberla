@@ -47,11 +47,11 @@ void runTests( const uint_t numAABBs )
 
    auto meshAABB = computeAABB( *mesh ); // works since the mesh is a cube
 
-   auto testVolume = meshAABB.getScaled( real_t(3) ); // AABB containing the test points
+   auto testVolume = meshAABB.getScaled( 3_r ); // AABB containing the test points
 
    TriangleDistance<MeshType> triDist( mesh );
 
-   WALBERLA_CHECK( isIntersecting( triDist, meshAABB, real_t(0) ) );
+   WALBERLA_CHECK( isIntersecting( triDist, meshAABB, 0_r ) );
 
    std::mt19937 rng( uint32_t(42) );
 
@@ -59,7 +59,7 @@ void runTests( const uint_t numAABBs )
    {
       math::GenericAABB< typename MeshType::Scalar > testAABB( testVolume.randomPoint( rng ), testVolume.randomPoint( rng ) );
 
-      const real_t maxErr = real_t(1e-2);
+      const real_t maxErr = 1e-2_r;
 
       boost::tribool result = isIntersecting( triDist, testAABB, maxErr );
 

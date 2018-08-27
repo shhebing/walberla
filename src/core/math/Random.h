@@ -193,7 +193,7 @@ private:
 
 
 inline bool boolRandom() { ///< Randomly returns 'true' or 'false'
-   return realRandom<real_t>() >= real_t(0.5);
+   return realRandom<real_t>() >= 0.5_r;
 }
 
 

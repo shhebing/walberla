@@ -101,7 +101,7 @@ void LubricationCorrection::treatLubricationSphrSphr( const pe::SphereID sphereI
 
    real_t gap = pe::getSurfaceDistance( sphereI, sphereJ );
 
-   if ( gap > cutOffDistance_ || gap < real_t(0) )
+   if ( gap > cutOffDistance_ || gap < 0_r )
    {
       WALBERLA_LOG_DETAIL("gap " << gap << " larger than cutOff " << cutOffDistance_ << " - ignoring pair");
       return;
@@ -139,7 +139,7 @@ void LubricationCorrection::treatLubricationSphrPlane( const pe::SphereID sphere
 
    real_t gap = pe::getSurfaceDistance( sphereI, planeJ );
 
-   if ( gap > cutOffDistance_ || gap < real_t(0) )
+   if ( gap > cutOffDistance_ || gap < 0_r )
    {
       WALBERLA_LOG_DETAIL("gap " << gap << " larger than cutOff " << cutOffDistance_ << " - ignoring pair");
       return;
@@ -189,7 +189,7 @@ pe::Vec3 LubricationCorrection::compLubricationSphrSphr( real_t gap, const pe::S
    real_t radiiSQR    = ( radiusSphereI * radiusSphereJ ) * ( radiusSphereI * radiusSphereJ );
    real_t radiiSumSQR = ( radiusSphereI + radiusSphereJ ) * ( radiusSphereI + radiusSphereJ );
 
-   pe::Vec3 fLub = ( -real_t(6) * dynamicViscosity_ * walberla::math::PI * radiiSQR / radiiSumSQR * ( real_t(1) / gap - real_t(1) / cutOffDistance_) * length * rIJ);
+   pe::Vec3 fLub = ( -6_r * dynamicViscosity_ * walberla::math::PI * radiiSQR / radiiSumSQR * ( 1_r / gap - 1_r / cutOffDistance_) * length * rIJ);
 
    WALBERLA_LOG_DETAIL_SECTION()
    {
@@ -247,7 +247,7 @@ pe::Vec3 LubricationCorrection::compLubricationSphrPlane( real_t gap, const pe::
 
    real_t radiiSQR = radiusSphereI * radiusSphereI;
 
-   pe::Vec3 fLub( -real_t(6) * dynamicViscosity_ * walberla::math::PI * radiiSQR * (real_t(1) / gap - real_t(1) / cutOffDistance_) * length * rIJ);
+   pe::Vec3 fLub( -6_r * dynamicViscosity_ * walberla::math::PI * radiiSQR * (1_r / gap - 1_r / cutOffDistance_) * length * rIJ);
 
    WALBERLA_LOG_DETAIL_SECTION() {
       std::stringstream ss;

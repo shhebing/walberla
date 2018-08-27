@@ -72,7 +72,7 @@ public:
    typedef PdfField< LatticeModel_T >        PdfField_T;
    typedef typename LatticeModel_T::Stencil  Stencil;
 
-   DefaultCellOperation() : omega_( real_t(0) ), latticeModel_( NULL ) {}
+   DefaultCellOperation() : omega_( 0_r ), latticeModel_( NULL ) {}
 
    void configure( const LatticeModel_T & latticeModel )
    {
@@ -92,7 +92,7 @@ public:
       // collide
       for( auto d = Stencil::begin(); d != Stencil::end(); ++d )
       {
-         dst->get( x, y, z, d.toIdx() ) = ( real_t(1.0) - omega_ ) * dst->get( x, y, z, d.toIdx() ) +
+         dst->get( x, y, z, d.toIdx() ) = ( 1.0_r - omega_ ) * dst->get( x, y, z, d.toIdx() ) +
                                                           omega_   * EquilibriumDistribution< LatticeModel_T >::get( *d, velocity, rho );
       }
    }
@@ -110,7 +110,7 @@ public:
       // collide
       for( auto d = Stencil::begin(); d != Stencil::end(); ++d )
       {
-         dst[ d.toIdx() ] = ( real_t(1.0) - omega_ ) * dst[ d.toIdx() ] +
+         dst[ d.toIdx() ] = ( 1.0_r - omega_ ) * dst[ d.toIdx() ] +
                                             omega_   * EquilibriumDistribution< LatticeModel_T >::get( *d, velocity, rho );
       }
    }
@@ -144,7 +144,7 @@ public:
    typedef PdfField< LatticeModel_T >        PdfField_T;
    typedef typename LatticeModel_T::Stencil  Stencil;
 
-   DefaultCellOperation() : omega_( real_t(0) ), latticeModel_( NULL ) {}
+   DefaultCellOperation() : omega_( 0_r ), latticeModel_( NULL ) {}
 
    void configure( const LatticeModel_T & latticeModel )
    {
@@ -167,10 +167,10 @@ public:
       {
          const Vector3<real_t> c( real_c(d.cx()), real_c(d.cy()), real_c(d.cz()) );
 
-         const real_t force_trm = real_t(3.0) * LatticeModel_T::w[ d.toIdx() ] * ( real_t(1) - real_t(0.5) * omega_ ) *
-                                  ( ( c - velocity + ( real_t(3) * ( c * velocity ) * c ) ) * force_ );
+         const real_t force_trm = 3.0_r * LatticeModel_T::w[ d.toIdx() ] * ( 1_r - 0.5_r * omega_ ) *
+                                  ( ( c - velocity + ( 3_r * ( c * velocity ) * c ) ) * force_ );
 
-         dst->get( x, y, z, d.toIdx() ) = ( real_t(1.0) - omega_ ) * dst->get( x, y, z, d.toIdx() ) +
+         dst->get( x, y, z, d.toIdx() ) = ( 1.0_r - omega_ ) * dst->get( x, y, z, d.toIdx() ) +
                                                           omega_   * EquilibriumDistribution< LatticeModel_T >::get( *d, velocity, rho ) +
                                           force_trm;
       }
@@ -191,10 +191,10 @@ public:
       {
          const Vector3<real_t> c( real_c(d.cx()), real_c(d.cy()), real_c(d.cz()) );
 
-         const real_t force_trm = real_t(3.0) * LatticeModel_T::w[ d.toIdx() ] * ( real_t(1) - real_t(0.5) * omega_ ) *
-                                  ( ( c - velocity + ( real_t(3) * ( c * velocity ) * c ) ) * force_ );
+         const real_t force_trm = 3.0_r * LatticeModel_T::w[ d.toIdx() ] * ( 1_r - 0.5_r * omega_ ) *
+                                  ( ( c - velocity + ( 3_r * ( c * velocity ) * c ) ) * force_ );
 
-         dst[ d.toIdx() ] = ( real_t(1.0) - omega_ ) * dst[ d.toIdx() ] +
+         dst[ d.toIdx() ] = ( 1.0_r - omega_ ) * dst[ d.toIdx() ] +
                                             omega_   * EquilibriumDistribution< LatticeModel_T >::get( *d, velocity, rho ) +
                               force_trm;
       }
@@ -239,15 +239,15 @@ public:
    typedef PdfField< LatticeModel_T >        PdfField_T;
    typedef typename LatticeModel_T::Stencil  Stencil;
 
-   DefaultCellOperation() : omega_trm_( real_t(0) ), omega_w0_( real_t(0) ), omega_w1_( real_t(0) ), omega_w2_( real_t(0) ) {}
+   DefaultCellOperation() : omega_trm_( 0_r ), omega_w0_( 0_r ), omega_w1_( 0_r ), omega_w2_( 0_r ) {}
 
    void configure( const LatticeModel_T & latticeModel )
    {
       const real_t omega = latticeModel.collisionModel().omega();
-      omega_trm_ = real_t(1) - omega;
-      omega_w0_  = real_t(3) * ( real_t(1) / real_t( 3) ) * omega;
-      omega_w1_  = real_t(3) * ( real_t(1) / real_t(18) ) * omega;
-      omega_w2_  = real_t(3) * ( real_t(1) / real_t(36) ) * omega;
+      omega_trm_ = 1_r - omega;
+      omega_w0_  = 3_r * ( 1_r / real_t( 3) ) * omega;
+      omega_w1_  = 3_r * ( 1_r / 18_r ) * omega;
+      omega_w2_  = 3_r * ( 1_r / 36_r ) * omega;
    }
 
    void operator()( PdfField_T * src, PdfField_T * dst, cell_idx_t x, cell_idx_t y, cell_idx_t z ) const;
@@ -309,13 +309,13 @@ void DefaultCellOperation< LatticeModel_T, typename boost::enable_if< boost::mpl
    const real_t velYY = velY * velY;
    const real_t velZZ = velZ * velZ;
 
-   const real_t dir_indep_trm = ( real_t(1) / real_t(3) ) * rho - real_t(0.5) * ( velXX + velYY + velZZ );
+   const real_t dir_indep_trm = ( 1_r / 3_r ) * rho - 0.5_r * ( velXX + velYY + velZZ );
 
    dst->get(x,y,z,Stencil::idx[C]) = omega_trm_ * dd_tmp_C + omega_w0_ * dir_indep_trm;
 
-   const real_t vel_trm_E_W = dir_indep_trm + real_t(1.5) * velXX;
-   const real_t vel_trm_N_S = dir_indep_trm + real_t(1.5) * velYY;
-   const real_t vel_trm_T_B = dir_indep_trm + real_t(1.5) * velZZ;
+   const real_t vel_trm_E_W = dir_indep_trm + 1.5_r * velXX;
+   const real_t vel_trm_N_S = dir_indep_trm + 1.5_r * velYY;
+   const real_t vel_trm_T_B = dir_indep_trm + 1.5_r * velZZ;
 
    dst->get(x,y,z,Stencil::idx[E]) = omega_trm_ * dd_tmp_E + omega_w1_ * ( vel_trm_E_W + velX );
    dst->get(x,y,z,Stencil::idx[W]) = omega_trm_ * dd_tmp_W + omega_w1_ * ( vel_trm_E_W - velX );
@@ -325,37 +325,37 @@ void DefaultCellOperation< LatticeModel_T, typename boost::enable_if< boost::mpl
    dst->get(x,y,z,Stencil::idx[B]) = omega_trm_ * dd_tmp_B + omega_w1_ * ( vel_trm_T_B - velZ );
 
    const real_t velXmY = velX - velY;
-   const real_t vel_trm_NW_SE = dir_indep_trm + real_t(1.5) * velXmY * velXmY;
+   const real_t vel_trm_NW_SE = dir_indep_trm + 1.5_r * velXmY * velXmY;
 
    dst->get(x,y,z,Stencil::idx[NW]) = omega_trm_ * dd_tmp_NW + omega_w2_ * ( vel_trm_NW_SE - velXmY );
    dst->get(x,y,z,Stencil::idx[SE]) = omega_trm_ * dd_tmp_SE + omega_w2_ * ( vel_trm_NW_SE + velXmY );
 
    const real_t velXpY = velX + velY;
-   const real_t vel_trm_NE_SW = dir_indep_trm + real_t(1.5) * velXpY * velXpY;
+   const real_t vel_trm_NE_SW = dir_indep_trm + 1.5_r * velXpY * velXpY;
 
    dst->get(x,y,z,Stencil::idx[NE]) = omega_trm_ * dd_tmp_NE + omega_w2_ * ( vel_trm_NE_SW + velXpY );
    dst->get(x,y,z,Stencil::idx[SW]) = omega_trm_ * dd_tmp_SW + omega_w2_ * ( vel_trm_NE_SW - velXpY );
 
    const real_t velXmZ = velX - velZ;
-   const real_t vel_trm_TW_BE = dir_indep_trm + real_t(1.5) * velXmZ * velXmZ;
+   const real_t vel_trm_TW_BE = dir_indep_trm + 1.5_r * velXmZ * velXmZ;
 
    dst->get(x,y,z,Stencil::idx[TW]) = omega_trm_ * dd_tmp_TW + omega_w2_ * ( vel_trm_TW_BE - velXmZ );
    dst->get(x,y,z,Stencil::idx[BE]) = omega_trm_ * dd_tmp_BE + omega_w2_ * ( vel_trm_TW_BE + velXmZ );
 
    const real_t velXpZ = velX + velZ;
-   const real_t vel_trm_TE_BW = dir_indep_trm + real_t(1.5) * velXpZ * velXpZ;
+   const real_t vel_trm_TE_BW = dir_indep_trm + 1.5_r * velXpZ * velXpZ;
 
    dst->get(x,y,z,Stencil::idx[TE]) = omega_trm_ * dd_tmp_TE + omega_w2_ * ( vel_trm_TE_BW + velXpZ );
    dst->get(x,y,z,Stencil::idx[BW]) = omega_trm_ * dd_tmp_BW + omega_w2_ * ( vel_trm_TE_BW - velXpZ );
 
    const real_t velYmZ = velY - velZ;
-   const real_t vel_trm_TS_BN = dir_indep_trm + real_t(1.5) * velYmZ * velYmZ;
+   const real_t vel_trm_TS_BN = dir_indep_trm + 1.5_r * velYmZ * velYmZ;
 
    dst->get(x,y,z,Stencil::idx[TS]) = omega_trm_ * dd_tmp_TS + omega_w2_ * ( vel_trm_TS_BN - velYmZ );
    dst->get(x,y,z,Stencil::idx[BN]) = omega_trm_ * dd_tmp_BN + omega_w2_ * ( vel_trm_TS_BN + velYmZ );
 
    const real_t velYpZ = velY + velZ;
-   const real_t vel_trm_TN_BS = dir_indep_trm + real_t(1.5) * velYpZ * velYpZ;
+   const real_t vel_trm_TN_BS = dir_indep_trm + 1.5_r * velYpZ * velYpZ;
 
    dst->get(x,y,z,Stencil::idx[TN]) = omega_trm_ * dd_tmp_TN + omega_w2_ * ( vel_trm_TN_BS + velYpZ );
    dst->get(x,y,z,Stencil::idx[BS]) = omega_trm_ * dd_tmp_BS + omega_w2_ * ( vel_trm_TN_BS - velYpZ );
@@ -408,13 +408,13 @@ void DefaultCellOperation< LatticeModel_T, typename boost::enable_if< boost::mpl
    const real_t velYY = velY * velY;
    const real_t velZZ = velZ * velZ;
 
-   const real_t dir_indep_trm = ( real_t(1) / real_t(3) ) * rho - real_t(0.5) * ( velXX + velYY + velZZ );
+   const real_t dir_indep_trm = ( 1_r / 3_r ) * rho - 0.5_r * ( velXX + velYY + velZZ );
 
    dst[ Stencil::idx[C] ] = omega_trm_ * dd_tmp_C + omega_w0_ * dir_indep_trm;
 
-   const real_t vel_trm_E_W = dir_indep_trm + real_t(1.5) * velXX;
-   const real_t vel_trm_N_S = dir_indep_trm + real_t(1.5) * velYY;
-   const real_t vel_trm_T_B = dir_indep_trm + real_t(1.5) * velZZ;
+   const real_t vel_trm_E_W = dir_indep_trm + 1.5_r * velXX;
+   const real_t vel_trm_N_S = dir_indep_trm + 1.5_r * velYY;
+   const real_t vel_trm_T_B = dir_indep_trm + 1.5_r * velZZ;
 
    dst[ Stencil::idx[E] ] = omega_trm_ * dd_tmp_E + omega_w1_ * ( vel_trm_E_W + velX );
    dst[ Stencil::idx[W] ] = omega_trm_ * dd_tmp_W + omega_w1_ * ( vel_trm_E_W - velX );
@@ -424,37 +424,37 @@ void DefaultCellOperation< LatticeModel_T, typename boost::enable_if< boost::mpl
    dst[ Stencil::idx[B] ] = omega_trm_ * dd_tmp_B + omega_w1_ * ( vel_trm_T_B - velZ );
 
    const real_t velXmY = velX - velY;
-   const real_t vel_trm_NW_SE = dir_indep_trm + real_t(1.5) * velXmY * velXmY;
+   const real_t vel_trm_NW_SE = dir_indep_trm + 1.5_r * velXmY * velXmY;
 
    dst[ Stencil::idx[NW] ] = omega_trm_ * dd_tmp_NW + omega_w2_ * ( vel_trm_NW_SE - velXmY );
    dst[ Stencil::idx[SE] ] = omega_trm_ * dd_tmp_SE + omega_w2_ * ( vel_trm_NW_SE + velXmY );
 
    const real_t velXpY = velX + velY;
-   const real_t vel_trm_NE_SW = dir_indep_trm + real_t(1.5) * velXpY * velXpY;
+   const real_t vel_trm_NE_SW = dir_indep_trm + 1.5_r * velXpY * velXpY;
 
    dst[ Stencil::idx[NE] ] = omega_trm_ * dd_tmp_NE + omega_w2_ * ( vel_trm_NE_SW + velXpY );
    dst[ Stencil::idx[SW] ] = omega_trm_ * dd_tmp_SW + omega_w2_ * ( vel_trm_NE_SW - velXpY );
 
    const real_t velXmZ = velX - velZ;
-   const real_t vel_trm_TW_BE = dir_indep_trm + real_t(1.5) * velXmZ * velXmZ;
+   const real_t vel_trm_TW_BE = dir_indep_trm + 1.5_r * velXmZ * velXmZ;
 
    dst[ Stencil::idx[TW] ] = omega_trm_ * dd_tmp_TW + omega_w2_ * ( vel_trm_TW_BE - velXmZ );
    dst[ Stencil::idx[BE] ] = omega_trm_ * dd_tmp_BE + omega_w2_ * ( vel_trm_TW_BE + velXmZ );
 
    const real_t velXpZ = velX + velZ;
-   const real_t vel_trm_TE_BW = dir_indep_trm + real_t(1.5) * velXpZ * velXpZ;
+   const real_t vel_trm_TE_BW = dir_indep_trm + 1.5_r * velXpZ * velXpZ;
 
    dst[ Stencil::idx[TE] ] = omega_trm_ * dd_tmp_TE + omega_w2_ * ( vel_trm_TE_BW + velXpZ );
    dst[ Stencil::idx[BW] ] = omega_trm_ * dd_tmp_BW + omega_w2_ * ( vel_trm_TE_BW - velXpZ );
 
    const real_t velYmZ = velY - velZ;
-   const real_t vel_trm_TS_BN = dir_indep_trm + real_t(1.5) * velYmZ * velYmZ;
+   const real_t vel_trm_TS_BN = dir_indep_trm + 1.5_r * velYmZ * velYmZ;
 
    dst[ Stencil::idx[TS] ] = omega_trm_ * dd_tmp_TS + omega_w2_ * ( vel_trm_TS_BN - velYmZ );
    dst[ Stencil::idx[BN] ] = omega_trm_ * dd_tmp_BN + omega_w2_ * ( vel_trm_TS_BN + velYmZ );
 
    const real_t velYpZ = velY + velZ;
-   const real_t vel_trm_TN_BS = dir_indep_trm + real_t(1.5) * velYpZ * velYpZ;
+   const real_t vel_trm_TN_BS = dir_indep_trm + 1.5_r * velYpZ * velYpZ;
 
    dst[ Stencil::idx[TN] ] = omega_trm_ * dd_tmp_TN + omega_w2_ * ( vel_trm_TN_BS + velYpZ );
    dst[ Stencil::idx[BS] ] = omega_trm_ * dd_tmp_BS + omega_w2_ * ( vel_trm_TN_BS - velYpZ );
@@ -488,15 +488,15 @@ public:
    typedef PdfField< LatticeModel_T >        PdfField_T;
    typedef typename LatticeModel_T::Stencil  Stencil;
 
-   DefaultCellOperation() : omega_trm_( real_t(0) ), omega_w0_( real_t(0) ), omega_w1_( real_t(0) ), omega_w2_( real_t(0) ) {}
+   DefaultCellOperation() : omega_trm_( 0_r ), omega_w0_( 0_r ), omega_w1_( 0_r ), omega_w2_( 0_r ) {}
 
    void configure( const LatticeModel_T & latticeModel )
    {
       const real_t omega = latticeModel.collisionModel().omega();
-      omega_trm_ = real_t(1) - omega;
-      omega_w0_  = real_t(3) * ( real_t(1) / real_t( 3) ) * omega;
-      omega_w1_  = real_t(3) * ( real_t(1) / real_t(18) ) * omega;
-      omega_w2_  = real_t(3) * ( real_t(1) / real_t(36) ) * omega;
+      omega_trm_ = 1_r - omega;
+      omega_w0_  = 3_r * ( 1_r / real_t( 3) ) * omega;
+      omega_w1_  = 3_r * ( 1_r / 18_r ) * omega;
+      omega_w2_  = 3_r * ( 1_r / 36_r ) * omega;
    }
 
    void operator()( PdfField_T * src, PdfField_T * dst, cell_idx_t x, cell_idx_t y, cell_idx_t z ) const;
@@ -550,7 +550,7 @@ void DefaultCellOperation< LatticeModel_T, typename boost::enable_if< boost::mpl
    const real_t velZ_trm = dd_tmp_T + dd_tmp_TS + dd_tmp_TW;
 
    const real_t rho = dd_tmp_C + dd_tmp_S + dd_tmp_W + dd_tmp_B + dd_tmp_SW + dd_tmp_BS + dd_tmp_BW + velX_trm + velY_trm + velZ_trm;
-   const real_t invRho = real_t(1.0) / rho;
+   const real_t invRho = 1.0_r / rho;
 
    const real_t velX = invRho * ( velX_trm - dd_tmp_W  - dd_tmp_NW - dd_tmp_SW - dd_tmp_TW - dd_tmp_BW );
    const real_t velY = invRho * ( velY_trm + dd_tmp_NE - dd_tmp_S  - dd_tmp_SW - dd_tmp_SE - dd_tmp_TS - dd_tmp_BS );
@@ -560,15 +560,15 @@ void DefaultCellOperation< LatticeModel_T, typename boost::enable_if< boost::mpl
    const real_t velYY = velY * velY;
    const real_t velZZ = velZ * velZ;
 
-   const real_t dir_indep_trm = ( real_t(1) / real_t(3) ) - real_t(0.5) * ( velXX + velYY + velZZ );
+   const real_t dir_indep_trm = ( 1_r / 3_r ) - 0.5_r * ( velXX + velYY + velZZ );
 
    dst->get(x,y,z,Stencil::idx[C]) = omega_trm_ * dd_tmp_C + omega_w0_ * rho * dir_indep_trm;
 
    const real_t omega_w1_rho = omega_w1_ * rho;
 
-   const real_t vel_trm_E_W = dir_indep_trm + real_t(1.5) * velXX;
-   const real_t vel_trm_N_S = dir_indep_trm + real_t(1.5) * velYY;
-   const real_t vel_trm_T_B = dir_indep_trm + real_t(1.5) * velZZ;
+   const real_t vel_trm_E_W = dir_indep_trm + 1.5_r * velXX;
+   const real_t vel_trm_N_S = dir_indep_trm + 1.5_r * velYY;
+   const real_t vel_trm_T_B = dir_indep_trm + 1.5_r * velZZ;
 
    dst->get(x,y,z,Stencil::idx[E]) = omega_trm_ * dd_tmp_E + omega_w1_rho * ( vel_trm_E_W + velX );
    dst->get(x,y,z,Stencil::idx[W]) = omega_trm_ * dd_tmp_W + omega_w1_rho * ( vel_trm_E_W - velX );
@@ -580,37 +580,37 @@ void DefaultCellOperation< LatticeModel_T, typename boost::enable_if< boost::mpl
    const real_t omega_w2_rho = omega_w2_ * rho;
 
    const real_t velXmY = velX - velY;
-   const real_t vel_trm_NW_SE = dir_indep_trm + real_t(1.5) * velXmY * velXmY;
+   const real_t vel_trm_NW_SE = dir_indep_trm + 1.5_r * velXmY * velXmY;
 
    dst->get(x,y,z,Stencil::idx[NW]) = omega_trm_ * dd_tmp_NW + omega_w2_rho * ( vel_trm_NW_SE - velXmY );
    dst->get(x,y,z,Stencil::idx[SE]) = omega_trm_ * dd_tmp_SE + omega_w2_rho * ( vel_trm_NW_SE + velXmY );
 
    const real_t velXpY = velX + velY;
-   const real_t vel_trm_NE_SW = dir_indep_trm + real_t(1.5) * velXpY * velXpY;
+   const real_t vel_trm_NE_SW = dir_indep_trm + 1.5_r * velXpY * velXpY;
 
    dst->get(x,y,z,Stencil::idx[NE]) = omega_trm_ * dd_tmp_NE + omega_w2_rho * ( vel_trm_NE_SW + velXpY );
    dst->get(x,y,z,Stencil::idx[SW]) = omega_trm_ * dd_tmp_SW + omega_w2_rho * ( vel_trm_NE_SW - velXpY );
 
    const real_t velXmZ = velX - velZ;
-   const real_t vel_trm_TW_BE = dir_indep_trm + real_t(1.5) * velXmZ * velXmZ;
+   const real_t vel_trm_TW_BE = dir_indep_trm + 1.5_r * velXmZ * velXmZ;
 
    dst->get(x,y,z,Stencil::idx[TW]) = omega_trm_ * dd_tmp_TW + omega_w2_rho * ( vel_trm_TW_BE - velXmZ );
    dst->get(x,y,z,Stencil::idx[BE]) = omega_trm_ * dd_tmp_BE + omega_w2_rho * ( vel_trm_TW_BE + velXmZ );
 
    const real_t velXpZ = velX + velZ;
-   const real_t vel_trm_TE_BW = dir_indep_trm + real_t(1.5) * velXpZ * velXpZ;
+   const real_t vel_trm_TE_BW = dir_indep_trm + 1.5_r * velXpZ * velXpZ;
 
    dst->get(x,y,z,Stencil::idx[TE]) = omega_trm_ * dd_tmp_TE + omega_w2_rho * ( vel_trm_TE_BW + velXpZ );
    dst->get(x,y,z,Stencil::idx[BW]) = omega_trm_ * dd_tmp_BW + omega_w2_rho * ( vel_trm_TE_BW - velXpZ );
 
    const real_t velYmZ = velY - velZ;
-   const real_t vel_trm_TS_BN = dir_indep_trm + real_t(1.5) * velYmZ * velYmZ;
+   const real_t vel_trm_TS_BN = dir_indep_trm + 1.5_r * velYmZ * velYmZ;
 
    dst->get(x,y,z,Stencil::idx[TS]) = omega_trm_ * dd_tmp_TS + omega_w2_rho * ( vel_trm_TS_BN - velYmZ );
    dst->get(x,y,z,Stencil::idx[BN]) = omega_trm_ * dd_tmp_BN + omega_w2_rho * ( vel_trm_TS_BN + velYmZ );
 
    const real_t velYpZ = velY + velZ;
-   const real_t vel_trm_TN_BS = dir_indep_trm + real_t(1.5) * velYpZ * velYpZ;
+   const real_t vel_trm_TN_BS = dir_indep_trm + 1.5_r * velYpZ * velYpZ;
 
    dst->get(x,y,z,Stencil::idx[TN]) = omega_trm_ * dd_tmp_TN + omega_w2_rho * ( vel_trm_TN_BS + velYpZ );
    dst->get(x,y,z,Stencil::idx[BS]) = omega_trm_ * dd_tmp_BS + omega_w2_rho * ( vel_trm_TN_BS - velYpZ );
@@ -654,7 +654,7 @@ void DefaultCellOperation< LatticeModel_T, typename boost::enable_if< boost::mpl
    const real_t velZ_trm = dd_tmp_T + dd_tmp_TS + dd_tmp_TW;
 
    const real_t rho = dd_tmp_C + dd_tmp_S + dd_tmp_W + dd_tmp_B + dd_tmp_SW + dd_tmp_BS + dd_tmp_BW + velX_trm + velY_trm + velZ_trm;
-   const real_t invRho = real_t(1.0) / rho;
+   const real_t invRho = 1.0_r / rho;
 
    const real_t velX = invRho * ( velX_trm - dd_tmp_W  - dd_tmp_NW - dd_tmp_SW - dd_tmp_TW - dd_tmp_BW );
    const real_t velY = invRho * ( velY_trm + dd_tmp_NE - dd_tmp_S  - dd_tmp_SW - dd_tmp_SE - dd_tmp_TS - dd_tmp_BS );
@@ -664,15 +664,15 @@ void DefaultCellOperation< LatticeModel_T, typename boost::enable_if< boost::mpl
    const real_t velYY = velY * velY;
    const real_t velZZ = velZ * velZ;
 
-   const real_t dir_indep_trm = ( real_t(1) / real_t(3) ) - real_t(0.5) * ( velXX + velYY + velZZ );
+   const real_t dir_indep_trm = ( 1_r / 3_r ) - 0.5_r * ( velXX + velYY + velZZ );
 
    dst[ Stencil::idx[C] ] = omega_trm_ * dd_tmp_C + omega_w0_ * rho * dir_indep_trm;
 
    const real_t omega_w1_rho = omega_w1_ * rho;
 
-   const real_t vel_trm_E_W = dir_indep_trm + real_t(1.5) * velXX;
-   const real_t vel_trm_N_S = dir_indep_trm + real_t(1.5) * velYY;
-   const real_t vel_trm_T_B = dir_indep_trm + real_t(1.5) * velZZ;
+   const real_t vel_trm_E_W = dir_indep_trm + 1.5_r * velXX;
+   const real_t vel_trm_N_S = dir_indep_trm + 1.5_r * velYY;
+   const real_t vel_trm_T_B = dir_indep_trm + 1.5_r * velZZ;
 
    dst[ Stencil::idx[E] ] = omega_trm_ * dd_tmp_E + omega_w1_rho * ( vel_trm_E_W + velX );
    dst[ Stencil::idx[W] ] = omega_trm_ * dd_tmp_W + omega_w1_rho * ( vel_trm_E_W - velX );
@@ -684,37 +684,37 @@ void DefaultCellOperation< LatticeModel_T, typename boost::enable_if< boost::mpl
    const real_t omega_w2_rho = omega_w2_ * rho;
 
    const real_t velXmY = velX - velY;
-   const real_t vel_trm_NW_SE = dir_indep_trm + real_t(1.5) * velXmY * velXmY;
+   const real_t vel_trm_NW_SE = dir_indep_trm + 1.5_r * velXmY * velXmY;
 
    dst[ Stencil::idx[NW] ] = omega_trm_ * dd_tmp_NW + omega_w2_rho * ( vel_trm_NW_SE - velXmY );
    dst[ Stencil::idx[SE] ] = omega_trm_ * dd_tmp_SE + omega_w2_rho * ( vel_trm_NW_SE + velXmY );
 
    const real_t velXpY = velX + velY;
-   const real_t vel_trm_NE_SW = dir_indep_trm + real_t(1.5) * velXpY * velXpY;
+   const real_t vel_trm_NE_SW = dir_indep_trm + 1.5_r * velXpY * velXpY;
 
    dst[ Stencil::idx[NE] ] = omega_trm_ * dd_tmp_NE + omega_w2_rho * ( vel_trm_NE_SW + velXpY );
    dst[ Stencil::idx[SW] ] = omega_trm_ * dd_tmp_SW + omega_w2_rho * ( vel_trm_NE_SW - velXpY );
 
    const real_t velXmZ = velX - velZ;
-   const real_t vel_trm_TW_BE = dir_indep_trm + real_t(1.5) * velXmZ * velXmZ;
+   const real_t vel_trm_TW_BE = dir_indep_trm + 1.5_r * velXmZ * velXmZ;
 
    dst[ Stencil::idx[TW] ] = omega_trm_ * dd_tmp_TW + omega_w2_rho * ( vel_trm_TW_BE - velXmZ );
    dst[ Stencil::idx[BE] ] = omega_trm_ * dd_tmp_BE + omega_w2_rho * ( vel_trm_TW_BE + velXmZ );
 
    const real_t velXpZ = velX + velZ;
-   const real_t vel_trm_TE_BW = dir_indep_trm + real_t(1.5) * velXpZ * velXpZ;
+   const real_t vel_trm_TE_BW = dir_indep_trm + 1.5_r * velXpZ * velXpZ;
 
    dst[ Stencil::idx[TE] ] = omega_trm_ * dd_tmp_TE + omega_w2_rho * ( vel_trm_TE_BW + velXpZ );
    dst[ Stencil::idx[BW] ] = omega_trm_ * dd_tmp_BW + omega_w2_rho * ( vel_trm_TE_BW - velXpZ );
 
    const real_t velYmZ = velY - velZ;
-   const real_t vel_trm_TS_BN = dir_indep_trm + real_t(1.5) * velYmZ * velYmZ;
+   const real_t vel_trm_TS_BN = dir_indep_trm + 1.5_r * velYmZ * velYmZ;
 
    dst[ Stencil::idx[TS] ] = omega_trm_ * dd_tmp_TS + omega_w2_rho * ( vel_trm_TS_BN - velYmZ );
    dst[ Stencil::idx[BN] ] = omega_trm_ * dd_tmp_BN + omega_w2_rho * ( vel_trm_TS_BN + velYmZ );
 
    const real_t velYpZ = velY + velZ;
-   const real_t vel_trm_TN_BS = dir_indep_trm + real_t(1.5) * velYpZ * velYpZ;
+   const real_t vel_trm_TN_BS = dir_indep_trm + 1.5_r * velYpZ * velYpZ;
 
    dst[ Stencil::idx[TN] ] = omega_trm_ * dd_tmp_TN + omega_w2_rho * ( vel_trm_TN_BS + velYpZ );
    dst[ Stencil::idx[BS] ] = omega_trm_ * dd_tmp_BS + omega_w2_rho * ( vel_trm_TN_BS - velYpZ );

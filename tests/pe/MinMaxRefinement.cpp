@@ -149,7 +149,7 @@ int main( int argc, char ** argv )
 
    for (unsigned int i = 0; i < 30; ++i)
    {
-      createSphere(*globalStorage.get(), forest->getBlockStorage(), storageID, 0, Vec3(real_t(2.1), real_t(2.1), real_t(2.1)), 1);
+      createSphere(*globalStorage.get(), forest->getBlockStorage(), storageID, 0, Vec3(2.1_r, 2.1_r, 2.1_r), 1);
    }
 
    WALBERLA_MPI_BARRIER();

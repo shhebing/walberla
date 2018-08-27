@@ -54,7 +54,7 @@ void RBGSIteration::operator()()
       for( auto block = blocks_.begin( requiredSelectors_, incompatibleSelectors_ ); block != blocks_.end(); ++block )
          blackUpdate_( block.get() );
 
-      if( residualNormThreshold_ > real_t(0) && residualCheckFrequency_ > uint_t(0) )
+      if( residualNormThreshold_ > 0_r && residualCheckFrequency_ > uint_t(0) )
       {
          if( (i % residualCheckFrequency_) == uint_t(0) )
          {

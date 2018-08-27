@@ -139,27 +139,27 @@ namespace stencil {
    /// The x,y,z component for each normalized direction \ingroup stencil
    const real_t cNorm[3][NR_OF_DIRECTIONS] = {
       {
-         real_t(0), real_t(0), real_t(0), real_t(-1), real_t(1), real_t(0), real_t(0), real_t(-1) / std::sqrt( real_t(2) ),
-         real_t(1) / std::sqrt( real_t(2) ), real_t(-1) / std::sqrt( real_t(2) ), real_t(1) / std::sqrt( real_t(2) ), real_t(0), real_t(0),
-         real_t(-1) / std::sqrt( real_t(2) ), real_t(1) / std::sqrt( real_t(2) ), real_t(0), real_t(0), real_t(-1) / std::sqrt( real_t(2) ),
-         real_t(1) / std::sqrt( real_t(2) ), real_t(1) / std::sqrt( real_t(3) ), real_t(-1) / std::sqrt( real_t(3) ),
-         real_t(1) / std::sqrt( real_t(3) ), real_t(-1) / std::sqrt( real_t(3) ), real_t(1) / std::sqrt( real_t(3) ),
-         real_t(-1) / std::sqrt( real_t(3) ), real_t(1) / std::sqrt( real_t(3) ), real_t(-1) / std::sqrt( real_t(3) )
+         0_r, 0_r, 0_r, -1_r, 1_r, 0_r, 0_r, -1_r / std::sqrt( 2_r ),
+         1_r / std::sqrt( 2_r ), -1_r / std::sqrt( 2_r ), 1_r / std::sqrt( 2_r ), 0_r, 0_r,
+         -1_r / std::sqrt( 2_r ), 1_r / std::sqrt( 2_r ), 0_r, 0_r, -1_r / std::sqrt( 2_r ),
+         1_r / std::sqrt( 2_r ), 1_r / std::sqrt( 3_r ), -1_r / std::sqrt( 3_r ),
+         1_r / std::sqrt( 3_r ), -1_r / std::sqrt( 3_r ), 1_r / std::sqrt( 3_r ),
+         -1_r / std::sqrt( 3_r ), 1_r / std::sqrt( 3_r ), -1_r / std::sqrt( 3_r )
       }, {
-         real_t(0), real_t(1), real_t(-1), real_t(0), real_t(0), real_t(0), real_t(0), real_t(1) / std::sqrt( real_t(2) ),
-         real_t(1) / std::sqrt( real_t(2) ), real_t(-1) / std::sqrt( real_t(2) ), real_t(-1) / std::sqrt( real_t(2) ),
-         real_t(1) / std::sqrt( real_t(2) ), real_t(-1) / std::sqrt( real_t(2) ), real_t(0), real_t(0), real_t(1) / std::sqrt( real_t(2) ),
-         real_t(-1) / std::sqrt( real_t(2) ), real_t(0), real_t(0), real_t(1) / std::sqrt( real_t(3) ), real_t(1) / std::sqrt( real_t(3) ),
-         real_t(-1) / std::sqrt( real_t(3) ), real_t(-1) / std::sqrt( real_t(3) ), real_t(1) / std::sqrt( real_t(3) ),
-         real_t(1) / std::sqrt( real_t(3) ), real_t(-1) / std::sqrt( real_t(3) ), real_t(-1) / std::sqrt( real_t(3) )
+         0_r, 1_r, -1_r, 0_r, 0_r, 0_r, 0_r, 1_r / std::sqrt( 2_r ),
+         1_r / std::sqrt( 2_r ), -1_r / std::sqrt( 2_r ), -1_r / std::sqrt( 2_r ),
+         1_r / std::sqrt( 2_r ), -1_r / std::sqrt( 2_r ), 0_r, 0_r, 1_r / std::sqrt( 2_r ),
+         -1_r / std::sqrt( 2_r ), 0_r, 0_r, 1_r / std::sqrt( 3_r ), 1_r / std::sqrt( 3_r ),
+         -1_r / std::sqrt( 3_r ), -1_r / std::sqrt( 3_r ), 1_r / std::sqrt( 3_r ),
+         1_r / std::sqrt( 3_r ), -1_r / std::sqrt( 3_r ), -1_r / std::sqrt( 3_r )
       }, {
-         real_t(0), real_t(0), real_t(0), real_t(0), real_t(0), real_t(1), real_t(-1), real_t(0), real_t(0), real_t(0), real_t(0),
-         real_t(1) / std::sqrt( real_t(2) ), real_t(1) / std::sqrt( real_t(2) ), real_t(1) / std::sqrt( real_t(2) ),
-         real_t(1) / std::sqrt( real_t(2) ), real_t(-1) / std::sqrt( real_t(2) ), real_t(-1) / std::sqrt( real_t(2) ),
-         real_t(-1) / std::sqrt( real_t(2) ), real_t(-1) / std::sqrt( real_t(2) ), real_t(1) / std::sqrt( real_t(3) ),
-         real_t(1) / std::sqrt( real_t(3) ), real_t(1) / std::sqrt( real_t(3) ), real_t(1) / std::sqrt( real_t(3) ),
-         real_t(-1) / std::sqrt( real_t(3) ), real_t(-1) / std::sqrt( real_t(3) ), real_t(-1) / std::sqrt( real_t(3) ),
-         real_t(-1) / std::sqrt( real_t(3) )
+         0_r, 0_r, 0_r, 0_r, 0_r, 1_r, -1_r, 0_r, 0_r, 0_r, 0_r,
+         1_r / std::sqrt( 2_r ), 1_r / std::sqrt( 2_r ), 1_r / std::sqrt( 2_r ),
+         1_r / std::sqrt( 2_r ), -1_r / std::sqrt( 2_r ), -1_r / std::sqrt( 2_r ),
+         -1_r / std::sqrt( 2_r ), -1_r / std::sqrt( 2_r ), 1_r / std::sqrt( 3_r ),
+         1_r / std::sqrt( 3_r ), 1_r / std::sqrt( 3_r ), 1_r / std::sqrt( 3_r ),
+         -1_r / std::sqrt( 3_r ), -1_r / std::sqrt( 3_r ), -1_r / std::sqrt( 3_r ),
+         -1_r / std::sqrt( 3_r )
       }
    };
 
@@ -186,26 +186,26 @@ namespace stencil {
 
    /// Length for each direction \ingroup stencil
    const real_t dirLength [NR_OF_DIRECTIONS] = {
-        real_t(0), real_t(1), real_t(1), real_t(1), real_t(1), real_t(1), real_t(1),
-        std::sqrt( real_t(2) ), std::sqrt( real_t(2) ), std::sqrt( real_t(2) ), std::sqrt( real_t(2) ), 
-        std::sqrt( real_t(2) ), std::sqrt( real_t(2) ), std::sqrt( real_t(2) ), std::sqrt( real_t(2) ),
-        std::sqrt( real_t(2) ), std::sqrt( real_t(2) ), std::sqrt( real_t(2) ), std::sqrt( real_t(2) ),
-        std::sqrt( real_t(3) ), std::sqrt( real_t(3) ), std::sqrt( real_t(3) ), std::sqrt( real_t(3) ),
-        std::sqrt( real_t(3) ), std::sqrt( real_t(3) ), std::sqrt( real_t(3) ), std::sqrt( real_t(3) )
+        0_r, 1_r, 1_r, 1_r, 1_r, 1_r, 1_r,
+        std::sqrt( 2_r ), std::sqrt( 2_r ), std::sqrt( 2_r ), std::sqrt( 2_r ), 
+        std::sqrt( 2_r ), std::sqrt( 2_r ), std::sqrt( 2_r ), std::sqrt( 2_r ),
+        std::sqrt( 2_r ), std::sqrt( 2_r ), std::sqrt( 2_r ), std::sqrt( 2_r ),
+        std::sqrt( 3_r ), std::sqrt( 3_r ), std::sqrt( 3_r ), std::sqrt( 3_r ),
+        std::sqrt( 3_r ), std::sqrt( 3_r ), std::sqrt( 3_r ), std::sqrt( 3_r )
    };
 
 
    const real_t gaussianWeights [NR_OF_DIRECTIONS] =
    {
       //C  N   S   W   E   T   B   NW  NE  SW  SE  TN  TS  TW  TE  BN  BS  BW  BE  TNE TNW TSE TSW BNE BNW BSE BSW
-      real_t(8) / real_t(64),
-      real_t(4) / real_t(64), real_t(4) / real_t(64), real_t(4) / real_t(64), real_t(4) / real_t(64),
-      real_t(4) / real_t(64), real_t(4) / real_t(64),
-      real_t(2) / real_t(64), real_t(2) / real_t(64), real_t(2) / real_t(64), real_t(2) / real_t(64),
-      real_t(2) / real_t(64), real_t(2) / real_t(64), real_t(2) / real_t(64), real_t(2) / real_t(64), 
-      real_t(2) / real_t(64), real_t(2) / real_t(64), real_t(2) / real_t(64), real_t(2) / real_t(64),
-      real_t(1) / real_t(64), real_t(1) / real_t(64), real_t(1) / real_t(64), real_t(1) / real_t(64), 
-      real_t(1) / real_t(64), real_t(1) / real_t(64), real_t(1) / real_t(64), real_t(1) / real_t(64)
+      8_r / 64_r,
+      4_r / 64_r, 4_r / 64_r, 4_r / 64_r, 4_r / 64_r,
+      4_r / 64_r, 4_r / 64_r,
+      2_r / 64_r, 2_r / 64_r, 2_r / 64_r, 2_r / 64_r,
+      2_r / 64_r, 2_r / 64_r, 2_r / 64_r, 2_r / 64_r, 
+      2_r / 64_r, 2_r / 64_r, 2_r / 64_r, 2_r / 64_r,
+      1_r / 64_r, 1_r / 64_r, 1_r / 64_r, 1_r / 64_r, 
+      1_r / 64_r, 1_r / 64_r, 1_r / 64_r, 1_r / 64_r
    };
 
 

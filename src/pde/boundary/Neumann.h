@@ -70,7 +70,7 @@ public:
       {
          includeBoundary_[i] = true;
          order_[i] = uint_t(1);
-         value_[i] = real_t(0);
+         value_[i] = 0_r;
       }
       dx_[ stencil::D3Q6::idx[ stencil::W ] ] = blocks.dx();
       dx_[ stencil::D3Q6::idx[ stencil::E ] ] = blocks.dx();
@@ -177,7 +177,7 @@ void NeumannDomainBoundary< PdeField >::apply( PdeField * p, const CellInterval 
 {
    if( order == uint_t(1) )
    {
-      if( isIdentical( value, real_t(0) ) )
+      if( isIdentical( value, 0_r ) )
       {
          WALBERLA_FOR_ALL_CELLS_IN_INTERVAL_XYZ( interval,
             p->get(x,y,z) = p->get( x + cx, y + cy, z + cz );  // (dp / dx) == 0 _on_ the boundary
@@ -195,7 +195,7 @@ void NeumannDomainBoundary< PdeField >::apply( PdeField * p, const CellInterval 
    {
       WALBERLA_ASSERT_EQUAL( order, uint_t(2) );
 
-      if( isIdentical( value, real_t(0) ) )
+      if( isIdentical( value, 0_r ) )
       {      
          WALBERLA_FOR_ALL_CELLS_IN_INTERVAL_XYZ( interval,
 
@@ -204,7 +204,7 @@ void NeumannDomainBoundary< PdeField >::apply( PdeField * p, const CellInterval 
 
             const real_t boundaryValue = pBoundary + real_c(0.5) * ( pBoundary - pInner ); // extrapolation of value _on_ the boundary
 
-            p->get(x,y,z) = real_t(2) * boundaryValue - pBoundary;  // (d^2 p / dx^2) == 0 _on_ the boundary
+            p->get(x,y,z) = 2_r * boundaryValue - pBoundary;  // (d^2 p / dx^2) == 0 _on_ the boundary
          )
       }
       else
@@ -217,7 +217,7 @@ void NeumannDomainBoundary< PdeField >::apply( PdeField * p, const CellInterval 
 
             const real_t boundaryValue = pBoundary + real_c(0.5) * ( pBoundary - pInner ); // extrapolation of value _on_ the boundary
 
-            p->get(x,y,z) = vdx + real_t(2) * boundaryValue - pBoundary;  // (d^2 p / dx^2) == value _on_ the boundary
+            p->get(x,y,z) = vdx + 2_r * boundaryValue - pBoundary;  // (d^2 p / dx^2) == value _on_ the boundary
          )
       }
    }

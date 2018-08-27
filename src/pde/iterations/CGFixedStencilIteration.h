@@ -51,7 +51,7 @@ public:
                             const BlockDataID & uId, const BlockDataID & rId, const BlockDataID & dId, const BlockDataID & zId,
                             const BlockDataID & fId, const std::vector< real_t > & weights,
                             const uint_t iterations, const std::function< void () > & synchronizeD,
-                            const real_t residualNormThreshold = real_t(0),
+                            const real_t residualNormThreshold = 0_r,
                             const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                             const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() );
       
@@ -215,13 +215,13 @@ void CGFixedStencilIteration< Stencil_T >::calcR()  // r = f - Au
 template< typename Stencil_T >
 real_t CGFixedStencilIteration< Stencil_T >::scalarProductRR() // r*r
 {
-   real_t result( real_t(0) );
+   real_t result( 0_r );
    
    for( auto block = blocks_.begin( requiredSelectors_, incompatibleSelectors_ ); block != blocks_.end(); ++block )
    {
       Field_T * rf = block->template getData< Field_T >( rId_ );
       
-      real_t blockResult( real_t(0) );
+      real_t blockResult( 0_r );
       
       WALBERLA_FOR_ALL_CELLS_XYZ_OMP( rf, omp parallel for schedule(static) reduction(+:blockResult),
 
@@ -290,7 +290,7 @@ void CGFixedStencilIteration< Stencil_T >::calcAd() // z = Ad
 template< typename Stencil_T >
 real_t CGFixedStencilIteration< Stencil_T >::scalarProductDZ() // d*z
 {
-   real_t result( real_t(0) );
+   real_t result( 0_r );
    
    for( auto block = blocks_.begin( requiredSelectors_, incompatibleSelectors_ ); block != blocks_.end(); ++block )
    {
@@ -302,7 +302,7 @@ real_t CGFixedStencilIteration< Stencil_T >::scalarProductDZ() // d*z
 
       WALBERLA_ASSERT_EQUAL( df->xyzSize(), zf->xyzSize() );
       
-      real_t blockResult( real_t(0) );
+      real_t blockResult( 0_r );
       
       WALBERLA_FOR_ALL_CELLS_XYZ_OMP( df, omp parallel for schedule(static) reduction(+:blockResult),
 

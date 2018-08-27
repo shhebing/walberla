@@ -76,7 +76,7 @@ struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< bo
    static void apply( Vector3< real_t > & velocity, const cell_idx_t, const cell_idx_t, const cell_idx_t,
                       const LatticeModel_T & latticeModel, const real_t rho )
    {
-      velocity += latticeModel.forceModel().force() * real_t(0.5) / rho;
+      velocity += latticeModel.forceModel().force() * 0.5_r / rho;
    }
 };
 
@@ -89,7 +89,7 @@ struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< bo
    static void apply( Vector3< real_t > & velocity, const cell_idx_t, const cell_idx_t, const cell_idx_t,
                       const LatticeModel_T & latticeModel, const real_t )
    {
-      velocity += latticeModel.forceModel().force() * real_t(0.5);
+      velocity += latticeModel.forceModel().force() * 0.5_r;
    }
 };
 
@@ -102,7 +102,7 @@ struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< bo
    static void apply( Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                       const LatticeModel_T & latticeModel, const real_t rho )
    {
-      velocity += latticeModel.forceModel().force(x,y,z) * real_t(0.5) / rho;
+      velocity += latticeModel.forceModel().force(x,y,z) * 0.5_r / rho;
    }
 };
 
@@ -115,7 +115,7 @@ struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< bo
    static void apply( Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                       const LatticeModel_T & latticeModel, const real_t )
    {
-      velocity += latticeModel.forceModel().force(x,y,z) * real_t(0.5);
+      velocity += latticeModel.forceModel().force(x,y,z) * 0.5_r;
    }
 };
 
@@ -128,7 +128,7 @@ struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< bo
    static void apply( Vector3< real_t > & velocity, const cell_idx_t, const cell_idx_t, const cell_idx_t,
                       const LatticeModel_T & latticeModel, const real_t rho )
    {
-      velocity -= latticeModel.forceModel().force() * real_t(0.5) / rho;
+      velocity -= latticeModel.forceModel().force() * 0.5_r / rho;
    }
 };
 
@@ -141,7 +141,7 @@ struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< bo
    static void apply( Vector3< real_t > & velocity, const cell_idx_t, const cell_idx_t, const cell_idx_t,
                       const LatticeModel_T & latticeModel, const real_t )
    {
-      velocity -= latticeModel.forceModel().force() * real_t(0.5);
+      velocity -= latticeModel.forceModel().force() * 0.5_r;
    }
 };
 
@@ -154,7 +154,7 @@ struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< bo
    static void apply( Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                       const LatticeModel_T & latticeModel, const real_t rho )
    {
-      velocity -= latticeModel.forceModel().force(x,y,z) * real_t(0.5) / rho;
+      velocity -= latticeModel.forceModel().force(x,y,z) * 0.5_r / rho;
    }
 };
 
@@ -167,7 +167,7 @@ struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< bo
    static void apply( Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                       const LatticeModel_T & latticeModel, const real_t )
    {
-      velocity -= latticeModel.forceModel().force(x,y,z) * real_t(0.5);
+      velocity -= latticeModel.forceModel().force(x,y,z) * 0.5_r;
    }
 };
 
@@ -488,7 +488,7 @@ private:
 //   {
 //      auto & storage = field->get(x,y,z,1);
 //      field->get(x,y,z) = velocity + storage;
-//      storage = latticeModel.forceModel().force() * real_t(0.5) / rho;
+//      storage = latticeModel.forceModel().force() * 0.5_r / rho;
 //   }
 //};
 //
@@ -504,7 +504,7 @@ private:
 //   {
 //      auto & storage = field->get(x,y,z,1);
 //      field->get(x,y,z) = velocity + storage;
-//      storage = latticeModel.forceModel().force() * real_t(0.5);
+//      storage = latticeModel.forceModel().force() * 0.5_r;
 //   }
 //};
 //
@@ -520,7 +520,7 @@ private:
 //   {
 //      auto & storage = field->get(x,y,z,1);
 //      field->get(x,y,z) = velocity + storage;
-//      storage = latticeModel.forceModel().force(x,y,z) * real_t(0.5) / rho;      
+//      storage = latticeModel.forceModel().force(x,y,z) * 0.5_r / rho;      
 //   }
 //};
 //
@@ -536,7 +536,7 @@ private:
 //   {
 //      auto & storage = field->get(x,y,z,1);
 //      field->get(x,y,z) = velocity + storage;
-//      storage = latticeModel.forceModel().force(x,y,z) * real_t(0.5);
+//      storage = latticeModel.forceModel().force(x,y,z) * 0.5_r;
 //   }
 //};
 //
@@ -550,7 +550,7 @@ private:
 //   static void apply( VelocityField_T * const & field, const Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
 //                      const LatticeModel_T & latticeModel, const real_t rho )
 //   {
-//      field->get(x,y,z) = velocity - latticeModel.forceModel().force() * real_t(0.5) / rho;
+//      field->get(x,y,z) = velocity - latticeModel.forceModel().force() * 0.5_r / rho;
 //   }
 //};
 //
@@ -564,7 +564,7 @@ private:
 //   static void apply( VelocityField_T * const & field, const Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
 //                      const LatticeModel_T & latticeModel, const real_t )
 //   {
-//      field->get(x,y,z) = velocity - latticeModel.forceModel().force() * real_t(0.5);   
+//      field->get(x,y,z) = velocity - latticeModel.forceModel().force() * 0.5_r;   
 //   }
 //};
 //
@@ -578,7 +578,7 @@ private:
 //   static void apply( VelocityField_T * const & field, const Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
 //                      const LatticeModel_T & latticeModel, const real_t rho )
 //   {
-//      field->get(x,y,z) = velocity - latticeModel.forceModel().force(x,y,z) * real_t(0.5) / rho;   
+//      field->get(x,y,z) = velocity - latticeModel.forceModel().force(x,y,z) * 0.5_r / rho;   
 //   }
 //};
 //
@@ -592,7 +592,7 @@ private:
 //   static void apply( VelocityField_T * const & field, const Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
 //                      const LatticeModel_T & latticeModel, const real_t )
 //   {
-//      field->get(x,y,z) = velocity - latticeModel.forceModel().force(x,y,z) * real_t(0.5);   
+//      field->get(x,y,z) = velocity - latticeModel.forceModel().force(x,y,z) * 0.5_r;   
 //   }
 //};
 //
@@ -606,7 +606,7 @@ private:
 //   static void apply( VelocityField_T * const & field, const Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
 //                      const LatticeModel_T & latticeModel, const real_t rho )
 //   {
-//      const auto current = latticeModel.forceModel().force() * real_t(0.5) / rho;
+//      const auto current = latticeModel.forceModel().force() * 0.5_r / rho;
 //      auto & storage = field->get(x,y,z,1);
 //      field->get(x,y,z) = velocity - current + storage;
 //      storage = current;
@@ -623,7 +623,7 @@ private:
 //   static void apply( VelocityField_T * const & field, const Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
 //                      const LatticeModel_T & latticeModel, const real_t )
 //   {
-//      const auto current = latticeModel.forceModel().force() * real_t(0.5);
+//      const auto current = latticeModel.forceModel().force() * 0.5_r;
 //      auto & storage = field->get(x,y,z,1);
 //      field->get(x,y,z) = velocity - current + storage;
 //      storage = current;  
@@ -640,7 +640,7 @@ private:
 //   static void apply( VelocityField_T * const & field, const Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
 //                      const LatticeModel_T & latticeModel, const real_t rho )
 //   {
-//      const auto current = latticeModel.forceModel().force(x,y,z) * real_t(0.5) / rho;
+//      const auto current = latticeModel.forceModel().force(x,y,z) * 0.5_r / rho;
 //      auto & storage = field->get(x,y,z,1);
 //      field->get(x,y,z) = velocity - current + storage;
 //      storage = current;
@@ -657,7 +657,7 @@ private:
 //   static void apply( VelocityField_T * const & field, const Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
 //                      const LatticeModel_T & latticeModel, const real_t )
 //   {
-//      const auto current = latticeModel.forceModel().force(x,y,z) * real_t(0.5);
+//      const auto current = latticeModel.forceModel().force(x,y,z) * 0.5_r;
 //      auto & storage = field->get(x,y,z,1);
 //      field->get(x,y,z) = velocity - current + storage;
 //      storage = current;

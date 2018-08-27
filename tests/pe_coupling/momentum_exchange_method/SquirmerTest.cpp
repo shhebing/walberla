@@ -293,8 +293,8 @@ int main(int argc, char **argv) {
                                                       std::ref(blocks->getBlockForest()), bodyStorageID,
                                                       static_cast<WcTimingTree *>(nullptr), overlap, false);
 
-   const auto myMat = pe::createMaterial("myMat", real_c(1), real_t(0), real_t(1), real_t(1), real_t(0), real_t(1),
-                                         real_t(1), real_t(0), real_t(0));
+   const auto myMat = pe::createMaterial("myMat", real_c(1), 0_r, 1_r, 1_r, 0_r, 1_r,
+                                         1_r, 0_r, 0_r);
 
    // create the squirmer in the middle of the domain
    const Vector3<real_t> position(real_c(L) * real_c(0.5), real_c(L) * real_c(0.5), real_c(L) * real_c(0.5));

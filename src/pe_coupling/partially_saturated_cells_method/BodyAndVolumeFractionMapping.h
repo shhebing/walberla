@@ -74,8 +74,8 @@ public:
                                  const BlockDataID & bodyStorageID,
                                  const BlockDataID & bodyAndVolumeFractionFieldID,
                                  const std::function<bool(pe::BodyID)> & mappingBodySelectorFct = selectRegularBodies,
-                                 const real_t velocityUpdatingEpsilon = real_t(0),
-                                 const real_t positionUpdatingEpsilon = real_t(0),
+                                 const real_t velocityUpdatingEpsilon = 0_r,
+                                 const real_t positionUpdatingEpsilon = 0_r,
                                  const uint_t superSamplingDepth = uint_t(4) )
    : blockStorage_( blockStorage), globalBodyStorage_( globalBodyStorage ), bodyStorageID_( bodyStorageID ),
      bodyAndVolumeFractionFieldID_( bodyAndVolumeFractionFieldID ), mappingBodySelectorFct_( mappingBodySelectorFct ),

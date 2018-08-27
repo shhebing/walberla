@@ -138,25 +138,25 @@ void InteractionForceEvaluator< FlagField_T, FieldInterpolator_T, Distributor_T 
       {
          if(!dpmBodySelectorFct_(bodyIt.getBodyID())) continue;
 
-         Vector3<real_t> forceOnFluid( real_t(0) );
+         Vector3<real_t> forceOnFluid( 0_r );
 
          Vector3<real_t> bodyPosition = bodyIt->getPosition();
 
          // interpolate fluid velocity to body position
-         Vector3<real_t> fluidVelocity( real_t(0) );
+         Vector3<real_t> fluidVelocity( 0_r );
          velocityInterpolator->get( bodyPosition, &fluidVelocity );
 
          // interpolate solid volume fraction to body position
-         real_t solidVolumeFraction( real_t(0) );
+         real_t solidVolumeFraction( 0_r );
          solidVolumeFractionInterpolator->get( bodyPosition, &solidVolumeFraction );
 
-         WALBERLA_ASSERT_GREATER( solidVolumeFraction, real_t(0) );
+         WALBERLA_ASSERT_GREATER( solidVolumeFraction, 0_r );
 
          // evaluate drag force
          Vector3<real_t> bodyVelocity = bodyIt->getLinearVel();
          real_t bodyDiameter = getSphereEquivalentDiameter( *bodyIt );
          real_t bodyVolume = bodyIt->getVolume();
-         real_t fluidDensity( real_t(1) );
+         real_t fluidDensity( 1_r );
 
          Vector3<real_t> dragForce = dragForceCorrelationFunction_( fluidVelocity, bodyVelocity, solidVolumeFraction, bodyDiameter, fluidDynamicViscosity_, fluidDensity );
 
@@ -168,7 +168,7 @@ void InteractionForceEvaluator< FlagField_T, FieldInterpolator_T, Distributor_T 
          forceOnFluid += ( -dragForce );
 
          // evaluate pressure gradient force = - V * grad(p)
-         Vector3<real_t> pressureGradient( real_t(0) );
+         Vector3<real_t> pressureGradient( 0_r );
          pressureGradientInterpolator->get( bodyPosition, &pressureGradient );
          Vector3<real_t> pressureGradientForce = -bodyVolume * pressureGradient;
          WALBERLA_ASSERT( !math::isnan(pressureGradientForce[0]) && !math::isnan(pressureGradientForce[1]) && !math::isnan(pressureGradientForce[2]),

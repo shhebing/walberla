@@ -58,7 +58,7 @@ class SumSweep
          if( init_ ){
             auto itSum0 = sumField->beginGhostLayerOnly(stencil::T);
             for( ; itSum0 != sumField->end(); ++itSum0 )
-               *itSum0 = real_t(0);
+               *itSum0 = 0_r;
          }
 
          auto itVal = valField->rbegin();
@@ -135,15 +135,15 @@ int main(int argc, char **argv)
 
    // In addition to the normal GhostLayerField's  we allocated additionally a field containing the whole global simulation domain for each block
    // we can then check if the GhostLayer communication is correct, by comparing the small field to the corresponding part of the big field
-   BlockDataID valFieldLoc = field::addToStorage<ScalarField>(blocks, "Val", real_t(1) );
-   BlockDataID sumFieldLoc = field::addToStorage<ScalarField>(blocks, "Sum", real_t(0) );
+   BlockDataID valFieldLoc = field::addToStorage<ScalarField>(blocks, "Val", 1_r );
+   BlockDataID sumFieldLoc = field::addToStorage<ScalarField>(blocks, "Sum", 0_r );
 
-   BlockDataID valFieldGlb = blocks->addBlockData<ScalarField>( makeBlockDataInitFunction<ScalarField>( glbCellsX, glbCellsY, glbCellsZ, uint_t(1), real_t(1), layout), "Global Src" );
-   BlockDataID sumFieldGlb = blocks->addBlockData<ScalarField>( makeBlockDataInitFunction<ScalarField>( glbCellsX, glbCellsY, glbCellsZ, uint_t(1), real_t(0), layout), "Global Dst" );
+   BlockDataID valFieldGlb = blocks->addBlockData<ScalarField>( makeBlockDataInitFunction<ScalarField>( glbCellsX, glbCellsY, glbCellsZ, uint_t(1), 1_r, layout), "Global Src" );
+   BlockDataID sumFieldGlb = blocks->addBlockData<ScalarField>( makeBlockDataInitFunction<ScalarField>( glbCellsX, glbCellsY, glbCellsZ, uint_t(1), 0_r, layout), "Global Dst" );
 
    // small local fields
    blockforest::DirectionBasedReduceScheme<stencil::B> schemeB( blocks );
-   schemeB.addPackInfo( make_shared<field::communication::ReducePackInfo< std::plus, ScalarField > >( sumFieldLoc, real_t(0) ) );
+   schemeB.addPackInfo( make_shared<field::communication::ReducePackInfo< std::plus, ScalarField > >( sumFieldLoc, 0_r ) );
 
    // Create TimeLoop
    SweepTimeloop timeLoop (blocks->getBlockStorage(), nrOfTimeSteps);

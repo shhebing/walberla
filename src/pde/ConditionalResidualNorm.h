@@ -80,7 +80,7 @@ protected:
 template< typename Stencil_T, typename FlagField_T >
 real_t ConditionalResidualNorm< Stencil_T, FlagField_T >::weightedL2() const
 {
-   real_t result( real_t(0) );
+   real_t result( 0_r );
    uint_t cells( uint_t(0) );
 
    for( auto block = blocks_.begin( requiredSelectors_, incompatibleSelectors_ ); block != blocks_.end(); ++block )
@@ -91,7 +91,7 @@ real_t ConditionalResidualNorm< Stencil_T, FlagField_T >::weightedL2() const
       const FlagField_T * const flag = block->template getData< const FlagField_T >( flagFieldId_ );
       auto domain = flag->getMask( domainMask_ );
 
-      real_t blockResult( real_t(0) );
+      real_t blockResult( 0_r );
       uint_t blockCells( uint_t(0) );
 
       WALBERLA_FOR_ALL_CELLS_XYZ_OMP( uf, omp parallel for schedule(static) reduction(+:blockResult,blockCells),

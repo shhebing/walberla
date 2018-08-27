@@ -36,7 +36,7 @@ public:
    typedef blockforest::DynamicParMetisBlockInfo           PhantomBlockWeight;
    typedef blockforest::DynamicParMetisBlockInfoPackUnpack PhantomBlockWeightPackUnpackFunctor;
 
-   MetisAssignmentFunctor( shared_ptr<InfoCollection>& ic, const real_t baseWeight = real_t(10.0) ) : ic_(ic), baseWeight_(baseWeight) {}
+   MetisAssignmentFunctor( shared_ptr<InfoCollection>& ic, const real_t baseWeight = 10.0_r ) : ic_(ic), baseWeight_(baseWeight) {}
 
    void operator()( std::vector< std::pair< const PhantomBlock *, walberla::any > > & blockData, const PhantomBlockForest & forest )
    {

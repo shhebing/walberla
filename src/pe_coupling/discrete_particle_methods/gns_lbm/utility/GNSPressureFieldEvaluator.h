@@ -52,12 +52,12 @@ public:
       //const ScalarField_T* solidVolumeFractionField = block->getData< ScalarField_T >( solidVolumeFractionFieldID_ );
       const BoundaryHandling_T * boundaryHandling   = block->getData< BoundaryHandling_T >( boundaryHandlingID_ );
 
-      const real_t c_s_sqr = real_t(1)/real_t(3);
+      const real_t c_s_sqr = 1_r/3_r;
       WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ( pdfField,
          if( boundaryHandling->isDomain(x,y,z) )
          {
             real_t fluidDensity = pdfField->getDensity(x,y,z);
-            //real_t fluidVolumeFraction = real_t(1) - solidVolumeFractionField->get(x,y,z);
+            //real_t fluidVolumeFraction = 1_r - solidVolumeFractionField->get(x,y,z);
 
             // according to Guo (2002): p = rho * eps / 3
             // However, this would result in pressure gradients in the presence of solid volume fraction gradients.

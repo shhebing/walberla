@@ -200,7 +200,7 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block, const
 
    BoundaryHandling_T * handling = new BoundaryHandling_T( "moving obstacle boundary handling", flagField, fluid,
          boost::tuples::make_tuple( UBB_T( "UBB", UBB_Flag, pdfField, velocity_),
-                                    Outlet_T( "Outlet", Outlet_Flag, pdfField, real_t(1) ),
+                                    Outlet_T( "Outlet", Outlet_Flag, pdfField, 1_r ),
                                     MEM_BB_T (  "MEM_BB",  MEM_BB_Flag, pdfField, flagField, bodyField, fluid, *storage, *block ),
                                     MEM_CLI_T( "MEM_CLI", MEM_CLI_Flag, pdfField, flagField, bodyField, fluid, *storage, *block ),
                                     MEM_MR_T (  "MEM_MR",  MEM_MR_Flag, pdfField, flagField, bodyField, fluid, *storage, *block, pdfFieldPreCol ) )  );
@@ -279,7 +279,7 @@ public:
 
       dragForceOld_ = dragForceNew_;
       dragForceNew_ = currentAverage_ / real_c( averageFrequency_ );
-      currentAverage_ = real_t(0);
+      currentAverage_ = 0_r;
 
    }
 
@@ -319,11 +319,11 @@ private:
    shared_ptr< StructuredBlockStorage > blocks_;
    const BlockDataID bodyStorageID_;
 
-   real_t currentAverage_ = real_t(0);
+   real_t currentAverage_ = 0_r;
    uint_t averageFrequency_;
    std::string filename_;
-   real_t dragForceOld_ = real_t(0);
-   real_t dragForceNew_ = real_t(0);
+   real_t dragForceOld_ = 0_r;
+   real_t dragForceNew_ = 0_r;
 
 };
 
@@ -358,7 +358,7 @@ public:
          fileSetup << "viscosity = " << viscosity << "\n";
          fileSetup << "diameter = " << diameter << "\n";
          fileSetup << "uInfty = " << u_infty_[2] << "\n";
-         real_t u_ref = std::sqrt( std::fabs(densityRatio - real_t(1)) * gravity * diameter );
+         real_t u_ref = std::sqrt( std::fabs(densityRatio - 1_r) * gravity * diameter );
          fileSetup << "u_{ref} = " << u_ref << "\n";
          fileSetup << "numLBMSubCycles = " << numLBMSubCycles << "\n";
          fileSetup.close();
@@ -392,12 +392,12 @@ public:
    {
       const uint_t timestep ( timeloop_->getCurrentTimeStep() * numLBMSubCycles_ + 1 );
 
-      Vector3<real_t> transVel( real_t(0) );
-      Vector3<real_t> angularVel( real_t(0) );
-      Vector3<real_t> pos( real_t(0) );
+      Vector3<real_t> transVel( 0_r );
+      Vector3<real_t> angularVel( 0_r );
+      Vector3<real_t> pos( 0_r );
 
-      Vector3<real_t> force( real_t(0) );
-      Vector3<real_t> torque( real_t(0) );
+      Vector3<real_t> force( 0_r );
+      Vector3<real_t> torque( 0_r );
 
       for( auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt )
       {
@@ -450,7 +450,7 @@ public:
          real_t omega_p_H = std::sqrt( particleAngularVel[0] * particleAngularVel[0] + particleAngularVel[1] * particleAngularVel[1] );
          real_t omega_p_V = particleAngularVel[2];
 
-         real_t u_ref = std::sqrt( std::fabs(densityRatio_ - real_t(1)) * gravity_ * diameter_ );
+         real_t u_ref = std::sqrt( std::fabs(densityRatio_ - 1_r) * gravity_ * diameter_ );
          real_t Reynolds = u_p_r.length() * diameter_ / viscosity_;
 
          // results
@@ -528,7 +528,7 @@ public:
 
    void operator()()
    {
-      Vector3<real_t> u_p( real_t(0) );
+      Vector3<real_t> u_p( 0_r );
       for( auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt )
       {
          for( auto bodyIt = pe::LocalBodyIterator::begin<pe::Sphere>(*blockIt, bodyStorageID_ ); bodyIt != pe::LocalBodyIterator::end<pe::Sphere>(); ++bodyIt )
@@ -550,9 +550,9 @@ public:
 
       real_t u_p_H = std::sqrt( u_p_r[0] * u_p_r[0] + u_p_r[1] * u_p_r[1]);
 
-      Vector3<real_t> e_p_H (u_p_r[0], u_p_r[1], real_t(0));
+      Vector3<real_t> e_p_H (u_p_r[0], u_p_r[1], 0_r);
       e_p_H /= u_p_H;
-      Vector3<real_t> e_p_Hz_perp (-u_p_r[1], u_p_r[0], real_t(0));
+      Vector3<real_t> e_p_Hz_perp (-u_p_r[1], u_p_r[0], 0_r);
       e_p_Hz_perp /= u_p_H;
 
       Vector3<real_t> e_p_parallel = u_p_r / u_p_r.length();
@@ -669,8 +669,8 @@ int main( int argc, char **argv )
    bool usePSM = false;
    PSMVariant psmVariant = PSMVariant::SC3W2;
 
-   real_t Galileo = real_t(144);
-   real_t diameter = real_t(18);
+   real_t Galileo = 144_r;
+   real_t diameter = 18_r;
 
    ////////////////////////////
    // COMMAND LINE ARGUMENTS //
@@ -695,39 +695,39 @@ int main( int argc, char **argv )
    // SIMULATION PROPERTIES //
    ///////////////////////////
 
-   const real_t radius = real_t(0.5) * diameter;
-   const uint_t xlength = uint_c( diameter * real_t(5.34) );
+   const real_t radius = 0.5_r * diameter;
+   const uint_t xlength = uint_c( diameter * 5.34_r );
    const uint_t ylength = xlength;
-   uint_t zlength = uint_c( diameter * real_t(16) );
+   uint_t zlength = uint_c( diameter * 16_r );
 
    if (longDom)
    {
       zlength *= uint_t(3);
    }
 
-   real_t viscosity = real_t(0.01);
-   real_t Re_target = real_t(1);
-   real_t timestepsNonDim = real_t(1);
+   real_t viscosity = 0.01_r;
+   real_t Re_target = 1_r;
+   real_t timestepsNonDim = 1_r;
 
    // estimate Reynolds number (i.e. inflow velocity) based on Galileo number
    // values are taken from the original simulation of Uhlmann, Dusek
    switch( int(Galileo) )
    {
       case 144:
-         Re_target = real_t(185.08);
-         timestepsNonDim = real_t(100);
+         Re_target = 185.08_r;
+         timestepsNonDim = 100_r;
          break;
       case 178:
-         Re_target = real_t(243.01);
-         timestepsNonDim = real_t(250);
+         Re_target = 243.01_r;
+         timestepsNonDim = 250_r;
          break;
       case 190:
-         Re_target = real_t(262.71);
-         timestepsNonDim = real_t(250);
+         Re_target = 262.71_r;
+         timestepsNonDim = 250_r;
          break;
       case 250:
-         Re_target = real_t(365.10);
-         timestepsNonDim = real_t(510);
+         Re_target = 365.10_r;
+         timestepsNonDim = 510_r;
          break;
       default:
          WALBERLA_ABORT("Galileo number is different from the usual ones (144, 178, 190, or 250). No estimate of the Reynolds number available. Add this case manually!");
@@ -738,20 +738,20 @@ int main( int argc, char **argv )
 
    real_t omega = lbm::collision_model::omegaFromViscosity(viscosity);
 
-   Vector3<real_t> uInfty = Vector3<real_t>( real_t(0), real_t(0), uIn );
+   Vector3<real_t> uInfty = Vector3<real_t>( 0_r, 0_r, uIn );
 
-   const real_t densityRatio = real_t(1.5);
+   const real_t densityRatio = 1.5_r;
 
-   const uint_t averageFrequency = uint_c( ( ( uint_c(Galileo) >= 200) ? real_t(500) : real_t(2) ) * diameter / uIn ); // for initial simulation
-   const real_t convergenceLimit = real_t(1e-4);
-   const real_t convergenceLimitGalileo = real_t(1e-4);
-   const real_t dx = real_t(1);
+   const uint_t averageFrequency = uint_c( ( ( uint_c(Galileo) >= 200) ? 500_r : 2_r ) * diameter / uIn ); // for initial simulation
+   const real_t convergenceLimit = 1e-4_r;
+   const real_t convergenceLimitGalileo = 1e-4_r;
+   const real_t dx = 1_r;
    const real_t magicNumberTRT = lbm::collision_model::TRT::threeSixteenth;
 
    const uint_t numLBMSubCycles = ( useMEM ) ? 2 : 1;
    const uint_t numPeSubCycles  = uint_c(numLBMSubCycles); // dtPE = dtLBM
 
-   const uint_t timestepsInit = uint_c( ( ( uint_c(Galileo) >= 200) ? real_t(3000) : real_t(100) ) * diameter / uIn ); // maximum number of time steps for the initial simulation
+   const uint_t timestepsInit = uint_c( ( ( uint_c(Galileo) >= 200) ? 3000_r : 100_r ) * diameter / uIn ); // maximum number of time steps for the initial simulation
    const uint_t writeFrequencyInit = uint_t(1000); // vtk write frequency init
 
    ///////////////////////////
@@ -785,7 +785,7 @@ int main( int argc, char **argv )
    WALBERLA_LOG_INFO_ON_ROOT("Domain: " << xlength << " x " << ylength << " x " << zlength);
    WALBERLA_LOG_INFO_ON_ROOT("Processes: " << XBlocks << " x " << YBlocks << " x " << ZBlocks);
    WALBERLA_LOG_INFO_ON_ROOT("Subdomains: " << XCells << " x " << YCells << " x " << ZCells);
-   WALBERLA_LOG_INFO_ON_ROOT("Tau: " << real_t(1)/omega);
+   WALBERLA_LOG_INFO_ON_ROOT("Tau: " << 1_r/omega);
    WALBERLA_LOG_INFO_ON_ROOT("Viscosity: " << viscosity);
    WALBERLA_LOG_INFO_ON_ROOT("uIn: " << uIn);
    WALBERLA_LOG_INFO_ON_ROOT("Re_infty: " << uIn * diameter / viscosity);
@@ -817,36 +817,36 @@ int main( int argc, char **argv )
       syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(nullptr), overlap, false );
 
 
-   real_t xParticle = real_t(0);
-   real_t yParticle = real_t(0);
-   real_t zParticle = real_t(0);
+   real_t xParticle = 0_r;
+   real_t yParticle = 0_r;
+   real_t zParticle = 0_r;
 
    // root determines particle position, then broadcasts it
    WALBERLA_ROOT_SECTION()
    {
       if( int(Galileo) == 144 )
       {
-         xParticle = real_c( xlength ) * real_t(0.5);
-         yParticle = real_c( ylength ) * real_t(0.5);
+         xParticle = real_c( xlength ) * 0.5_r;
+         yParticle = real_c( ylength ) * 0.5_r;
       }
       else if( int(Galileo) == 250 )
       {
          // add random perturbance for chaotic regime
          walberla::math::seedRandomGenerator( std::mt19937::result_type(std::time(nullptr)) );
-         xParticle = real_c( xlength ) * real_t(0.5) + walberla::math::realRandom( real_t(-0.5), real_t(0.5) );
-         yParticle = real_c( ylength ) * real_t(0.5) + walberla::math::realRandom( real_t(-0.5), real_t(0.5) );
+         xParticle = real_c( xlength ) * 0.5_r + walberla::math::realRandom( -0.5_r, 0.5_r );
+         yParticle = real_c( ylength ) * 0.5_r + walberla::math::realRandom( -0.5_r, 0.5_r );
 
       }
       else
       {
          //add small perturbance to sphere position to break stability due to numerical symmetry
-         real_t perturbance = real_t(0.35);
+         real_t perturbance = 0.35_r;
 
-         xParticle = real_c( xlength ) * real_t(0.5) + perturbance;
-         yParticle = real_c( ylength ) * real_t(0.5);
+         xParticle = real_c( xlength ) * 0.5_r + perturbance;
+         yParticle = real_c( ylength ) * 0.5_r;
       }
 
-      zParticle = (longDom) ? ( diameter * real_t(16) + real_c( xlength ) ) : real_c( xlength );
+      zParticle = (longDom) ? ( diameter * 16_r + real_c( xlength ) ) : real_c( xlength );
    }
 
    // broadcast to other ranks
@@ -858,7 +858,7 @@ int main( int argc, char **argv )
    }
 
    // add sphere
-   const auto sphereMaterial = pe::createMaterial( "mySphereMat", densityRatio , real_t(0.5), real_t(0.1), real_t(0.1), real_t(0.24), real_t(200), real_t(200), real_t(0), real_t(0) );
+   const auto sphereMaterial = pe::createMaterial( "mySphereMat", densityRatio , 0.5_r, 0.1_r, 0.1_r, 0.24_r, 200_r, 200_r, 0_r, 0_r );
    Vector3<real_t> position( xParticle, yParticle, zParticle );
    pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, position, radius, sphereMaterial );
    syncCall();
@@ -874,10 +874,10 @@ int main( int argc, char **argv )
 
    // add PDF field
    // initial velocity in domain = inflow velocity
-   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (zyxf)", latticeModel, uInfty, real_t(1), uint_t(1), field::zyxf );
+   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (zyxf)", latticeModel, uInfty, 1_r, uint_t(1), field::zyxf );
 
    // add PDF field (needed to store pre collision values for MEM_MR scheme)
-   BlockDataID pdfFieldPreColID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "nqOdd field (zyxf)", latticeModel, uInfty, real_t(1), uint_t(1), field::zyxf );
+   BlockDataID pdfFieldPreColID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "nqOdd field (zyxf)", latticeModel, uInfty, 1_r, uint_t(1), field::zyxf );
 
    // add flag field
    BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field" );
@@ -1040,16 +1040,16 @@ int main( int argc, char **argv )
       timeloopInit.addFuncAfterTimeStep( vtk::writeFiles( pdfFieldVTKInit ), "VTK (fluid field data)" );
    }
 
-   timeloopInit.addFuncAfterTimeStep( RemainingTimeLogger( timeloopInit.getNrOfTimeSteps(), real_t(120) ), "Remaining Time Logger" );
+   timeloopInit.addFuncAfterTimeStep( RemainingTimeLogger( timeloopInit.getNrOfTimeSteps(), 120_r ), "Remaining Time Logger" );
 
    ////////////////////////////////
    // EXECUTE INITIAL SIMULATION //
    ////////////////////////////////
 
-   real_t gravity = real_t(1);
-   real_t GalileoSim = real_t(1);
-   real_t ReynoldsSim = real_t(1);
-   real_t u_ref = real_t(1);
+   real_t gravity = 1_r;
+   real_t GalileoSim = 1_r;
+   real_t ReynoldsSim = 1_r;
+   real_t u_ref = 1_r;
 
    WALBERLA_LOG_INFO_ON_ROOT("Starting initialization phase (sphere is kept fixed).");
    WALBERLA_LOG_INFO_ON_ROOT("Iterating, and adapting the viscosity, until the targeted Galileo number is set.");
@@ -1081,10 +1081,10 @@ int main( int argc, char **argv )
       WALBERLA_LOG_INFO_ON_ROOT("Initial simulation has ended.")
 
       //evaluate the gravitational force necessary to keep the sphere at a approximately fixed position
-      gravity = forceEval->getForce() / ( (densityRatio - real_t(1) ) * diameter * diameter * diameter * math::PI / real_t(6) );
-      GalileoSim = std::sqrt( ( densityRatio - real_t(1) ) * gravity * diameter * diameter * diameter ) / viscosity;
+      gravity = forceEval->getForce() / ( (densityRatio - 1_r ) * diameter * diameter * diameter * math::PI / 6_r );
+      GalileoSim = std::sqrt( ( densityRatio - 1_r ) * gravity * diameter * diameter * diameter ) / viscosity;
       ReynoldsSim = uIn * diameter / viscosity;
-      u_ref = std::sqrt( std::fabs(densityRatio - real_t(1)) * gravity * diameter );
+      u_ref = std::sqrt( std::fabs(densityRatio - 1_r) * gravity * diameter );
 
       WALBERLA_LOG_INFO_ON_ROOT("Acting gravity (= interaction force) = " << gravity );
       WALBERLA_LOG_INFO_ON_ROOT("Simulated Galileo number = " << GalileoSim );
@@ -1139,7 +1139,7 @@ int main( int argc, char **argv )
    const uint_t timesteps = timestepsLBM / numLBMSubCycles + 1; // total number of time steps for the whole simulation
 
    // set vtk write frequency accordingly
-   const real_t dtWriteNonDim = real_t(3); // write every 3 non-dim timesteps
+   const real_t dtWriteNonDim = 3_r; // write every 3 non-dim timesteps
    const uint_t nVTK = ( int(Galileo) != 178 ) ? 2 : 10; // write only 10 vtk files: the 10 final ones
 
    const uint_t writeFrequency = uint_c( dtWriteNonDim * t_ref ) / numLBMSubCycles; // vtk write frequency
@@ -1190,7 +1190,7 @@ int main( int argc, char **argv )
       }
 
       if( numLBMSubCycles != uint_t(1) )
-         timeloop.addFuncAfterTimeStep( pe_coupling::ForceTorqueOnBodiesScaler( blocks, bodyStorageID, real_t(1) / real_c(numLBMSubCycles) ), "Force averaging for several LBM steps" );
+         timeloop.addFuncAfterTimeStep( pe_coupling::ForceTorqueOnBodiesScaler( blocks, bodyStorageID, 1_r / real_c(numLBMSubCycles) ), "Force averaging for several LBM steps" );
 
    }else{
 
@@ -1230,12 +1230,12 @@ int main( int argc, char **argv )
       }
 
       if( numLBMSubCycles != uint_t(1) )
-         timeloop.addFuncAfterTimeStep( pe_coupling::ForceTorqueOnBodiesScaler( blocks, bodyStorageID, real_t(1) / real_c(numLBMSubCycles) ), "Force averaging for several LBM steps" );
+         timeloop.addFuncAfterTimeStep( pe_coupling::ForceTorqueOnBodiesScaler( blocks, bodyStorageID, 1_r / real_c(numLBMSubCycles) ), "Force averaging for several LBM steps" );
 
    }
 
    // add gravity
-   Vector3<real_t> extForcesOnSphere( real_t(0), real_t(0), - gravity * ( densityRatio - real_t(1) ) * diameter * diameter * diameter * math::PI / real_t(6));
+   Vector3<real_t> extForcesOnSphere( 0_r, 0_r, - gravity * ( densityRatio - 1_r ) * diameter * diameter * diameter * math::PI / 6_r);
    timeloop.addFuncAfterTimeStep( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, extForcesOnSphere ), "Add external forces (gravity and buoyancy)" );
 
    // evaluate the sphere properties
@@ -1271,7 +1271,7 @@ int main( int argc, char **argv )
    timeloop.addFuncAfterTimeStep( vtk::writeFiles( pdfFieldVTK ), "VTK (fluid field data)" );
 
 
-   timeloop.addFuncAfterTimeStep( RemainingTimeLogger( timeloop.getNrOfTimeSteps(), real_t(120) ), "Remaining Time Logger" );
+   timeloop.addFuncAfterTimeStep( RemainingTimeLogger( timeloop.getNrOfTimeSteps(), 120_r ), "Remaining Time Logger" );
 
    ////////////////////////
    // EXECUTE SIMULATION //

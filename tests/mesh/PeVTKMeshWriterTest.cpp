@@ -55,13 +55,13 @@ typedef boost::tuple<ConvexPolyhedron, Plane> BodyTuple ;
 std::vector<Vector3<real_t>> generatePointCloudCube()
 {
    std::vector<Vector3<real_t>> points;
-   points.emplace_back( real_t(-1), real_t(-1), real_t(-1) );
-   points.emplace_back( real_t(-1), real_t(-1), real_t( 1) );
-   points.emplace_back( real_t(-1), real_t( 1), real_t(-1) );
-   points.emplace_back( real_t(-1), real_t( 1), real_t( 1) );
-   points.emplace_back( real_t( 1), real_t(-1), real_t(-1) );
-   points.emplace_back( real_t( 1), real_t(-1), real_t( 1) );
-   points.emplace_back( real_t( 1), real_t( 1), real_t(-1) );
+   points.emplace_back( -1_r, -1_r, -1_r );
+   points.emplace_back( -1_r, -1_r, real_t( 1) );
+   points.emplace_back( -1_r, real_t( 1), -1_r );
+   points.emplace_back( -1_r, real_t( 1), real_t( 1) );
+   points.emplace_back( real_t( 1), -1_r, -1_r );
+   points.emplace_back( real_t( 1), -1_r, real_t( 1) );
+   points.emplace_back( real_t( 1), real_t( 1), -1_r );
    points.emplace_back( real_t( 1), real_t( 1), real_t( 1) );
 
    return points;
@@ -71,8 +71,8 @@ std::vector<Vector3<real_t>> generatePointCloudDodecahedron()
 {
    std::vector<Vector3<real_t>> points = generatePointCloudCube();
 
-   static const real_t PHI = ( real_t(1) + std::sqrt( real_t(5) ) ) / real_t(2);
-   static const real_t PHI_INV = real_t(1) / PHI;
+   static const real_t PHI = ( 1_r + std::sqrt( 5_r ) ) / 2_r;
+   static const real_t PHI_INV = 1_r / PHI;
 
    for( auto phi : {-PHI, PHI} )
       for( auto piv : {-PHI_INV, PHI_INV} )
@@ -95,7 +95,7 @@ std::vector<Vector3<real_t>> generatPointCloudOnSphere( const real_t radius, con
    for( auto & p : pointCloud )
    {
       real_t theta = 2 * math::PI * distribution(rng);
-      real_t phi = std::acos( real_t(1.0) - real_t(2.0) * distribution(rng) );
+      real_t phi = std::acos( 1.0_r - 2.0_r * distribution(rng) );
       p[0] = std::sin(phi) * std::cos(theta) * radius;
       p[1] = std::sin(phi) * std::sin(theta) * radius;
       p[2] = std::cos(phi) * radius;
@@ -128,7 +128,7 @@ int main( int argc, char ** argv )
 
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
 
-   shared_ptr< BlockForest > forest = createBlockForest( AABB( real_t(0), real_t(0), real_t(0), real_t(6), real_t(6), real_t(6) ), 
+   shared_ptr< BlockForest > forest = createBlockForest( AABB( 0_r, 0_r, 0_r, 6_r, 6_r, 6_r ), 
                                                          Vector3<uint_t>( uint_t(2) ), Vector3<bool>( false ) );
 
    SetBodyTypeIDs<BodyTuple>::execute();
@@ -141,7 +141,7 @@ int main( int argc, char ** argv )
    cr::HCSITS cr(globalBodyStorage, forest, storageID, ccdID, fcdID);
    cr.setMaxIterations( 10 );
    cr.setRelaxationModel( cr::HardContactSemiImplicitTimesteppingSolvers::ApproximateInelasticCoulombContactByDecoupling );
-   cr.setRelaxationParameter( real_t(0.7) );
+   cr.setRelaxationParameter( 0.7_r );
    cr.setGlobalLinearAcceleration( Vec3(0,0,5) );
 
    std::function<void(void)> syncCall = std::bind( pe::syncNextNeighbors<BodyTuple>, std::ref(*forest), storageID, static_cast<WcTimingTree*>(nullptr), real_c(0.0), false );

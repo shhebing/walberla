@@ -68,7 +68,7 @@ public:
       WALBERLA_FOR_ALL_CELLS_XYZ( pdfField,
          if( boundaryHandling->isDomain(x,y,z) )
          {
-            real_t fluidVolumeFraction = real_t(1) - svfField->get(x,y,z);
+            real_t fluidVolumeFraction = 1_r - svfField->get(x,y,z);
             Vector3<real_t> volumeAverageVelocity = pdfField->getVelocity(x,y,z);
             velocityField->get(x,y,z) = volumeAverageVelocity / fluidVolumeFraction;
          }

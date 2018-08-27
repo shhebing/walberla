@@ -168,7 +168,7 @@ void PostProcessing< LatticeModel_T, Filter_T >::operator()( BlockForest & fores
                            WALBERLA_ASSERT( !math::isnan( coarse(x,y,z,f) ) );
                            const auto v = coarse(x,y,z,f);
 
-                           Vector3< real_t > grad( real_t(0) );
+                           Vector3< real_t > grad( 0_r );
 
                            for( uint_t i = 0; i < Stencil_T::D; ++i )
                            {
@@ -176,7 +176,7 @@ void PostProcessing< LatticeModel_T, Filter_T >::operator()( BlockForest & fores
                               {
                                  if( interval.contains( fmin[i] ) && markerField->get( fmin[i] ) != uint8_t(0) )
                                  {
-                                    grad[i] = real_t(0.5) * ( coarse( max[i], f ) - coarse( min[i], f ) );
+                                    grad[i] = 0.5_r * ( coarse( max[i], f ) - coarse( min[i], f ) );
                                  }
                                  else
                                  {
@@ -262,8 +262,8 @@ void PostProcessing< LatticeModel_T, Filter_T >::operator()( BlockForest & fores
 
                      /*
                      Vector3<real_t> velocity;
-                     real_t density( real_t(0) );
-                     real_t count( real_t(0) );
+                     real_t density( 0_r );
+                     real_t count( 0_r );
 
                      for( auto it = NeighborsStencil_T::begin(); it != NeighborsStencil_T::end(); ++it )
                      {
@@ -278,20 +278,20 @@ void PostProcessing< LatticeModel_T, Filter_T >::operator()( BlockForest & fores
                               Vector3<real_t> vel;
                               density += pdfField->getDensityAndVelocity(vel,x,y,z);
                               velocity += vel;
-                              count += real_t(1);
+                              count += 1_r;
                            }
                         }
                      }
                      
-                     if( count > real_t(0) )
+                     if( count > 0_r )
                      {
-                        const real_t factor = real_t(1) / count;
+                        const real_t factor = 1_r / count;
                         velocity *= factor;
                         density *= factor;
                      }
                      else
                      {
-                        density = real_t(1);
+                        density = 1_r;
                      }
 
                      pdfField->setDensityAndVelocity(x,y,z,velocity,density);

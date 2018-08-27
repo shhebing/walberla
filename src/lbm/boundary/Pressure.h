@@ -217,7 +217,7 @@ inline void Pressure< LatticeModel_T, flag_t >::treatDirection( const cell_idx_t
    // result will be streamed to (x,y,z, stencil::inverseDir[d]) during sweep
    pdfField_->get( nx, ny, nz, Stencil::invDirIdx(dir) ) =
       - pdfField_->get( x, y, z, Stencil::idx[dir] )                   //anti-bounce-back
-      + real_t(2) * EquilibriumDistribution<LatticeModel_T>::getSymmetricPart( dir, u,  latticeDensityField_->get(nx,ny,nz) ); //pressure term
+      + 2_r * EquilibriumDistribution<LatticeModel_T>::getSymmetricPart( dir, u,  latticeDensityField_->get(nx,ny,nz) ); //pressure term
 }
 
 

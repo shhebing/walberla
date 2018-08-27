@@ -120,9 +120,9 @@ static void refinementSelection( SetupBlockForest& forest, const uint_t levels )
    {
       AABB topCorner( domain.xMin(),
                       domain.yMin(),
-                      domain.zMax() - domain.zMax() / real_t(14),
-                      domain.xMin() + domain.xMax() / real_t(14),
-                      domain.yMin() + domain.yMax() / real_t(14),
+                      domain.zMax() - domain.zMax() / 14_r,
+                      domain.xMin() + domain.xMax() / 14_r,
+                      domain.yMin() + domain.yMax() / 14_r,
                       domain.zMax() );
 
       for( auto block = forest.begin(); block != forest.end(); ++block )
@@ -134,13 +134,13 @@ static void refinementSelection( SetupBlockForest& forest, const uint_t levels )
    }
    else if( testMode == MIDDLE )
    {
-      const real_t xSpan = domain.xSize() / real_t(32);
-      const real_t ySpan = domain.ySize() / real_t(32);
-      const real_t zSpan = domain.zSize() / real_t(32);
+      const real_t xSpan = domain.xSize() / 32_r;
+      const real_t ySpan = domain.ySize() / 32_r;
+      const real_t zSpan = domain.zSize() / 32_r;
 
-      const real_t xMiddle = ( domain.xMin() + domain.xMax() ) / real_t(2);
-      const real_t yMiddle = ( domain.yMin() + domain.yMax() ) / real_t(2);
-      const real_t zMiddle = ( domain.zMin() + domain.zMax() ) / real_t(2);
+      const real_t xMiddle = ( domain.xMin() + domain.xMax() ) / 2_r;
+      const real_t yMiddle = ( domain.yMin() + domain.yMax() ) / 2_r;
+      const real_t zMiddle = ( domain.zMin() + domain.zMax() ) / 2_r;
 
       AABB middleBox( xMiddle - xSpan, yMiddle - ySpan, zMiddle - zSpan,
                       xMiddle + xSpan, yMiddle + ySpan, zMiddle + zSpan );
@@ -193,7 +193,7 @@ static shared_ptr< StructuredBlockForest > createBlockStructure( const uint_t le
    // calculate process distribution
    const memory_t memoryLimit = math::Limits< memory_t >::inf();
 
-   sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), uint_c( MPIManager::instance()->numProcesses() ), real_t(0), memoryLimit, true );
+   sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), uint_c( MPIManager::instance()->numProcesses() ), 0_r, memoryLimit, true );
 
    WALBERLA_LOG_INFO_ON_ROOT( sforest );
 
@@ -300,12 +300,12 @@ shared_ptr< vtk::VTKOutput> createFluidFieldVTKWriter( shared_ptr< StructuredBlo
    combine.addFilter( fluidFilter );
    if( testMode == MIDDLE )
    {
-      vtk::AABBCellFilter aabbFilter( AABB( aabb.xMin(), real_t(7), aabb.zMin(), aabb.xMax(), real_t(8), aabb.zMax() ) );
+      vtk::AABBCellFilter aabbFilter( AABB( aabb.xMin(), 7_r, aabb.zMin(), aabb.xMax(), 8_r, aabb.zMax() ) );
       combine.addFilter( aabbFilter );
    }
    else
    {
-      vtk::AABBCellFilter aabbFilter( AABB( aabb.xMin(), real_t(1), aabb.zMin(), aabb.xMax(), real_t(2), aabb.zMax() ) );
+      vtk::AABBCellFilter aabbFilter( AABB( aabb.xMin(), 1_r, aabb.zMin(), aabb.xMax(), 2_r, aabb.zMax() ) );
       combine.addFilter( aabbFilter );
    }
    pdfFieldVTKWriter->addCellInclusionFilter( combine );
@@ -405,9 +405,9 @@ int main( int argc, char ** argv )
 
    auto blocks = createBlockStructure( levels, xBlocks, yBlocks, zBlocks, xCells, yCells, zCells, true, true, false );
    
-   const real_t Re = real_t(10);
+   const real_t Re = 10_r;
    const real_t omega = ( testMode == ENTIRE_TOP || testMode == ENTIRE_BOTTOM ) ? real_c(1.9) : real_c(1.3);
-   const real_t nu = ( real_t(1) / omega - real_c(0.5) ) / real_t(3);
+   const real_t nu = ( 1_r / omega - real_c(0.5) ) / 3_r;
    const real_t L = real_c( zBlocks * zCells );
    const real_t topVelocity = ( Re * nu ) / L;
 
@@ -429,11 +429,11 @@ int main( int argc, char ** argv )
 
    BlockDataID pdfFieldId1 = lbm::addPdfFieldToStorage( blocks, "pdf field (1)", latticeModel,
                                                        Vector3< real_t >( topVelocity / real_c(2), real_c(0), real_c(0) ),
-                                                       real_t(1), FieldGhostLayers );
+                                                       1_r, FieldGhostLayers );
 
    BlockDataID pdfFieldId2 = lbm::addPdfFieldToStorage( blocks, "pdf field (2)", latticeModel,
                                                        Vector3< real_t >( topVelocity / real_c(2), real_c(0), real_c(0) ),
-                                                       real_t(1), FieldGhostLayers );
+                                                       1_r, FieldGhostLayers );
 
    BlockDataID flagFieldId1 = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field (1)", FieldGhostLayers );
    BlockDataID flagFieldId2 = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field (2)", FieldGhostLayers );

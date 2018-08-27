@@ -73,7 +73,7 @@ const FlagUID    UBB_Flag( "velocity bounce back" );
 const FlagUID NoSlip_Flag( "no slip" );
 
 const uint_t FieldGhostLayers  = uint_t(1);
-const real_t GlobalOmega       = real_t(1.4);
+const real_t GlobalOmega       = 1.4_r;
 
 
 
@@ -148,7 +148,7 @@ MyBoundaryHandling<LatticeModel_T>::operator()( IBlock * const block, const Stru
 
    // velocity bounce back ball :-)
 
-   const Vector3<real_t> center( real_t(36), real_t(27), real_t(33) );
+   const Vector3<real_t> center( 36_r, 27_r, 33_r );
    const real_t sqrRadius( real_t(7*7) );
 
    for( auto cell = flagField->beginWithGhostLayer(); cell != flagField->end(); ++cell )
@@ -162,7 +162,7 @@ MyBoundaryHandling<LatticeModel_T>::operator()( IBlock * const block, const Stru
 
       Vector3<real_t> distance = center - cellCenter;
       if( distance.sqrLength() <= sqrRadius )
-         boundaryHandling->forceBoundary( UBB_Flag, x, y, z, typename UBB_T::Velocity( velocity_, real_t(0), real_t(0) ) );
+         boundaryHandling->forceBoundary( UBB_Flag, x, y, z, typename UBB_T::Velocity( velocity_, 0_r, 0_r ) );
    }
 
    boundaryHandling->fillWithDomain( domainBB );
@@ -255,7 +255,7 @@ int main( int argc, char ** argv )
                                                       uint_t(2),  uint_t(2),  uint_t(2),
                                                       true, false, false ); // periodicty
 
-   const real_t velocity = real_t(0.0005);
+   const real_t velocity = 0.0005_r;
 
 #ifdef TEST_USES_VTK_OUTPUT
    SweepTimeloop timeloop( blocks->getBlockStorage(), uint_t(201) );

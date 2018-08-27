@@ -526,9 +526,9 @@ BodyID HashGrids::HashGrid::getBodyIntersectionForBlockCell(const Vector3<int32_
    raytracing::IntersectsFunctor intersectsFunc(ray, t_local, n_local);
    
    // calculate center coordinates of the cell in the block
-   real_t x = (real_c(blockCell[0]) + real_t(0.5)) * cellSpan_;
-   real_t y = (real_c(blockCell[1]) + real_t(0.5)) * cellSpan_;
-   real_t z = (real_c(blockCell[2]) + real_t(0.5)) * cellSpan_;
+   real_t x = (real_c(blockCell[0]) + 0.5_r) * cellSpan_;
+   real_t y = (real_c(blockCell[1]) + 0.5_r) * cellSpan_;
+   real_t z = (real_c(blockCell[2]) + 0.5_r) * cellSpan_;
    
    // hash of cell in the hashgrid
    size_t cellHash = hashPoint(x, y, z);
@@ -639,7 +639,7 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
       Vec3 firstPointNormal;
       if (intersects(blockAABB, ray, t_start, cellSpan_, &firstPointNormal)) {
          firstPoint = ray.getOrigin() + ray.getDirection()*t_start;
-         firstPointCenteredInCell = firstPoint - firstPointNormal * (cellSpan_/real_t(2));
+         firstPointCenteredInCell = firstPoint - firstPointNormal * (cellSpan_/2_r);
          tRayOriginToGrid = (ray.getOrigin() - firstPoint).length();
       } else {
          return NULL;

@@ -79,7 +79,7 @@ void testJacobi2D()
    shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid (
            uint_t(1) , uint_t(1),  uint_t(1),  // number of blocks in x,y,z direction
            xSize, ySize, uint_t(1),  // how many cells per block (x,y,z)
-           real_t(1),                          // dx: length of one cell in physical coordinates
+           1_r,                          // dx: length of one cell in physical coordinates
            false,                              // one block per process - "false" means all blocks to one process
            true, true, true );                 // no periodicity
 
@@ -133,7 +133,7 @@ void testJacobi3D()
    shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid (
            uint_t(1) , uint_t(1),  uint_t(1),  // number of blocks in x,y,z direction
            xSize, ySize, zSize,                // how many cells per block (x,y,z)
-           real_t(1),                          // dx: length of one cell in physical coordinates
+           1_r,                          // dx: length of one cell in physical coordinates
            false,                              // one block per process - "false" means all blocks to one process
            true, true, true );                 // no periodicity
 

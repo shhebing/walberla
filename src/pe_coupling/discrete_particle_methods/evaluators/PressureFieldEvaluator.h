@@ -52,7 +52,7 @@ public:
       ScalarField_T* pressureField                 = block->getData< ScalarField_T >( pressureFieldID_ );
       const BoundaryHandling_T * boundaryHandling  = block->getData< BoundaryHandling_T >( boundaryHandlingID_ );
 
-      const real_t c_s_sqr = real_t(1)/real_t(3);
+      const real_t c_s_sqr = 1_r/3_r;
       WALBERLA_FOR_ALL_CELLS_XYZ( pdfField,
          if( boundaryHandling->isDomain(x,y,z) )
          {

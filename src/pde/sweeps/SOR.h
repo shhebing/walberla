@@ -74,7 +74,7 @@ void SOR< Stencil_T >::update( IBlock * const block, const bool rb )
 {
 #ifndef NDEBUG
    for( auto dir = Stencil_T::beginNoCenter(); dir != Stencil_T::end(); ++dir )
-      WALBERLA_ASSERT( realIsIdentical( dir.length(), real_t(1) ) );
+      WALBERLA_ASSERT( realIsIdentical( dir.length(), 1_r ) );
 #endif
 
    Field_T * uf( NULL );
@@ -87,7 +87,7 @@ void SOR< Stencil_T >::update( IBlock * const block, const bool rb )
    const cell_idx_t zero = cell_idx_t(0);
    const cell_idx_t one  = cell_idx_t(1);
 
-   const real_t omegaInv = real_t(1) - omega_;
+   const real_t omegaInv = 1_r - omega_;
 
    Cell cell(zero,zero,zero);
    blocks_->transformBlockLocalToGlobalCell( cell, *block );

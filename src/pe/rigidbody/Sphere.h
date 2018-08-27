@@ -303,9 +303,9 @@ inline Mat3 Sphere::calcInertia( const real_t mass, const real_t radius )
 inline Vec3 Sphere::support( const Vec3& d ) const
 {
    auto len = d.sqrLength();
-   if (!math::equal(len, real_t(0)))
+   if (!math::equal(len, 0_r))
    {
-      //WALBERLA_ASSERT_FLOAT_EQUAL( len, real_t(1), "search direction not normalized!");
+      //WALBERLA_ASSERT_FLOAT_EQUAL( len, 1_r, "search direction not normalized!");
       const Vec3 s = getPosition() + (getRadius() / sqrt(len)) * d;
       //std::cout << "Support in direction " << d << " with center " << getPosition() << " (r=" << getRadius() << ") is " << s << std::endl;
       return s;
@@ -327,9 +327,9 @@ inline Vec3 Sphere::support( const Vec3& d ) const
 inline Vec3 Sphere::supportContactThreshold( const Vec3& d ) const
 {
    auto len = d.sqrLength();
-   if (!math::equal(len, real_t(0)))
+   if (!math::equal(len, 0_r))
    {
-      //WALBERLA_ASSERT_FLOAT_EQUAL( len, real_t(1), "search direction not normalized!");
+      //WALBERLA_ASSERT_FLOAT_EQUAL( len, 1_r, "search direction not normalized!");
       const Vec3 s = getPosition() + (getRadius() / sqrt(len) + contactThreshold) * d;
       //std::cout << "Support in direction " << d << " with center " << getPosition() << " (r=" << getRadius() << ") is " << s << std::endl;
       return s;

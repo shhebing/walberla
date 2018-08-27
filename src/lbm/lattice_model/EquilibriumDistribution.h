@@ -77,41 +77,41 @@ public:
    typedef typename LatticeModel_T::Stencil Stencil;
 
    static real_t get( const real_t cx, const real_t cy, const real_t cz, const real_t w,
-                      const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                      const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       const real_t vel = internal::multiplyVelocityDirection( cx, cy, cz, velocity );
-      return w * ( (rho - real_t(1.0)) - real_t(1.5) * velocity.sqrLength() + real_t(4.5) * vel * vel + real_t(3.0) * vel );
+      return w * ( (rho - 1.0_r) - 1.5_r * velocity.sqrLength() + 4.5_r * vel * vel + 3.0_r * vel );
    }
 
    static real_t get( const stencil::Direction direction,
-                      const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                      const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       using namespace stencil;
       return get( real_c(cx[direction]), real_c(cy[direction]), real_c(cz[direction]), LatticeModel_T::w[ Stencil::idx[direction] ], velocity, rho );
    }
 
    static real_t getSymmetricPart( const stencil::Direction direction,
-                                   const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                                   const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       const real_t vel = internal::multiplyVelocityDirection( direction, velocity );
-      return LatticeModel_T::w[ Stencil::idx[direction] ] * ( (rho - real_t(1.0)) - real_t(1.5) * velocity.sqrLength() + real_t(4.5) * vel * vel );
+      return LatticeModel_T::w[ Stencil::idx[direction] ] * ( (rho - 1.0_r) - 1.5_r * velocity.sqrLength() + 4.5_r * vel * vel );
    }
 
    static real_t getAsymmetricPart( const stencil::Direction direction,
-                                    const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t /*rho*/ = real_t(1.0) )
+                                    const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t /*rho*/ = 1.0_r )
    {
-      return LatticeModel_T::w[ Stencil::idx[direction] ] * real_t(3.0) * internal::multiplyVelocityDirection( direction, velocity );
+      return LatticeModel_T::w[ Stencil::idx[direction] ] * 3.0_r * internal::multiplyVelocityDirection( direction, velocity );
    }
 
-   static std::vector< real_t > get( const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+   static std::vector< real_t > get( const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       std::vector< real_t > equilibrium( Stencil::Size );
 
-      const real_t dirIndependent = (rho - real_t(1.0)) - real_t(1.5) * velocity.sqrLength();
+      const real_t dirIndependent = (rho - 1.0_r) - 1.5_r * velocity.sqrLength();
       for( auto d = Stencil::begin(); d != Stencil::end(); ++d )
       {
          const real_t vel = internal::multiplyVelocityDirection( *d, velocity );
-         equilibrium[d.toIdx()] = LatticeModel_T::w[ d.toIdx() ] * ( dirIndependent + real_t(4.5) * vel * vel + real_t(3.0) * vel );
+         equilibrium[d.toIdx()] = LatticeModel_T::w[ d.toIdx() ] * ( dirIndependent + 4.5_r * vel * vel + 3.0_r * vel );
       }
 
       return equilibrium;
@@ -132,36 +132,36 @@ public:
    typedef typename LatticeModel_T::Stencil Stencil;
 
    static real_t get( const real_t cx, const real_t cy, const real_t cz, const real_t w,
-                      const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                      const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
-      return w * ( (rho - real_t(1.0)) + real_t(3.0) * internal::multiplyVelocityDirection( cx, cy, cz, velocity ) );
+      return w * ( (rho - 1.0_r) + 3.0_r * internal::multiplyVelocityDirection( cx, cy, cz, velocity ) );
    }
 
    static real_t get( const stencil::Direction direction,
-                      const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                      const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       using namespace stencil;
       return get( real_c(cx[direction]), real_c(cy[direction]), real_c(cz[direction]), LatticeModel_T::w[ Stencil::idx[direction] ], velocity, rho );
    }
 
    static real_t getSymmetricPart( const stencil::Direction direction,
-                                   const Vector3< real_t > & /*velocity*/ = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                                   const Vector3< real_t > & /*velocity*/ = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
-      return LatticeModel_T::w[ Stencil::idx[direction] ] * ( rho - real_t(1.0) );
+      return LatticeModel_T::w[ Stencil::idx[direction] ] * ( rho - 1.0_r );
    }
 
    static real_t getAsymmetricPart( const stencil::Direction direction,
-                                    const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t /*rho*/ = real_t(1.0) )
+                                    const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t /*rho*/ = 1.0_r )
    {
-      return LatticeModel_T::w[ Stencil::idx[direction] ] * real_t(3.0) * internal::multiplyVelocityDirection( direction, velocity );
+      return LatticeModel_T::w[ Stencil::idx[direction] ] * 3.0_r * internal::multiplyVelocityDirection( direction, velocity );
    }
 
-   static std::vector< real_t > get( const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+   static std::vector< real_t > get( const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       std::vector< real_t > equilibrium( Stencil::Size );
 
       for( auto d = Stencil::begin(); d != Stencil::end(); ++d )
-         equilibrium[d.toIdx()] = LatticeModel_T::w[ d.toIdx() ] * ( (rho - real_t(1.0)) + real_t(3.0) * internal::multiplyVelocityDirection( *d, velocity ) );
+         equilibrium[d.toIdx()] = LatticeModel_T::w[ d.toIdx() ] * ( (rho - 1.0_r) + 3.0_r * internal::multiplyVelocityDirection( *d, velocity ) );
 
       return equilibrium;
    }
@@ -181,41 +181,41 @@ public:
    typedef typename LatticeModel_T::Stencil Stencil;
 
    static real_t get( const real_t cx, const real_t cy, const real_t cz, const real_t w,
-                      const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                      const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       const real_t vel = internal::multiplyVelocityDirection( cx, cy, cz, velocity );
-      return w * rho * ( real_t(1.0) - real_t(1.5) * velocity.sqrLength() + real_t(4.5) * vel * vel + real_t(3.0) * vel );
+      return w * rho * ( 1.0_r - 1.5_r * velocity.sqrLength() + 4.5_r * vel * vel + 3.0_r * vel );
    }
 
    static real_t get( const stencil::Direction direction,
-                      const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                      const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       using namespace stencil;
       return get( real_c(cx[direction]), real_c(cy[direction]), real_c(cz[direction]), LatticeModel_T::w[ Stencil::idx[direction] ], velocity, rho );
    }
 
    static real_t getSymmetricPart( const stencil::Direction direction,
-                                   const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                                   const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       const real_t vel = internal::multiplyVelocityDirection( direction, velocity );
-      return LatticeModel_T::w[ Stencil::idx[direction] ] * rho * ( real_t(1.0) - real_t(1.5) * velocity.sqrLength() + real_t(4.5) * vel * vel );
+      return LatticeModel_T::w[ Stencil::idx[direction] ] * rho * ( 1.0_r - 1.5_r * velocity.sqrLength() + 4.5_r * vel * vel );
    }
 
    static real_t getAsymmetricPart( const stencil::Direction direction,
-                                    const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                                    const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
-      return LatticeModel_T::w[ Stencil::idx[direction] ] * rho * real_t(3.0) * internal::multiplyVelocityDirection( direction, velocity );
+      return LatticeModel_T::w[ Stencil::idx[direction] ] * rho * 3.0_r * internal::multiplyVelocityDirection( direction, velocity );
    }
 
-   static std::vector< real_t > get( const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+   static std::vector< real_t > get( const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       std::vector< real_t > equilibrium( Stencil::Size );
 
-      const real_t dirIndependent = real_t(1.0) - real_t(1.5) * velocity.sqrLength();
+      const real_t dirIndependent = 1.0_r - 1.5_r * velocity.sqrLength();
       for( auto d = Stencil::begin(); d != Stencil::end(); ++d )
       {
          const real_t vel = internal::multiplyVelocityDirection( *d, velocity );
-         equilibrium[d.toIdx()] = LatticeModel_T::w[ d.toIdx() ] * rho * ( dirIndependent + real_t(4.5) * vel * vel + real_t(3.0) * vel );
+         equilibrium[d.toIdx()] = LatticeModel_T::w[ d.toIdx() ] * rho * ( dirIndependent + 4.5_r * vel * vel + 3.0_r * vel );
       }
 
       return equilibrium;
@@ -236,36 +236,36 @@ public:
    typedef typename LatticeModel_T::Stencil Stencil;
 
    static real_t get( const real_t cx, const real_t cy, const real_t cz, const real_t w,
-                      const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                      const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
-      return w * rho * ( real_t(1.0) + real_t(3.0) * internal::multiplyVelocityDirection( cx, cy, cz, velocity ) );
+      return w * rho * ( 1.0_r + 3.0_r * internal::multiplyVelocityDirection( cx, cy, cz, velocity ) );
    }
 
    static real_t get( const stencil::Direction direction,
-                      const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                      const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       using namespace stencil;
       return get( real_c(cx[direction]), real_c(cy[direction]), real_c(cz[direction]), LatticeModel_T::w[ Stencil::idx[direction] ], velocity, rho );
    }
 
    static real_t getSymmetricPart( const stencil::Direction direction,
-                                   const Vector3< real_t > & /*velocity*/ = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                                   const Vector3< real_t > & /*velocity*/ = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       return LatticeModel_T::w[ Stencil::idx[direction] ] * rho;
    }
 
    static real_t getAsymmetricPart( const stencil::Direction direction,
-                                    const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                                    const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
-      return LatticeModel_T::w[ Stencil::idx[direction] ] * rho * real_t(3.0) * internal::multiplyVelocityDirection( direction, velocity );
+      return LatticeModel_T::w[ Stencil::idx[direction] ] * rho * 3.0_r * internal::multiplyVelocityDirection( direction, velocity );
    }
 
-   static std::vector< real_t > get( const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+   static std::vector< real_t > get( const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       std::vector< real_t > equilibrium( Stencil::Size );
 
       for( auto d = Stencil::begin(); d != Stencil::end(); ++d )
-         equilibrium[d.toIdx()] = LatticeModel_T::w[ d.toIdx() ] * rho * ( real_t(1.0) + real_t(3.0) * internal::multiplyVelocityDirection( *d, velocity ) );
+         equilibrium[d.toIdx()] = LatticeModel_T::w[ d.toIdx() ] * rho * ( 1.0_r + 3.0_r * internal::multiplyVelocityDirection( *d, velocity ) );
 
       return equilibrium;
    }

@@ -123,7 +123,7 @@ inline real_t         getRestitution(ConstContactID c)
    {
       return Material::getRestitution( c->getBody1()->getMaterial(), c->getBody1()->getMaterial() );
    }
-   return real_t(0.0);
+   return 0.0_r;
 }
 
 // Calculate the stiffness and damping parameters

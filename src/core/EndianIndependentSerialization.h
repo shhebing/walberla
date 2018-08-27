@@ -102,9 +102,9 @@ uint_t realToByteArray( const REAL_T value, std::vector< uint8_t >& array, const
 
    int exp;
    const REAL_T x = std::frexp( value, &exp );
-   const REAL_T sign = ( x < REAL_T(0) ) ? REAL_T(-1) : REAL_T(1);
+   const REAL_T sign = ( x < 0_r ) ? -1_r : 1_r;
 
-   uint_t signByte = ( ( exp >= 0 ) ? uint_c(0) : uint_c(1) ) + ( ( sign < REAL_T(0) ) ? uint_c(2) : uint_c(0) );
+   uint_t signByte = ( ( exp >= 0 ) ? uint_c(0) : uint_c(1) ) + ( ( sign < 0_r ) ? uint_c(2) : uint_c(0) );
    array[ offset ] = uint8_c( signByte );
 
    uint32_t uexp = ( exp >= 0 ) ? uint32_c( exp ) : uint32_c( -1 * exp );
@@ -141,7 +141,7 @@ REAL_T byteArrayToReal( const std::vector< uint8_t >& array, const uint_t offset
    for( uint_t i = 0; i != sizeof( REAL_T ); ++i )
       mant |= uint64_c( array[ offset + 3 + i ] ) << ( i * 8 );
 
-   const REAL_T sign = ( ( uint_c( array[ offset ] ) & uint_c(2) ) == uint_c(0) ) ? REAL_T(1) : REAL_T(-1);
+   const REAL_T sign = ( ( uint_c( array[ offset ] ) & uint_c(2) ) == uint_c(0) ) ? 1_r : -1_r;
    return std::ldexp( sign * numeric_cast<REAL_T>( mant ) / numeric_cast<REAL_T>( uint64_c(1) << uint64_c( 1 + std::numeric_limits<REAL_T>::digits ) ), exp );
 }
 

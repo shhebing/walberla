@@ -166,13 +166,13 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block, const
 #ifdef OutletBC
    BoundaryHandling_T * handling = new BoundaryHandling_T( "Boundary handling", flagField, fluid,
          boost::tuples::make_tuple( NoSlip_T( "NoSlip", NoSlip_Flag, pdfField ),
-                                    Inflow_T( "Inflow", Inflow_Flag, pdfField, Vector3<real_t>(real_t(0),real_t(0),uInflow_) ),
+                                    Inflow_T( "Inflow", Inflow_Flag, pdfField, Vector3<real_t>(0_r,0_r,uInflow_) ),
                                     Outflow_T( "Outflow", Outflow_Flag, pdfField, flagField, fluid ) ) );
 #else
    BoundaryHandling_T * handling = new BoundaryHandling_T( "Boundary handling", flagField, fluid,
          boost::tuples::make_tuple( NoSlip_T( "NoSlip", NoSlip_Flag, pdfField ),
-                                    Inflow_T( "Inflow", Inflow_Flag, pdfField, Vector3<real_t>(real_t(0),real_t(0),uInflow_) ),
-                                    Outflow_T( "Outflow", Outflow_Flag, pdfField, real_t(1) ) ) );
+                                    Inflow_T( "Inflow", Inflow_Flag, pdfField, Vector3<real_t>(0_r,0_r,uInflow_) ),
+                                    Outflow_T( "Outflow", Outflow_Flag, pdfField, 1_r ) ) );
 #endif
 
    const auto noslip  = flagField->getFlag( NoSlip_Flag );
@@ -320,7 +320,7 @@ uint_t createSpheresRandomly( StructuredBlockForest & forest, pe::BodyStorage & 
    real_t domainVolume = generationDomain.volume();
    real_t totalSphereVolume = domainVolume * solidVolumeFraction;
 
-   real_t percentageOfSpecies1 = real_t(1);
+   real_t percentageOfSpecies1 = 1_r;
    if( diameter1 < diameter2 || diameter1 > diameter2 )
    {
       real_t effectiveMass1 = diameter1 * diameter1 * diameter1;
@@ -330,15 +330,15 @@ uint_t createSpheresRandomly( StructuredBlockForest & forest, pe::BodyStorage & 
       percentageOfSpecies1 = (effectiveMassAvg - effectiveMass2) / (effectiveMass1 - effectiveMass2);
    }
 
-   WALBERLA_LOG_INFO_ON_ROOT("Creating "<< percentageOfSpecies1 * real_t(100) << "% of sphere type 1 with diameter = " << diameter1 <<
-                             " and " << (real_t(1) - percentageOfSpecies1) * real_t(100) << "% of sphere type 2 with diameter = " << diameter2);
+   WALBERLA_LOG_INFO_ON_ROOT("Creating "<< percentageOfSpecies1 * 100_r << "% of sphere type 1 with diameter = " << diameter1 <<
+                             " and " << (1_r - percentageOfSpecies1) * 100_r << "% of sphere type 2 with diameter = " << diameter2);
 
-   real_t xParticle = real_t(0);
-   real_t yParticle = real_t(0);
-   real_t zParticle = real_t(0);
-   real_t creationDiameter = real_t(0);
+   real_t xParticle = 0_r;
+   real_t yParticle = 0_r;
+   real_t zParticle = 0_r;
+   real_t creationDiameter = 0_r;
 
-   real_t currentSphereVolume = real_t(0);
+   real_t currentSphereVolume = 0_r;
    uint_t numberOfSpheres = uint_t(0);
 
    while( currentSphereVolume < totalSphereVolume )
@@ -350,7 +350,7 @@ uint_t createSpheresRandomly( StructuredBlockForest & forest, pe::BodyStorage & 
          yParticle = math::realRandom<real_t>(generationDomain.yMin(), generationDomain.yMax());
          zParticle = math::realRandom<real_t>(generationDomain.zMin(), generationDomain.zMax());
 
-         real_t speciesDecider = math::realRandom<real_t>(real_t(0), real_t(1));
+         real_t speciesDecider = math::realRandom<real_t>(0_r, 1_r);
          // if decider is in [0,...,percentageOfSpecies1], then species 1 is created, else species 2
          if( percentageOfSpecies1 > speciesDecider )
          {
@@ -370,9 +370,9 @@ uint_t createSpheresRandomly( StructuredBlockForest & forest, pe::BodyStorage & 
          mpi::broadcastObject( creationDiameter );
       }
 
-      pe::createSphere( globalBodyStorage, forest.getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( xParticle, yParticle, zParticle ), creationDiameter * real_t(0.5), material );
+      pe::createSphere( globalBodyStorage, forest.getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( xParticle, yParticle, zParticle ), creationDiameter * 0.5_r, material );
 
-      currentSphereVolume += math::M_PI / real_t(6) * creationDiameter * creationDiameter * creationDiameter;
+      currentSphereVolume += math::M_PI / 6_r * creationDiameter * creationDiameter * creationDiameter;
 
       ++numberOfSpheres;
    }
@@ -527,7 +527,7 @@ private:
 class CollisionPropertiesEvaluator
 {
 public:
-   CollisionPropertiesEvaluator( pe::cr::ICR & collisionResponse ) : collisionResponse_( collisionResponse ), maximumPenetration_(real_t(0))
+   CollisionPropertiesEvaluator( pe::cr::ICR & collisionResponse ) : collisionResponse_( collisionResponse ), maximumPenetration_(0_r)
    {}
 
    void operator()()
@@ -545,7 +545,7 @@ public:
    }
    void resetMaximumPenetration()
    {
-      maximumPenetration_ = real_t(0);
+      maximumPenetration_ = 0_r;
    }
 private:
    pe::cr::ICR & collisionResponse_;
@@ -671,17 +671,17 @@ int main( int argc, char **argv ) {
    uint_t numberOfInitialTimeSteps = uint_t(0);
    std::string vtkBaseFolder = "vtk_out_BiDisperseFluidizedBedDPM";
 
-   real_t densityRatio = real_t(2500) / real_t(1000);
-   real_t ReynoldsNumber = real_t(10); // = rho_f * diameterAvg * uInflow / visc_f
-   real_t GalileoNumber = real_t(28); // = sqrt((densityRatio - 1) * g * diameterAvg ) * diameterAvg / visc_f
+   real_t densityRatio = 2500_r / 1000_r;
+   real_t ReynoldsNumber = 10_r; // = rho_f * diameterAvg * uInflow / visc_f
+   real_t GalileoNumber = 28_r; // = sqrt((densityRatio - 1) * g * diameterAvg ) * diameterAvg / visc_f
 
-   real_t diameter1 = real_t(0.7); // diameter of species 1
-   real_t diameter2 = real_t(0.8); // diameter of species 2
-   real_t diameterAvg = real_t(0.75); // (mass) average diameter of all particles
+   real_t diameter1 = 0.7_r; // diameter of species 1
+   real_t diameter2 = 0.8_r; // diameter of species 2
+   real_t diameterAvg = 0.75_r; // (mass) average diameter of all particles
 
    uint_t interactionSubCycles = uint_t(2); // number of subcycles that involve evaluation of the interaction force
    uint_t peSubSteps = uint_t(10); // number of pe only calls in each subcycle
-   real_t solidVolumeFraction = real_t(0.2); // in the generation domain (fraction of the whole domain)
+   real_t solidVolumeFraction = 0.2_r; // in the generation domain (fraction of the whole domain)
 
    DPMethod dpm = DPMethod::GNS;
    Interpolation interpol = Interpolation::IKernel;
@@ -692,7 +692,7 @@ int main( int argc, char **argv ) {
    EffectiveViscosity effVisc = EffectiveViscosity::Eilers;
 
    bool useTurbulenceModel = true;
-   const real_t smagorinskyConstant = real_t(0.1); //for turbulence model
+   const real_t smagorinskyConstant = 0.1_r; //for turbulence model
 
    real_t lubricationCutOffDistance = diameterAvg; //0 switches it off
 
@@ -725,16 +725,16 @@ int main( int argc, char **argv ) {
 
    if (vtkWriteFrequency > 0) vtkIO = true;
 
-   WALBERLA_CHECK(diameter1 <= real_t(1), "Diameter is not allowed to be > 1!");
-   WALBERLA_CHECK(diameter2 <= real_t(1), "Diameter is not allowed to be > 1!");
+   WALBERLA_CHECK(diameter1 <= 1_r, "Diameter is not allowed to be > 1!");
+   WALBERLA_CHECK(diameter2 <= 1_r, "Diameter is not allowed to be > 1!");
    WALBERLA_CHECK((diameter1 <= diameterAvg && diameterAvg <= diameter2) ||
                   (diameter2 <= diameterAvg && diameterAvg <= diameter1),
                   "Average diameter has to be between diameter 1 and 2!");
-   WALBERLA_CHECK(solidVolumeFraction > real_t(0), "Solid volume fraction has to be > 0!");
-   WALBERLA_CHECK(solidVolumeFraction <= real_t(0.65), "Solid volume fraction is not allowed to be > 0.65!");
+   WALBERLA_CHECK(solidVolumeFraction > 0_r, "Solid volume fraction has to be > 0!");
+   WALBERLA_CHECK(solidVolumeFraction <= 0.65_r, "Solid volume fraction is not allowed to be > 0.65!");
    WALBERLA_CHECK(interactionSubCycles > uint_t(0), "Number of interaction sub cycles has to be at least 1!");
    WALBERLA_CHECK(peSubSteps > uint_t(0), "Number of pe sub steps has to be at least 1!");
-   WALBERLA_CHECK(lubricationCutOffDistance >= real_t(0), "Lubrication cut off distance has to be non-negative!");
+   WALBERLA_CHECK(lubricationCutOffDistance >= 0_r, "Lubrication cut off distance has to be non-negative!");
 
    if (funcTest) {
       walberla::logging::Logging::instance()->setLogLevel(logging::Logging::LogLevel::WARNING);
@@ -754,24 +754,24 @@ int main( int argc, char **argv ) {
    //                           //
    ///////////////////////////////
 
-   const uint_t xlength = uint_c(real_t(32) * diameterAvg);
-   const uint_t ylength = uint_c(real_t(16) * diameterAvg);
-   const uint_t zlength = uint_c(real_t(256) * diameterAvg);
+   const uint_t xlength = uint_c(32_r * diameterAvg);
+   const uint_t ylength = uint_c(16_r * diameterAvg);
+   const uint_t zlength = uint_c(256_r * diameterAvg);
 
-   const real_t uInflow = real_t(0.01);
+   const real_t uInflow = 0.01_r;
    const real_t viscosity = diameterAvg * uInflow / ReynoldsNumber;
 
    const real_t ug = GalileoNumber * viscosity / diameterAvg;
-   const real_t gravitationalAcc = ug * ug / ((densityRatio - real_t(1)) * diameterAvg);
+   const real_t gravitationalAcc = ug * ug / ((densityRatio - 1_r) * diameterAvg);
 
    const real_t omega = lbm::collision_model::omegaFromViscosity(viscosity);
-   const real_t tau = real_t(1) / omega;
+   const real_t tau = 1_r / omega;
 
-   const real_t dx = real_t(1);
+   const real_t dx = 1_r;
 
-   const real_t dt_DEM = real_t(1) / real_c(interactionSubCycles * peSubSteps);
+   const real_t dt_DEM = 1_r / real_c(interactionSubCycles * peSubSteps);
 
-   const real_t dt = real_t(1);
+   const real_t dt = 1_r;
    const real_t dtInteractionSubCycle = dt / real_c(interactionSubCycles);
    const real_t dtBodyVelocityTimeDerivativeEvaluation = dtInteractionSubCycle;
 
@@ -781,7 +781,7 @@ int main( int argc, char **argv ) {
    const uint_t initialTimesteps = (funcTest) ? uint_t(0)
                                               : numberOfInitialTimeSteps; // total number of time steps for the initial simulation
 
-   const Vector3<real_t> initialFluidVelocity(real_t(0), real_t(0), uInflow);
+   const Vector3<real_t> initialFluidVelocity(0_r, 0_r, uInflow);
 
 
    if (!funcTest) {
@@ -849,19 +849,19 @@ int main( int argc, char **argv ) {
    pe::cr::DEM cr_dem(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID);
    cr = &cr_dem;
 
-   const real_t restitutionCoeff = real_t(0.88);
-   const real_t frictionCoeff = real_t(0.25);
+   const real_t restitutionCoeff = 0.88_r;
+   const real_t frictionCoeff = 0.25_r;
 
-   real_t sphereVolume = diameterAvg * diameterAvg * diameterAvg * math::M_PI / real_t(6); // based on avg. diameter
+   real_t sphereVolume = diameterAvg * diameterAvg * diameterAvg * math::M_PI / 6_r; // based on avg. diameter
    const real_t particleMass = densityRatio * sphereVolume;
-   const real_t Mij = particleMass * particleMass / (real_t(2) * particleMass);
+   const real_t Mij = particleMass * particleMass / (2_r * particleMass);
    const real_t lnDryResCoeff = std::log(restitutionCoeff);
-   const real_t collisionTime = real_t(0.5);
+   const real_t collisionTime = 0.5_r;
    const real_t stiffnessCoeff = math::M_PI * math::M_PI * Mij / (collisionTime * collisionTime *
-                                 (real_t(1) - lnDryResCoeff * lnDryResCoeff / (math::M_PI * math::M_PI + lnDryResCoeff * lnDryResCoeff)));
-   const real_t dampingCoeff = -real_t(2) * std::sqrt(Mij * stiffnessCoeff) *
+                                 (1_r - lnDryResCoeff * lnDryResCoeff / (math::M_PI * math::M_PI + lnDryResCoeff * lnDryResCoeff)));
+   const real_t dampingCoeff = -2_r * std::sqrt(Mij * stiffnessCoeff) *
                                (std::log(restitutionCoeff) / std::sqrt(math::M_PI * math::M_PI + (std::log(restitutionCoeff) * std::log(restitutionCoeff))));
-   const real_t contactDuration = real_t(2) * math::M_PI * Mij / (std::sqrt(real_t(4) * Mij * stiffnessCoeff - dampingCoeff * dampingCoeff)); //formula from Uhlman
+   const real_t contactDuration = 2_r * math::M_PI * Mij / (std::sqrt(4_r * Mij * stiffnessCoeff - dampingCoeff * dampingCoeff)); //formula from Uhlman
 
    WALBERLA_LOG_INFO_ON_ROOT("Created particle material with:\n"
                                    << " - coefficient of restitution = " << restitutionCoeff << "\n"
@@ -871,7 +871,7 @@ int main( int argc, char **argv ) {
                                    << " - contact time Tc = " << contactDuration);
 
    auto peMaterial = pe::createMaterial("particleMat", densityRatio, restitutionCoeff, frictionCoeff, frictionCoeff,
-                                        real_t(0), real_t(200), stiffnessCoeff, dampingCoeff, dampingCoeff);
+                                        0_r, 200_r, stiffnessCoeff, dampingCoeff, dampingCoeff);
 
    // create bounding planes
    pe::createPlane(*globalBodyStorage, 0, Vector3<real_t>(1, 0, 0), Vector3<real_t>(0, 0, 0), peMaterial);
@@ -880,7 +880,7 @@ int main( int argc, char **argv ) {
    pe::createPlane(*globalBodyStorage, 0, Vector3<real_t>(0, -1, 0), Vector3<real_t>(0, real_c(ylength), 0), peMaterial);
 
    // set the planes in z-direction slightly inwards the simulation domain to avoid direct interaction of the spheres with the in- and outflow BC
-   real_t zOffset = real_t(4);
+   real_t zOffset = 4_r;
    pe::createPlane(*globalBodyStorage, 0, Vector3<real_t>(0, 0, 1), Vector3<real_t>(0, 0, zOffset), peMaterial);
    pe::createPlane(*globalBodyStorage, 0, Vector3<real_t>(0, 0, -1), Vector3<real_t>(0, 0, real_c(zlength) - zOffset), peMaterial);
 
@@ -890,7 +890,7 @@ int main( int argc, char **argv ) {
    /////////////////
 
    // connect to pe
-   const real_t overlap = real_t(1.5) * dx;
+   const real_t overlap = 1.5_r * dx;
    auto syncCall = std::bind(pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()),
                                bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
    shared_ptr<CollisionPropertiesEvaluator> collisionPropertiesEvaluator = walberla::make_shared<CollisionPropertiesEvaluator>(*cr);
@@ -898,20 +898,20 @@ int main( int argc, char **argv ) {
    // create the spheres
    uint_t numSpheres = 0;
    {
-      real_t radiusMax = real_t(0.5) * std::max(diameter1, diameter2);
+      real_t radiusMax = 0.5_r * std::max(diameter1, diameter2);
       AABB generationDomain(radiusMax, radiusMax, radiusMax + zOffset,
-                            real_c(xlength) - radiusMax, real_c(ylength) - radiusMax, real_t(64) * diameterAvg + zOffset);
+                            real_c(xlength) - radiusMax, real_c(ylength) - radiusMax, 64_r * diameterAvg + zOffset);
       numSpheres = createSpheresRandomly(*blocks, *globalBodyStorage, bodyStorageID, generationDomain,
                                          diameter1, diameter2, diameterAvg, solidVolumeFraction, peMaterial);
       syncCall();
 
       const uint_t initialPeSteps = uint_t(50000);
       const real_t dt_DEM_init = collisionTime / real_t(uint_t(10) * peSubSteps);
-      const real_t overlapLimit = real_t(0.05) * diameterAvg;
+      const real_t overlapLimit = 0.05_r * diameterAvg;
 
       WALBERLA_LOG_INFO_ON_ROOT("Sphere creation done -- " << numSpheres << " spheres created");
       WALBERLA_LOG_INFO_ON_ROOT(
-            "resolving overlaps with goal all < " << overlapLimit / diameterAvg * real_t(100) << "%");
+            "resolving overlaps with goal all < " << overlapLimit / diameterAvg * 100_r << "%");
 
       auto boundingPlaneForInit = pe::createPlane(*globalBodyStorage, 0, Vector3<real_t>(0, 0, -1),
                                                   Vector3<real_t>(0, 0, generationDomain.zMax() + radiusMax),
@@ -928,7 +928,7 @@ int main( int argc, char **argv ) {
          } else {
             if (pet % uint_t(200) == uint_t(0)) {
                WALBERLA_LOG_INFO_ON_ROOT(
-                     pet << " - current max overlap = " << maxPen / diameterAvg * real_t(100) << "%");
+                     pet << " - current max overlap = " << maxPen / diameterAvg * 100_r << "%");
             }
          }
          collisionPropertiesEvaluator->resetMaximumPenetration();
@@ -937,7 +937,7 @@ int main( int argc, char **argv ) {
                            boundingPlaneForInit->getSystemID());
 
       // set body velocities to zero
-      setBodyVelocities(blocks, bodyStorageID, Vector3<real_t>(real_t(0)));
+      setBodyVelocities(blocks, bodyStorageID, Vector3<real_t>(0_r));
 
       // some spheres might have gone lost due to unfortunate random generation
       SphereCounter sphereNumberChecker(blocks, bodyStorageID, numSpheres);
@@ -993,11 +993,11 @@ int main( int argc, char **argv ) {
    //////////////////////
 
    // create force field
-   BlockDataID forceFieldID = field::addToStorage< Vec3Field_T >( blocks, "force field", Vector3<real_t>(real_t(0)), field::zyxf, FieldGhostLayers );
+   BlockDataID forceFieldID = field::addToStorage< Vec3Field_T >( blocks, "force field", Vector3<real_t>(0_r), field::zyxf, FieldGhostLayers );
 
-   BlockDataID dragForceFieldID = field::addToStorage< Vec3Field_T >( blocks, "drag force field", Vector3<real_t>(real_t(0)), field::zyxf, FieldGhostLayers );
-   BlockDataID amForceFieldID = field::addToStorage< Vec3Field_T >( blocks, "am force field", Vector3<real_t>(real_t(0)), field::zyxf, FieldGhostLayers );
-   BlockDataID liftForceFieldID = field::addToStorage< Vec3Field_T >( blocks, "lift force field", Vector3<real_t>(real_t(0)), field::zyxf, FieldGhostLayers );
+   BlockDataID dragForceFieldID = field::addToStorage< Vec3Field_T >( blocks, "drag force field", Vector3<real_t>(0_r), field::zyxf, FieldGhostLayers );
+   BlockDataID amForceFieldID = field::addToStorage< Vec3Field_T >( blocks, "am force field", Vector3<real_t>(0_r), field::zyxf, FieldGhostLayers );
+   BlockDataID liftForceFieldID = field::addToStorage< Vec3Field_T >( blocks, "lift force field", Vector3<real_t>(0_r), field::zyxf, FieldGhostLayers );
 
    // create omega field
    BlockDataID omegaFieldID = field::addToStorage< ScalarField_T >( blocks, "omega field", omega, field::zyxf, FieldGhostLayers );
@@ -1006,7 +1006,7 @@ int main( int argc, char **argv ) {
    LatticeModel_T latticeModel = LatticeModel_T( omegaFieldID, ForceModel_T( forceFieldID ) );
 
    // add PDF field
-   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage( blocks, "pdf field (zyxf)", latticeModel, initialFluidVelocity, real_t(1), FieldGhostLayers, field::zyxf );
+   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage( blocks, "pdf field (zyxf)", latticeModel, initialFluidVelocity, 1_r, FieldGhostLayers, field::zyxf );
 
    // add flag field
    BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field" );
@@ -1020,10 +1020,10 @@ int main( int argc, char **argv ) {
    BlockDataID swappedOldVelocityFieldID = field::addToStorage< Vec3Field_T >( blocks, "swapped old velocity field", initialFluidVelocity, field::zyxf, FieldGhostLayers );
 
    // create pressure field
-   BlockDataID pressureFieldID = field::addToStorage< ScalarField_T >( blocks, "pressure field", real_t(0), field::zyxf, FieldGhostLayers );
+   BlockDataID pressureFieldID = field::addToStorage< ScalarField_T >( blocks, "pressure field", 0_r, field::zyxf, FieldGhostLayers );
 
    // create solid volume fraction field
-   BlockDataID svfFieldID = field::addToStorage< ScalarField_T >( blocks, "svf field", real_t(0), field::zyxf, FieldGhostLayers );
+   BlockDataID svfFieldID = field::addToStorage< ScalarField_T >( blocks, "svf field", 0_r, field::zyxf, FieldGhostLayers );
 
    // field to store pressure gradient
    BlockDataID pressureGradientFieldID = field::addToStorage< Vec3Field_T >( blocks, "pressure gradient field", Vector3<real_t>(real_c(0)), field::zyxf, FieldGhostLayers );
@@ -1374,7 +1374,7 @@ int main( int argc, char **argv ) {
 
    // function to evaluate lubrication forces
    std::function<void(void)> lubricationEvaluationFunction;
-   if( lubricationCutOffDistance > real_t(0) )
+   if( lubricationCutOffDistance > 0_r )
    {
       using LE_T = pe_coupling::discrete_particle_methods::LubricationForceEvaluator;
       shared_ptr<LE_T> lubEval = make_shared<LE_T>( blocks, globalBodyStorage, bodyStorageID, viscosity, lubricationCutOffDistance );
@@ -1569,7 +1569,7 @@ int main( int argc, char **argv ) {
       // ext forces on bodies and PE step(s)
       timeloop.add() << Sweep( DummySweep(), "Dummy Sweep ")
                      << AfterFunction( BodiesQuantityEvaluator(&timeloop, blocks, bodyStorageID, vtkBaseFolder+"/quantityLogging.txt", numSpheres, real_t(numSpheres) * particleMass ), "Body Quantity Evaluator")
-                     << AfterFunction( ForceOnBodiesAdder( blocks, bodyStorageID, Vector3<real_t>(0,0,- gravitationalAcc * ( densityRatio - real_t(1) ) )  ), "Gravitational and Buoyancy Force Add" )
+                     << AfterFunction( ForceOnBodiesAdder( blocks, bodyStorageID, Vector3<real_t>(0,0,- gravitationalAcc * ( densityRatio - 1_r ) )  ), "Gravitational and Buoyancy Force Add" )
                      << AfterFunction( pe_coupling::TimeStep( blocks, bodyStorageID, *cr, syncCall, dtInteractionSubCycle, peSubSteps, lubricationEvaluationFunction ), "Pe Time Step" );
 
       // update solid volume fraction field

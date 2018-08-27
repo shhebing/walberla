@@ -40,7 +40,7 @@ public:
    // constructor
    LubricationCorrection ( const shared_ptr<StructuredBlockStorage> & blockStorage, const shared_ptr<pe::BodyStorage> & globalBodyStorage,
                            const BlockDataID & bodyStorageID, real_t dynamicViscosity,
-                           real_t cutOffDistance = real_t(2) / real_t(3), real_t minimalGapSize = real_t(1e-5) )
+                           real_t cutOffDistance = 2_r / 3_r, real_t minimalGapSize = 1e-5_r )
       : blockStorage_ ( blockStorage )
       , globalBodyStorage_( globalBodyStorage )
       , bodyStorageID_( bodyStorageID )

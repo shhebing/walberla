@@ -51,12 +51,12 @@ void testJacobi2D()
    shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid (
            uint_t(1) , uint_t(1),  uint_t(1),  // number of blocks in x,y,z direction
            xSize, ySize, uint_t(1),            // how many cells per block (x,y,z)
-           real_t(1),                          // dx: length of one cell in physical coordinates
+           1_r,                          // dx: length of one cell in physical coordinates
            false,                              // one block per process - "false" means all blocks to one process
            true, true, true );                 // no periodicity
 
 
-   BlockDataID fieldID = field::addToStorage<ScalarField>(blocks, "Field", real_t(0.0));
+   BlockDataID fieldID = field::addToStorage<ScalarField>(blocks, "Field", 0.0_r);
 
    // Initialize a quarter of the field with ones, the rest remains 0
    // Jacobi averages the domain -> every cell should be at 0.25 at sufficiently many timesteps
@@ -98,12 +98,12 @@ void testJacobi3D()
    shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid (
            uint_t(1) , uint_t(1),  uint_t(1),  // number of blocks in x,y,z direction
            xSize, ySize, zSize,                // how many cells per block (x,y,z)
-           real_t(1),                          // dx: length of one cell in physical coordinates
+           1_r,                          // dx: length of one cell in physical coordinates
            false,                              // one block per process - "false" means all blocks to one process
            true, true, true );                 // no periodicity
 
 
-   BlockDataID fieldID = field::addToStorage<ScalarField>(blocks, "Field", real_t(0.0));
+   BlockDataID fieldID = field::addToStorage<ScalarField>(blocks, "Field", 0.0_r);
 
    // Initialize a quarter of the field with ones, the rest remains 0
    // Jacobi averages the domain -> every cell should be at 0.25 at sufficiently many timesteps

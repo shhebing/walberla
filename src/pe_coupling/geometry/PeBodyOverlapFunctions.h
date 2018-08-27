@@ -46,7 +46,7 @@ template<> inline FastOverlapResult fastOverlapCheck( const pe::Sphere & peSpher
    else
    {
       Vector3<real_t> midPoint = peSphere.getPosition();
-      const real_t oneOverSqrt3 = real_t(1) / std::sqrt( real_t(3) );
+      const real_t oneOverSqrt3 = 1_r / std::sqrt( 3_r );
       real_t halfBoxEdge = peSphere.getRadius() * oneOverSqrt3;
       AABB innerBox = AABB::createFromMinMaxCorner( midPoint[0] - halfBoxEdge, midPoint[1] - halfBoxEdge, midPoint[2] - halfBoxEdge,
                                                     midPoint[0] + halfBoxEdge, midPoint[1] + halfBoxEdge, midPoint[2] + halfBoxEdge );
@@ -61,7 +61,7 @@ template<> inline FastOverlapResult fastOverlapCheck( const pe::Sphere & peSpher
 
 template<> inline FastOverlapResult fastOverlapCheck( const pe::Sphere & peSphere, const Vector3<real_t> & cellMidpoint, const Vector3<real_t> & dx )
 {
-   const real_t sqrt3half = std::sqrt( real_t(3) ) / real_t(2);
+   const real_t sqrt3half = std::sqrt( 3_r ) / 2_r;
 
    const real_t midPointDistSq = (peSphere.getPosition() - cellMidpoint).sqrLength();
 
@@ -135,8 +135,8 @@ template<> inline FastOverlapResult fastOverlapCheck( const pe::Plane & pePlane,
 
 template<> inline FastOverlapResult fastOverlapCheck( const pe::Plane & pePlane, const Vector3<real_t> & cellMidpoint, const Vector3<real_t> & dx )
 {
-   AABB box = AABB::createFromMinMaxCorner( cellMidpoint[0] - real_t(0.5)*dx[0], cellMidpoint[1] - real_t(0.5)*dx[1], cellMidpoint[2] - real_t(0.5)*dx[2],
-                                            cellMidpoint[0] + real_t(0.5)*dx[0], cellMidpoint[1] + real_t(0.5)*dx[1], cellMidpoint[2] + real_t(0.5)*dx[2]);
+   AABB box = AABB::createFromMinMaxCorner( cellMidpoint[0] - 0.5_r*dx[0], cellMidpoint[1] - 0.5_r*dx[1], cellMidpoint[2] - 0.5_r*dx[2],
+                                            cellMidpoint[0] + 0.5_r*dx[0], cellMidpoint[1] + 0.5_r*dx[1], cellMidpoint[2] + 0.5_r*dx[2]);
    return fastOverlapCheck(pePlane, box);
 }
 
@@ -164,8 +164,8 @@ template<> inline FastOverlapResult fastOverlapCheck( const pe::RigidBody & peBo
 template<> inline FastOverlapResult fastOverlapCheck( const pe::RigidBody & peBody, const Vector3<real_t> & cellMidpoint, const Vector3<real_t> & dx )
 {
 
-   AABB box = AABB::createFromMinMaxCorner( cellMidpoint[0] - real_t(0.5)*dx[0], cellMidpoint[1] - real_t(0.5)*dx[1], cellMidpoint[2] - real_t(0.5)*dx[2],
-                                            cellMidpoint[0] + real_t(0.5)*dx[0], cellMidpoint[1] + real_t(0.5)*dx[1], cellMidpoint[2] + real_t(0.5)*dx[2]);
+   AABB box = AABB::createFromMinMaxCorner( cellMidpoint[0] - 0.5_r*dx[0], cellMidpoint[1] - 0.5_r*dx[1], cellMidpoint[2] - 0.5_r*dx[2],
+                                            cellMidpoint[0] + 0.5_r*dx[0], cellMidpoint[1] + 0.5_r*dx[1], cellMidpoint[2] + 0.5_r*dx[2]);
 
    if ( ! peBody.getAABB().intersects( box ) )
    {

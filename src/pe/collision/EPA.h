@@ -435,7 +435,7 @@ inline bool EPA::EPA_Triangle::isObsolete() const
  */
 inline bool EPA::EPA_Triangle::isClosestInternal() const
 {
-   real_t tol = real_t(0.0);
+   real_t tol = 0.0_r;
    return bar_[0] >= tol
          && bar_[1] >= tol
          && bar_[2] >= tol;
@@ -478,7 +478,7 @@ inline void EPA::pushSupportMargin(const GeomPrimitive &geom1, const GeomPrimiti
                                    std::vector<Vec3>& epaVolume, std::vector<Vec3>& supportA, std::vector<Vec3>& supportB)
 {
    Vec3 ndir;
-   if(floatIsEqual(dir.sqrLength(), real_t(1.0))){
+   if(floatIsEqual(dir.sqrLength(), 1.0_r)){
       ndir = dir.getNormalized();
    }else{
       ndir = dir;
@@ -488,7 +488,7 @@ inline void EPA::pushSupportMargin(const GeomPrimitive &geom1, const GeomPrimiti
    supportA.push_back(sA);
    supportB.push_back(sB);
 
-   Vec3 support = sA -sB + real_t(2.0) * ndir * margin;
+   Vec3 support = sA -sB + 2.0_r * ndir * margin;
    epaVolume.push_back(support);
 }
 //*************************************************************************************************
@@ -505,14 +505,14 @@ inline void EPA::replaceSupportMargin(const GeomPrimitive &geom1, const GeomPrim
                                       std::vector<Vec3>& epaVolume, std::vector<Vec3>& supportA, std::vector<Vec3>& supportB, size_t indexToReplace)
 {
    Vec3 ndir;
-   if(floatIsEqual(dir.sqrLength(), real_t(1.0))){
+   if(floatIsEqual(dir.sqrLength(), 1.0_r)){
       ndir = dir.getNormalized();
    }else{
       ndir = dir;
    }
    Vec3 sA = geom1.support(ndir);
    Vec3 sB = geom2.support(-ndir);
-   Vec3 support = sA -sB + real_t(2.0) * ndir * margin;
+   Vec3 support = sA -sB + 2.0_r * ndir * margin;
 
    supportA[indexToReplace] = sA;
    supportB[indexToReplace] = sB;

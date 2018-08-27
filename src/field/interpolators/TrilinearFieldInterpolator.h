@@ -117,7 +117,7 @@ public:
       {
          // trilinear interpolation can be applied
 
-         const real_t inv_totalVolume = real_t(1) / ( dx * dy * dz );
+         const real_t inv_totalVolume = 1_r / ( dx * dy * dz );
          Vector3<real_t> cccCellCenter = blockStorage->getBlockLocalCellCenter( block_, ccc );
 
          // weighting = volume of opposing volume element / total volume

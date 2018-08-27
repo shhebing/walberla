@@ -371,7 +371,7 @@ inline bool equal( T1 a, T2 b )
  */
 inline real_t round( real_t a )
 {
-   return std::floor( a + real_t(0.5) );
+   return std::floor( a + 0.5_r );
 }
 //**********************************************************************************************************************
 

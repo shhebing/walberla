@@ -62,11 +62,11 @@ namespace initializer {
          if ( initialFill == addKeyword_ )
          {
             for( auto blockIt = structuredBlockStorage_.begin(); blockIt != structuredBlockStorage_.end(); ++blockIt )
-               blockIt->getData<GhostLayerField<real_t,1> > ( scalarFieldID_ )->setWithGhostLayer( real_t(1.0) );
+               blockIt->getData<GhostLayerField<real_t,1> > ( scalarFieldID_ )->setWithGhostLayer( 1.0_r );
          }
          else if ( initialFill == subtractKeyword_ ) {
             for( auto blockIt = structuredBlockStorage_.begin(); blockIt != structuredBlockStorage_.end(); ++blockIt )
-               blockIt->getData<GhostLayerField<real_t,1> > ( scalarFieldID_ )->setWithGhostLayer( real_t(0.0) );
+               blockIt->getData<GhostLayerField<real_t,1> > ( scalarFieldID_ )->setWithGhostLayer( 0.0_r );
          }
          else {
             WALBERLA_ABORT("Unknown value of initialFill. Valid values are " << addKeyword_ << "," << subtractKeyword_ );

@@ -150,7 +150,7 @@ public:
    inline void            setRelaxationModel( RelaxationModel relaxationModel );
    inline void            setErrorReductionParameter( real_t erp );
    inline void            setAbortThreshold( real_t threshold );
-   inline void            setSpeedLimiter( bool active, const real_t speedLimitFactor = real_t(0.0) );
+   inline void            setSpeedLimiter( bool active, const real_t speedLimitFactor = 0.0_r );
    //@}
    //**********************************************************************************************
 

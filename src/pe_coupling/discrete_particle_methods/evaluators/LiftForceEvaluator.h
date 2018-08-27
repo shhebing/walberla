@@ -117,19 +117,19 @@ void LiftForceEvaluator< FlagField_T, FieldInterpolator_T, Distributor_T >
       {
          if(!dpmBodySelectorFct_(bodyIt.getBodyID())) continue;
 
-         Vector3<real_t> forceOnFluid( real_t(0) );
+         Vector3<real_t> forceOnFluid( 0_r );
 
          Vector3<real_t> bodyPosition = bodyIt->getPosition();
          Vector3<real_t> bodyVelocity = bodyIt->getLinearVel();
 
-         real_t fluidDensity( real_t(1) );
+         real_t fluidDensity( 1_r );
          real_t bodyDiameter = getSphereEquivalentDiameter( *bodyIt );
 
          // interpolate fluid velocity and fluid curl to body position
-         Vector3<real_t> fluidVelocity( real_t(0) );
+         Vector3<real_t> fluidVelocity( 0_r );
          velocityInterpolator->get( bodyPosition, &fluidVelocity );
 
-         Vector3<real_t> velocityCurl( real_t(0) );
+         Vector3<real_t> velocityCurl( 0_r );
          velocityCurlInterpolator->get( bodyPosition, &velocityCurl );
 
          // evaluate lift force according to empirical model

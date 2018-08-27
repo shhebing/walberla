@@ -69,7 +69,7 @@ real_t intersectionRatioPlanePe( const pe::Plane & plane,
 
    auto diff = planeCenter - fluidPoint;
 
-   WALBERLA_ASSERT_FLOAT_UNEQUAL(denom, real_t(0));
+   WALBERLA_ASSERT_FLOAT_UNEQUAL(denom, 0_r);
 
    real_t delta = diff * planeNormal / denom;
 
@@ -92,22 +92,22 @@ real_t intersectionRatioEllipsoidPe( const pe::Ellipsoid & ellipsoid,
 
    Vector3<real_t> semiAxes = ellipsoid.getSemiAxes();
 
-   Matrix3<real_t> M = Matrix3<real_t>::makeDiagonalMatrix(real_t(1)/semiAxes[0], real_t(1)/semiAxes[1], real_t(1)/semiAxes[2]);
+   Matrix3<real_t> M = Matrix3<real_t>::makeDiagonalMatrix(1_r/semiAxes[0], 1_r/semiAxes[1], 1_r/semiAxes[2]);
 
    Vector3<real_t> P_M = M*transformedP;
    Vector3<real_t> d_M = M*transformedDir;
 
    const real_t a = d_M*d_M;
-   const real_t b = real_t(2)*P_M*d_M;
-   const real_t c = P_M*P_M - real_t(1);
+   const real_t b = 2_r*P_M*d_M;
+   const real_t c = P_M*P_M - 1_r;
 
-   const real_t discriminant = b*b - real_t(4)*a*c;
+   const real_t discriminant = b*b - 4_r*a*c;
 
-   WALBERLA_ASSERT_GREATER_EQUAL(discriminant, real_t(0), "No intersection possible!");
-   WALBERLA_ASSERT_FLOAT_UNEQUAL(a, real_t(0));
+   WALBERLA_ASSERT_GREATER_EQUAL(discriminant, 0_r, "No intersection possible!");
+   WALBERLA_ASSERT_FLOAT_UNEQUAL(a, 0_r);
 
    const real_t root = std::sqrt(discriminant);
-   real_t delta = (-b - root) / (real_t(2) * a);
+   real_t delta = (-b - root) / (2_r * a);
 
    WALBERLA_ASSERT_GREATER_EQUAL( delta, real_t( 0 ) );
    WALBERLA_ASSERT_LESS_EQUAL( delta, real_t( 1 ) );

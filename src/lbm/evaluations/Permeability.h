@@ -79,7 +79,7 @@ public:
     *  \param calcFrequency The frequency (in time steps) in which the permeability is evaluated.
     *  \param convCrit      The delta value (du/dt) at which the flow is considered to have reached steady state.
     */
-   void init( const AABB & sampleVolume, uint_t flowAxis, uint_t calcFrequency, real_t convCrit = real_t(1.0E-20) );
+   void init( const AABB & sampleVolume, uint_t flowAxis, uint_t calcFrequency, real_t convCrit = 1.0E-20_r );
    
    /*!
     *  \brief Initializes the permeability evaluation with the given set of parameters.
@@ -89,7 +89,7 @@ public:
     *  \param calcFrequency The frequency (in time steps) in which the permeability is evaluated.
     *  \param convCrit      The delta value (du/dt) at which the flow is considered to have reached steady state.
     */
-   void init( const CellInterval & sampleVolume, uint_t flowAxis, uint_t calcFrequency, real_t convCrit = real_t(1.0E-20) );
+   void init( const CellInterval & sampleVolume, uint_t flowAxis, uint_t calcFrequency, real_t convCrit = 1.0E-20_r );
 
    real_t convCriterion() const { return convCrit_;              }
    real_t currentDelta()  const { return delta_;                 }

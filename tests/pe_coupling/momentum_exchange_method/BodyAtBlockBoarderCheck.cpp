@@ -143,7 +143,7 @@ static shared_ptr< StructuredBlockForest > createBlockStructure( AABB domainAABB
    // calculate process distribution
    const memory_t memoryLimit = math::Limits< memory_t >::inf();
 
-   sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), uint_c( MPIManager::instance()->numProcesses() ), real_t(0), memoryLimit, true );
+   sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), uint_c( MPIManager::instance()->numProcesses() ), 0_r, memoryLimit, true );
 
    WALBERLA_LOG_INFO_ON_ROOT( sforest );
 

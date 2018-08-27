@@ -372,7 +372,7 @@ void checkAndResolveOverlap( BlockForest& forest, BlockDataID storageID, const r
 }
 
 template <typename BodyTypeTuple>
-void syncShadowOwners( BlockForest& forest, BlockDataID storageID, WcTimingTree* tt = NULL, const real_t dx = real_t(0), const bool syncNonCommunicatingBodies = false )
+void syncShadowOwners( BlockForest& forest, BlockDataID storageID, WcTimingTree* tt = NULL, const real_t dx = 0_r, const bool syncNonCommunicatingBodies = false )
 {
    if (tt != NULL) tt->start("Sync");
 

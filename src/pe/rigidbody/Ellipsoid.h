@@ -301,12 +301,12 @@ inline Mat3 Ellipsoid::calcInertia( const real_t mass, const Vec3& semiAxes )
 inline Vec3 Ellipsoid::support( const Vec3& d ) const
 {
    auto len = d.sqrLength();
-   if (!math::equal(len, real_t(0)))
+   if (!math::equal(len, 0_r))
    {
       Vec3 d_loc = vectorFromWFtoBF(d);
       Vec3 norm_vec(d_loc[0] * semiAxes_[0], d_loc[1] * semiAxes_[1], d_loc[2] * semiAxes_[2]);
       real_t norm_length = norm_vec.length();
-      Vec3 local_support = (real_t(1.0) / norm_length) * Vec3(semiAxes_[0] * semiAxes_[0] * d_loc[0],
+      Vec3 local_support = (1.0_r / norm_length) * Vec3(semiAxes_[0] * semiAxes_[0] * d_loc[0],
             semiAxes_[1] * semiAxes_[1] * d_loc[1], semiAxes_[2] * semiAxes_[2] * d_loc[2]);
       return pointFromBFtoWF(local_support);
    } else

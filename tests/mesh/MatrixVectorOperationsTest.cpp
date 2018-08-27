@@ -32,12 +32,12 @@ int main( int /*argc*/, char * /*argv*/[] )
 {
    debug::enterTestMode();
 
-   const math::Matrix3<real_t> m( real_t(2), real_t(3), real_t(4),
-                                  real_t(5), real_t(6), real_t(7),
-                                  real_t(8), real_t(9), real_t(10) );
+   const math::Matrix3<real_t> m( 2_r, 3_r, 4_r,
+                                  5_r, 6_r, 7_r,
+                                  8_r, 9_r, 10_r );
 
-   const math::Vector3<real_t> vwb( real_t(2), real_t(3), real_t(4) );
-   const OpenMesh::VectorT<real_t, 3> vom( real_t(2), real_t(3), real_t(4) );
+   const math::Vector3<real_t> vwb( 2_r, 3_r, 4_r );
+   const OpenMesh::VectorT<real_t, 3> vom( 2_r, 3_r, 4_r );
 
    WALBERLA_CHECK_EQUAL( vwb, toWalberla( vom ) );
    WALBERLA_CHECK_EQUAL( toOpenMesh(vwb), vom );

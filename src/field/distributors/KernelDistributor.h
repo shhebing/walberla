@@ -92,11 +92,11 @@ public:
                                      centerCell[0] + cell_idx_c(neighborhoodSize), centerCell[1] + cell_idx_c(neighborhoodSize), centerCell[2] + cell_idx_c(neighborhoodSize) );
 
       const uint_t kernelSizeOneDirection = uint_t(2) * neighborhoodSize + uint_t(1);
-      std::vector<real_t> weights( kernelSizeOneDirection * kernelSizeOneDirection * kernelSizeOneDirection, real_t(0) );
+      std::vector<real_t> weights( kernelSizeOneDirection * kernelSizeOneDirection * kernelSizeOneDirection, 0_r );
 
       uint_t counter = uint_t(0);
-      real_t sumOfWeights = real_t(0);
-      real_t sumOfWeightsUnavailable = real_t(0);
+      real_t sumOfWeights = 0_r;
+      real_t sumOfWeightsUnavailable = 0_r;
 
       // get distribution weights and count available cells in surrounding cells
       for( auto cellIt = cellNeighborhood.begin(); cellIt != cellNeighborhood.end(); ++cellIt )
@@ -109,24 +109,24 @@ public:
          }
          else
          {
-            weights[counter] = real_t(0);
+            weights[counter] = 0_r;
             sumOfWeightsUnavailable += kernelweights::kernelWeightFunction( x, y, z, curCellCenter[0], curCellCenter[1], curCellCenter[2], dx, dy, dz );
          }
          ++counter;
       }
 
       // check if at least one cell was available, to prevent division by 0
-      if( sumOfWeights <= real_t(0) )
+      if( sumOfWeights <= 0_r )
          return;
 
       // scale domain weights if some non-domain cells are in neighborhood
-      const real_t scalingFactor = real_t(1) + sumOfWeightsUnavailable / sumOfWeights;
+      const real_t scalingFactor = 1_r + sumOfWeightsUnavailable / sumOfWeights;
 
       // distribute the values to the neighboring domain cells with the corresponding (scaled) weighting
       counter = uint_t(0);
       for( auto cellIt = cellNeighborhood.begin(); cellIt != cellNeighborhood.end(); ++cellIt )
       {
-         if ( weights[counter] > real_t(0) )
+         if ( weights[counter] > 0_r )
          {
             addWeightedCellValue( distributeValueBegin, *cellIt, scalingFactor * weights[counter] );
          }

@@ -140,7 +140,7 @@ Ellipsoid::~Ellipsoid()
 bool Ellipsoid::containsRelPointImpl( real_t px, real_t py, real_t pz ) const
 {
 return ( (px * px)/(semiAxes_[0] * semiAxes_[0]) + (py * py)/(semiAxes_[1] * semiAxes_[1]) 
-		+ (pz * pz)/(semiAxes_[2] * semiAxes_[2]) <= real_t(1.0) );
+		+ (pz * pz)/(semiAxes_[2] * semiAxes_[2]) <= 1.0_r );
 }
 //*************************************************************************************************
 
@@ -158,7 +158,7 @@ return ( (px * px)/(semiAxes_[0] * semiAxes_[0]) + (py * py)/(semiAxes_[1] * sem
 bool Ellipsoid::isSurfaceRelPointImpl( real_t px, real_t py, real_t pz ) const
 {
    return floatIsEqual( (px * px)/(semiAxes_[0] * semiAxes_[0]) + (py * py)/(semiAxes_[1] * semiAxes_[1]) 
-		+ (pz * pz)/(semiAxes_[2] * semiAxes_[2]), real_t(1.0), pe::surfaceThreshold);
+		+ (pz * pz)/(semiAxes_[2] * semiAxes_[2]), 1.0_r, pe::surfaceThreshold);
 }
 //*************************************************************************************************
 

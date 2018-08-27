@@ -67,7 +67,7 @@ void initU( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
       {
          const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, *cell );
          math::seedRandomGenerator( static_cast<unsigned int>( (p[0] * real_t(blocks->getNumberOfXCells()) + p[1]) * real_t(blocks->getNumberOfYCells()) + p[2] ) );
-         u->get( *cell ) = math::realRandom( real_t(-10), real_t(10) );
+         u->get( *cell ) = math::realRandom( -10_r, 10_r );
          sum += u->get( *cell );
       }
    }
@@ -125,7 +125,7 @@ void checkProlongateRestrict( const shared_ptr< StructuredBlockStorage > & block
       
       coarse->set( orig );
       c2f( &*block );
-      coarse->set( real_t(0.0) );
+      coarse->set( 0.0_r );
       f2c( &*block );
       
       CellInterval xyz = coarse->xyzSize();
@@ -174,8 +174,8 @@ int main( int argc, char** argv )
    const real_t dx = xSize / real_c( xBlocks * xCells + uint_t(1) );
    const real_t dy = ySize / real_c( yBlocks * yCells + uint_t(1) );
    const real_t dz =  zSize / real_c( zBlocks * zCells + uint_t(1) );
-   auto blocks = blockforest::createUniformBlockGrid( math::AABB( real_t(0.5) * dx, real_t(0.5) * dy, real_t(0.5) * dz,
-                                                                  xSize - real_t(0.5) * dx, ySize - real_t(0.5) * dy, zSize - real_t(0.5) * dz ),
+   auto blocks = blockforest::createUniformBlockGrid( math::AABB( 0.5_r * dx, 0.5_r * dy, 0.5_r * dz,
+                                                                  xSize - 0.5_r * dx, ySize - 0.5_r * dy, zSize - 0.5_r * dz ),
                                                       xBlocks, yBlocks, zBlocks,
                                                       xCells, yCells, zCells,
                                                       true,
@@ -186,22 +186,22 @@ int main( int argc, char** argv )
 
    // run the main test
 
-   BlockDataID uId = field::addToStorage< PdeField_T >( blocks, "u", real_t(0), field::zyxf, uint_t(1) );
+   BlockDataID uId = field::addToStorage< PdeField_T >( blocks, "u", 0_r, field::zyxf, uint_t(1) );
 
    initU( blocks, uId );
 
-   BlockDataID fId = field::addToStorage< PdeField_T >( blocks, "f", real_t(0), field::zyxf, uint_t(1) );
+   BlockDataID fId = field::addToStorage< PdeField_T >( blocks, "f", 0_r, field::zyxf, uint_t(1) );
 
    SweepTimeloop timeloop( blocks, uint_t(1) );
 
    std::vector< real_t > weights( Stencil_T::Size );
-   weights[ Stencil_T::idx[ stencil::C ] ] = real_t(2) / ( blocks->dx() * blocks->dx() ) + real_t(2) / ( blocks->dy() * blocks->dy() ) + real_t(2) / ( blocks->dz() * blocks->dz() );
-   weights[ Stencil_T::idx[ stencil::N ] ] = real_t(-1) / ( blocks->dy() * blocks->dy() );
-   weights[ Stencil_T::idx[ stencil::S ] ] = real_t(-1) / ( blocks->dy() * blocks->dy() );
-   weights[ Stencil_T::idx[ stencil::E ] ] = real_t(-1) / ( blocks->dx() * blocks->dx() );
-   weights[ Stencil_T::idx[ stencil::W ] ] = real_t(-1) / ( blocks->dx() * blocks->dx() );
-   weights[ Stencil_T::idx[ stencil::T ] ] = real_t(-1) / ( blocks->dx() * blocks->dz() );
-   weights[ Stencil_T::idx[ stencil::B ] ] = real_t(-1) / ( blocks->dx() * blocks->dz() );
+   weights[ Stencil_T::idx[ stencil::C ] ] = 2_r / ( blocks->dx() * blocks->dx() ) + 2_r / ( blocks->dy() * blocks->dy() ) + 2_r / ( blocks->dz() * blocks->dz() );
+   weights[ Stencil_T::idx[ stencil::N ] ] = -1_r / ( blocks->dy() * blocks->dy() );
+   weights[ Stencil_T::idx[ stencil::S ] ] = -1_r / ( blocks->dy() * blocks->dy() );
+   weights[ Stencil_T::idx[ stencil::E ] ] = -1_r / ( blocks->dx() * blocks->dx() );
+   weights[ Stencil_T::idx[ stencil::W ] ] = -1_r / ( blocks->dx() * blocks->dx() );
+   weights[ Stencil_T::idx[ stencil::T ] ] = -1_r / ( blocks->dx() * blocks->dz() );
+   weights[ Stencil_T::idx[ stencil::B ] ] = -1_r / ( blocks->dx() * blocks->dz() );
 
    auto solverDCA = walberla::make_shared<pde::VCycles< Stencil_T > >( blocks, uId, fId, weights,
                                                                        shortrun ? uint_t(1) : uint_t(20),                                              // iterations
@@ -219,7 +219,7 @@ int main( int argc, char** argv )
       for (uint_t i = 1; i < convrate.size(); ++i)
       {
          WALBERLA_LOG_RESULT_ON_ROOT("Convergence rate in iteration " << i << ": " << convrate[i]);
-         WALBERLA_CHECK_LESS(convrate[i], real_t(0.1));
+         WALBERLA_CHECK_LESS(convrate[i], 0.1_r);
       }
 
       vtk::writeDomainDecomposition( blocks );
@@ -256,7 +256,7 @@ int main( int argc, char** argv )
       for (uint_t i = 1; i < convrate.size(); ++i)
       {
          WALBERLA_LOG_RESULT_ON_ROOT("Convergence rate in iteration " << i << ": " << convrate[i]);
-         WALBERLA_CHECK_LESS(convrate[i], real_t(0.1));
+         WALBERLA_CHECK_LESS(convrate[i], 0.1_r);
       }
    }
 
@@ -267,7 +267,7 @@ int main( int argc, char** argv )
 
    SweepTimeloop timeloop3( blocks, uint_t(1) );
 
-   pde::CoarsenStencilFieldsGCA<Stencil_T>  coarsenWithGCA( blocks, numLvl, real_t(2));		// Set up GCA object with overrelaxation factor 2 (only valid for Poisson equation)
+   pde::CoarsenStencilFieldsGCA<Stencil_T>  coarsenWithGCA( blocks, numLvl, 2_r);		// Set up GCA object with overrelaxation factor 2 (only valid for Poisson equation)
 
    auto solverGCA = walberla::make_shared<pde::VCycles< Stencil_T, decltype(coarsenWithGCA) > >(
 		                                                      blocks, uId, fId, stencilId, coarsenWithGCA,
@@ -286,7 +286,7 @@ int main( int argc, char** argv )
       for (uint_t i = 1; i < convrate.size(); ++i)
       {
          WALBERLA_LOG_RESULT_ON_ROOT("Convergence rate in iteration " << i << ": " << convrate[i]);
-         WALBERLA_CHECK_LESS(convrate[i], real_t(0.1));
+         WALBERLA_CHECK_LESS(convrate[i], 0.1_r);
       }
    }
 

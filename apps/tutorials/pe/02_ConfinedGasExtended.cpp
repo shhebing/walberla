@@ -148,7 +148,7 @@ int main( int argc, char ** argv )
    cr::HCSITS cr(globalBodyStorage, forest, storageID, ccdID, fcdID);
    cr.setMaxIterations( 10 );
    cr.setRelaxationModel( cr::HardContactSemiImplicitTimesteppingSolvers::ApproximateInelasticCoulombContactByDecoupling );
-   cr.setRelaxationParameter( real_t(0.7) );
+   cr.setRelaxationParameter( 0.7_r );
    cr.setGlobalLinearAcceleration( Vec3(0,0,0) );
 
    WALBERLA_LOG_INFO_ON_ROOT("*** SYNCCALL ***");

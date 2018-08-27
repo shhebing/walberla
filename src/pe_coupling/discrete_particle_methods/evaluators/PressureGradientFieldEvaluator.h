@@ -72,7 +72,7 @@ private:
    {
 
       // temporarily store pressure values of surrounding cells
-      std::vector<real_t> pressureValues( Stencil_T::Size, real_t(0) );
+      std::vector<real_t> pressureValues( Stencil_T::Size, 0_r );
 
       // store pressure value in center cell to potentially apply Neumann like boundary conditions
       real_t pressureInCenterCell = pressureField->get( cell );

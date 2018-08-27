@@ -69,8 +69,8 @@ void initU( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
          for( auto cell = xyz.begin(); cell != xyz.end(); ++cell )
          {
             const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, *cell );
-            src->get( *cell ) = std::sin( real_t(2) * math::PI * p[0] ) * std::sinh( real_t(2) * math::PI * p[1] );
-            dst->get( *cell ) = std::sin( real_t(2) * math::PI * p[0] ) * std::sinh( real_t(2) * math::PI * p[1] );
+            src->get( *cell ) = std::sin( 2_r * math::PI * p[0] ) * std::sinh( 2_r * math::PI * p[1] );
+            dst->get( *cell ) = std::sin( 2_r * math::PI * p[0] ) * std::sinh( 2_r * math::PI * p[1] );
          }
       }
    }
@@ -87,7 +87,7 @@ void initF( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
       for( auto cell = xyz.begin(); cell != xyz.end(); ++cell )
       {
          const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, *cell );
-         f->get( *cell ) = real_t(4) * math::PI * math::PI * std::sin( real_t(2) * math::PI * p[0] ) * std::sinh( real_t(2) * math::PI * p[1] );
+         f->get( *cell ) = 4_r * math::PI * math::PI * std::sin( 2_r * math::PI * p[0] ) * std::sinh( 2_r * math::PI * p[1] );
       }
    }
 }
@@ -141,23 +141,23 @@ int main( int argc, char** argv )
    const uint_t yBlocks = ( processes == uint_t(1) ) ? uint_t(1) : uint_t(2);
    const uint_t xCells = ( processes == uint_t(1) ) ? uint_t(200) : ( ( processes == uint_t(4) ) ? uint_t(100) : uint_t(50) );
    const uint_t yCells = ( processes == uint_t(1) ) ? uint_t(100) : uint_t(50);
-   const real_t xSize = real_t(2);
-   const real_t ySize = real_t(1);
+   const real_t xSize = 2_r;
+   const real_t ySize = 1_r;
    const real_t dx = xSize / real_c( xBlocks * xCells + uint_t(1) );
    const real_t dy = ySize / real_c( yBlocks * yCells + uint_t(1) );
-   auto blocks = blockforest::createUniformBlockGrid( math::AABB( real_t(0.5) * dx, real_t(0.5) * dy, real_t(0),
-                                                                  xSize - real_t(0.5) * dx, ySize - real_t(0.5) * dy, dx ),
+   auto blocks = blockforest::createUniformBlockGrid( math::AABB( 0.5_r * dx, 0.5_r * dy, 0_r,
+                                                                  xSize - 0.5_r * dx, ySize - 0.5_r * dy, dx ),
                                                       xBlocks, yBlocks, uint_t(1),
                                                       xCells, yCells, uint_t(1),
                                                       true,
                                                       false, false, false );
 
-   BlockDataID srcId = field::addToStorage< PdeField_T >( blocks, "u (src)", real_t(0), field::zyxf, uint_t(1) );
-   BlockDataID dstId = field::addToStorage< PdeField_T >( blocks, "u (dst)", real_t(0), field::zyxf, uint_t(1) );
+   BlockDataID srcId = field::addToStorage< PdeField_T >( blocks, "u (src)", 0_r, field::zyxf, uint_t(1) );
+   BlockDataID dstId = field::addToStorage< PdeField_T >( blocks, "u (dst)", 0_r, field::zyxf, uint_t(1) );
 
    initU( blocks, srcId, dstId );
 
-   BlockDataID fId = field::addToStorage< PdeField_T >( blocks, "f", real_t(0), field::zyxf, uint_t(1) );
+   BlockDataID fId = field::addToStorage< PdeField_T >( blocks, "f", 0_r, field::zyxf, uint_t(1) );
 
    initF( blocks, fId );
 
@@ -167,11 +167,11 @@ int main( int argc, char** argv )
    communication.addPackInfo( make_shared< field::communication::PackInfo< PdeField_T > >( srcId ) );
 
    std::vector< real_t > weights( Stencil_T::Size );
-   weights[ Stencil_T::idx[ stencil::C ] ] = real_t(2) / ( blocks->dx() * blocks->dx() ) + real_t(2) / ( blocks->dy() * blocks->dy() ) + real_t(4) * math::PI * math::PI;
-   weights[ Stencil_T::idx[ stencil::N ] ] = real_t(-1) / ( blocks->dy() * blocks->dy() );
-   weights[ Stencil_T::idx[ stencil::S ] ] = real_t(-1) / ( blocks->dy() * blocks->dy() );
-   weights[ Stencil_T::idx[ stencil::E ] ] = real_t(-1) / ( blocks->dx() * blocks->dx() );
-   weights[ Stencil_T::idx[ stencil::W ] ] = real_t(-1) / ( blocks->dx() * blocks->dx() );
+   weights[ Stencil_T::idx[ stencil::C ] ] = 2_r / ( blocks->dx() * blocks->dx() ) + 2_r / ( blocks->dy() * blocks->dy() ) + 4_r * math::PI * math::PI;
+   weights[ Stencil_T::idx[ stencil::N ] ] = -1_r / ( blocks->dy() * blocks->dy() );
+   weights[ Stencil_T::idx[ stencil::S ] ] = -1_r / ( blocks->dy() * blocks->dy() );
+   weights[ Stencil_T::idx[ stencil::E ] ] = -1_r / ( blocks->dx() * blocks->dx() );
+   weights[ Stencil_T::idx[ stencil::W ] ] = -1_r / ( blocks->dx() * blocks->dx() );
 
    timeloop.addFuncBeforeTimeStep( pde::JacobiIteration( blocks->getBlockStorage(), shortrun ? uint_t(10) : uint_t(10000),
                                                          communication,

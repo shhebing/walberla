@@ -841,7 +841,7 @@ uint_t GlobalLoadBalancing::metis( const std::vector< BLOCK* >& blocks, const me
 
    // second call to METIS: try to balance both workload and memory as good as possible ...
 
-   real_t minUbvec = real_t(1);
+   real_t minUbvec = 1_r;
    ubvec[1] = minUbvec;
 
    ret = core::METIS_PartGraphRecursive( &nvtxs, &ncon, &(xadj[0]), &(adjncy[0]), &(vwgt[0]), NULL, &(adjwgt[0]), &nparts, NULL,
@@ -969,7 +969,7 @@ void GlobalLoadBalancing::metis2( const std::vector< BLOCK* >& blocks, const uin
       {
          if( block->getNeighbor( k )->getLevel() == block->getLevel() && block->getNeighbor( k )->getWorkload() > workload_t(0) )
          {
-            if( communicationWeights[ commIdx ] > real_t(0) )
+            if( communicationWeights[ commIdx ] > 0_r )
             {
                adjncy.push_back( numeric_cast<int64_t>( block->getNeighbor( k )->getIndex() ) );
                WALBERLA_ASSERT_LESS( commIdx, communicationWeights.size() );

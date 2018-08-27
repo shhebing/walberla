@@ -47,18 +47,18 @@ inline bool intersects(const mesh::pe::ConvexPolyhedronID poly, const Ray& ray, 
       const real_t             vn = Pn * transformedRay.getOrigin() + d;
       const real_t             vd = Pn * transformedRay.getDirection();
 
-      if ( floatIsEqual(vd, real_t(0)) )
+      if ( floatIsEqual(vd, 0_r) )
       {
-         if (vn > real_t(0)) return false;
+         if (vn > 0_r) return false;
          continue;
       }
 
       const real_t                 t = -vn / vd;
 
-      if (vd > real_t(0))
+      if (vd > 0_r)
       {
          // back-facing
-         if (t < real_t(0)) return false;
+         if (t < 0_r) return false;
          if (t < t_far) t_far=t;
       } else
       {

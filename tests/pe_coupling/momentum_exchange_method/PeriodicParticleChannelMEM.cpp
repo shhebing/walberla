@@ -364,7 +364,7 @@ int main( int argc, char **argv )
    //const real_t rho_SI   = real_c(1000);    // density of water [ kg / m^3 ]
    const real_t L_SI     = real_c(0.04);    // length of channel [ m ]
 
-   const real_t nu_L  = ( real_t(1) / omega - real_c(0.5) ) / real_t(3);
+   const real_t nu_L  = ( 1_r / omega - real_c(0.5) ) / 3_r;
    const real_t dx_SI = L_SI / real_c( length );          // dx in [ m ]
    const real_t dt_SI = ( nu_L * dx_SI * dx_SI ) / nu_SI; // dt in [ s ]
 
@@ -386,7 +386,7 @@ int main( int argc, char **argv )
    const uint_t yCells  =  width / blockDist[1];
    const uint_t zCells  =  width / blockDist[2];
 
-   const real_t dx = real_t(1);
+   const real_t dx = 1_r;
 
    auto blocks = blockforest::createUniformBlockGrid( blockDist[0], blockDist[1], blockDist[2], xCells, yCells, zCells, dx,
                                                       ( processes != 1 ),
@@ -426,42 +426,42 @@ int main( int argc, char **argv )
 
    // spheres as obstacles
    std::vector<pe::BodyID> globalBodiesToBeMapped;
-   auto globalSphere1 = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>(real_c(length) / real_t(2), real_t(50), real_t(110)), real_t(60), material, true, false, true );
+   auto globalSphere1 = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>(real_c(length) / 2_r, 50_r, 110_r), 60_r, material, true, false, true );
    globalBodiesToBeMapped.push_back(globalSphere1);
-   auto globalSphere2 = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>(                 real_t(0), real_t(50), -real_t(60)), real_t(80), material, true, false, true );
+   auto globalSphere2 = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>(                 0_r, 50_r, -60_r), 80_r, material, true, false, true );
    globalBodiesToBeMapped.push_back(globalSphere2);
-   auto globalSphere3 = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>(            real_c(length), real_t(50), -real_t(60)), real_t(80), material, true, false, true );
+   auto globalSphere3 = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>(            real_c(length), 50_r, -60_r), 80_r, material, true, false, true );
    globalBodiesToBeMapped.push_back(globalSphere3);
 
    // local bodies: moving spheres
-   const real_t radius = real_t(10);
+   const real_t radius = 10_r;
 
-   auto sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( real_t(15), real_t(50), real_t(35) ), radius, material );
-   if( sphere != nullptr ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
+   auto sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( 15_r, 50_r, 35_r ), radius, material );
+   if( sphere != nullptr ) sphere->setLinearVel( velocity, 0_r, 0_r );
 
-   sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( real_t(15), real_t(35), real_t(50) ), radius, material );
-   if( sphere != nullptr ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
+   sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( 15_r, 35_r, 50_r ), radius, material );
+   if( sphere != nullptr ) sphere->setLinearVel( velocity, 0_r, 0_r );
 
-   sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( real_t(15), real_t(65), real_t(50) ), radius, material );
-   if( sphere != nullptr ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
+   sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( 15_r, 65_r, 50_r ), radius, material );
+   if( sphere != nullptr ) sphere->setLinearVel( velocity, 0_r, 0_r );
 
-   sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( real_t(15), real_t(50), real_t(65) ), radius, material );
-   if( sphere != nullptr ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
+   sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( 15_r, 50_r, 65_r ), radius, material );
+   if( sphere != nullptr ) sphere->setLinearVel( velocity, 0_r, 0_r );
 
-   sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( real_t(35), real_t(35), real_t(35) ), radius, material );
-   if( sphere != nullptr ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
+   sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( 35_r, 35_r, 35_r ), radius, material );
+   if( sphere != nullptr ) sphere->setLinearVel( velocity, 0_r, 0_r );
 
-   sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( real_t(35), real_t(65), real_t(35) ), radius, material );
-   if( sphere != nullptr ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
+   sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( 35_r, 65_r, 35_r ), radius, material );
+   if( sphere != nullptr ) sphere->setLinearVel( velocity, 0_r, 0_r );
 
-   sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( real_t(35), real_t(35), real_t(65) ), radius, material );
-   if( sphere != nullptr ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
+   sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( 35_r, 35_r, 65_r ), radius, material );
+   if( sphere != nullptr ) sphere->setLinearVel( velocity, 0_r, 0_r );
 
-   sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( real_t(35), real_t(65), real_t(65) ), radius, material );
-   if( sphere != nullptr ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
+   sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( 35_r, 65_r, 65_r ), radius, material );
+   if( sphere != nullptr ) sphere->setLinearVel( velocity, 0_r, 0_r );
 
-   sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( real_t(50), real_t(50), real_t(50) ), radius, material );
-   if( sphere != nullptr ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
+   sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( 50_r, 50_r, 50_r ), radius, material );
+   if( sphere != nullptr ) sphere->setLinearVel( velocity, 0_r, 0_r );
 
    //synchronize the pe set up on all processes
    syncCall();
@@ -474,10 +474,10 @@ int main( int argc, char **argv )
    LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::TRT::constructWithMagicNumber( omega ) );
 
    BlockDataID pdfFieldID = useFZYX ? lbm::addPdfFieldToStorage( blocks, "pdf field (fzyx)", latticeModel,
-                                                                 Vector3< real_t >( velocity, real_t(0), real_t(0) ), real_t(1),
+                                                                 Vector3< real_t >( velocity, 0_r, 0_r ), 1_r,
                                                                  uint_t(1), field::fzyx ) :
                                       lbm::addPdfFieldToStorage( blocks, "pdf field (zyxf)", latticeModel,
-                                                                 Vector3< real_t >( velocity, real_t(0), real_t(0) ), real_t(1),
+                                                                 Vector3< real_t >( velocity, 0_r, 0_r ), 1_r,
                                                                  uint_t(1), field::zyxf );
 
    // add flag field

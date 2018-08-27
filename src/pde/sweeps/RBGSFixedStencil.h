@@ -73,7 +73,7 @@ void RBGSFixedStencil< Stencil_T >::update( IBlock * const block, const bool rb 
 {
 #ifndef NDEBUG
    for( auto dir = Stencil_T::beginNoCenter(); dir != Stencil_T::end(); ++dir )
-      WALBERLA_ASSERT( realIsIdentical( dir.length(), real_t(1) ) );
+      WALBERLA_ASSERT( realIsIdentical( dir.length(), 1_r ) );
 #endif
 
    Field_T * uf( NULL );
@@ -86,7 +86,7 @@ void RBGSFixedStencil< Stencil_T >::update( IBlock * const block, const bool rb 
    real_t weights[ Stencil_T::Size ];
    for( auto dir = Stencil_T::beginNoCenter(); dir != Stencil_T::end(); ++dir )
       weights[ dir.toIdx() ] = this->w( dir.toIdx() );
-   weights[ Stencil_T::idx[ stencil::C ] ] = real_t(1) / this->w( Stencil_T::idx[ stencil::C ] ); // center already inverted here!
+   weights[ Stencil_T::idx[ stencil::C ] ] = 1_r / this->w( Stencil_T::idx[ stencil::C ] ); // center already inverted here!
    
    cell_idx_t zero = cell_idx_t(0);
    cell_idx_t one  = cell_idx_t(1);

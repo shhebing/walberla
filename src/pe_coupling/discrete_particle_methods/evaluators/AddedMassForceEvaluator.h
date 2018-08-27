@@ -123,16 +123,16 @@ void AddedMassForceEvaluator< FlagField_T, FieldInterpolator_T, Distributor_T >
       {
          if(!dpmBodySelectorFct_(bodyIt.getBodyID())) continue;
 
-         Vector3<real_t> forceOnFluid( real_t(0) );
+         Vector3<real_t> forceOnFluid( 0_r );
 
          Vector3<real_t> bodyPosition = bodyIt->getPosition();
          Vector3<real_t> bodyVelocity = bodyIt->getLinearVel();
          real_t bodyVolume = bodyIt->getVolume();
-         real_t fluidDensity( real_t(1) );
+         real_t fluidDensity( 1_r );
 
          // evaluate added (virtual) mass force
-         Vector3<real_t> timeDerivativeFluidVelocity( real_t(0) );
-         Vector3<real_t> timeDerivativeBodyVelocity( real_t(0) );
+         Vector3<real_t> timeDerivativeFluidVelocity( 0_r );
+         Vector3<real_t> timeDerivativeBodyVelocity( 0_r );
          bodyVelocityTimeDerivativeEvaluator_->get(timeDerivativeBodyVelocity, bodyVelocity, bodyIt->getSystemID() );
          velocityTimeDerivativeInterpolator->get( bodyPosition, &timeDerivativeFluidVelocity );
          Vector3<real_t> addedMassForce = addedMassForceCorrelationFunction_( timeDerivativeFluidVelocity, timeDerivativeBodyVelocity, bodyVolume, fluidDensity );

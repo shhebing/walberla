@@ -34,7 +34,7 @@ namespace walberla {
 void testPointUnitSphere( const math::Vector3<real_t> & p )
 {
    static const geometry::Sphere UNIT_SPHERE( math::Vector3<real_t>( 0, 0, 0 ), real_t( 1 ) );
-   static const real_t EPSILON = real_t(1e-4);
+   static const real_t EPSILON = 1e-4_r;
 
    real_t q = lbm::intersectionRatioBisection( UNIT_SPHERE, p, -p, EPSILON );
    
@@ -75,7 +75,7 @@ void testAABB()
 
    static const math::Vector3<real_t> ZERO( real_t( 0 ), real_t( 0 ), real_t( 0 ) );
    static const math::Vector3<real_t> UNIT( real_t( 1 ), real_t( 1 ), real_t( 1 ) );
-   static const real_t EPSILON = real_t(1e-4);
+   static const real_t EPSILON = 1e-4_r;
 
    std::mt19937 randomEngine;
 

@@ -65,9 +65,9 @@ Box::Box( id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
    // Since the box constructor is never directly called but only used in a small number
    // of functions that already check the box arguments, only asserts are used here to
    // double check the arguments.
-   WALBERLA_ASSERT_GREATER( lengths[0], real_t(0), "Invalid side length in x-dimension" );
-   WALBERLA_ASSERT_GREATER( lengths[1], real_t(0), "Invalid side length in y-dimension" );
-   WALBERLA_ASSERT_GREATER( lengths[2], real_t(0), "Invalid side length in z-dimension" );
+   WALBERLA_ASSERT_GREATER( lengths[0], 0_r, "Invalid side length in x-dimension" );
+   WALBERLA_ASSERT_GREATER( lengths[1], 0_r, "Invalid side length in y-dimension" );
+   WALBERLA_ASSERT_GREATER( lengths[2], 0_r, "Invalid side length in z-dimension" );
 
    // Initializing the instantiated box
    gpos_   = gpos;
@@ -129,9 +129,9 @@ Box::~Box()
  */
 bool Box::containsRelPointImpl( real_t px, real_t py, real_t pz ) const
 {
-   return std::fabs(px) <= real_t(0.5)*lengths_[0] &&
-         std::fabs(py) <= real_t(0.5)*lengths_[1] &&
-         std::fabs(pz) <= real_t(0.5)*lengths_[2];
+   return std::fabs(px) <= 0.5_r*lengths_[0] &&
+         std::fabs(py) <= 0.5_r*lengths_[1] &&
+         std::fabs(pz) <= 0.5_r*lengths_[2];
 }
 //*************************************************************************************************
 
@@ -149,21 +149,21 @@ bool Box::containsRelPointImpl( real_t px, real_t py, real_t pz ) const
 bool Box::isSurfaceRelPointImpl( real_t px, real_t py, real_t pz ) const
 {
    // Checking if the body relative point lies on one of the x-faces
-   if( std::fabs( real_t(0.5)*lengths_[0] - std::fabs(px) ) <= surfaceThreshold &&
-       std::fabs(py) < real_t(0.5)*lengths_[1] + surfaceThreshold &&
-       std::fabs(pz) < real_t(0.5)*lengths_[2] + surfaceThreshold ) {
+   if( std::fabs( 0.5_r*lengths_[0] - std::fabs(px) ) <= surfaceThreshold &&
+       std::fabs(py) < 0.5_r*lengths_[1] + surfaceThreshold &&
+       std::fabs(pz) < 0.5_r*lengths_[2] + surfaceThreshold ) {
       return true;
    }
    // Checking if the body relative point lies on one of the y-faces
-   else if( std::fabs( real_t(0.5)*lengths_[1] - std::fabs(py) ) <= surfaceThreshold &&
-            std::fabs(pz) < real_t(0.5)*lengths_[2] + surfaceThreshold &&
-            std::fabs(px) < real_t(0.5)*lengths_[0] + surfaceThreshold ) {
+   else if( std::fabs( 0.5_r*lengths_[1] - std::fabs(py) ) <= surfaceThreshold &&
+            std::fabs(pz) < 0.5_r*lengths_[2] + surfaceThreshold &&
+            std::fabs(px) < 0.5_r*lengths_[0] + surfaceThreshold ) {
       return true;
    }
    // Checking if the body relative point lies on one of the z-faces
-   else if( std::fabs( real_t(0.5)*lengths_[2] - std::fabs(pz) ) <= surfaceThreshold &&
-            std::fabs(px) < real_t(0.5)*lengths_[0] + surfaceThreshold &&
-            std::fabs(py) < real_t(0.5)*lengths_[1] + surfaceThreshold ) {
+   else if( std::fabs( 0.5_r*lengths_[2] - std::fabs(pz) ) <= surfaceThreshold &&
+            std::fabs(px) < 0.5_r*lengths_[0] + surfaceThreshold &&
+            std::fabs(py) < 0.5_r*lengths_[1] + surfaceThreshold ) {
       return true;
    }
    else return false;
@@ -184,30 +184,30 @@ bool Box::isSurfaceRelPointImpl( real_t px, real_t py, real_t pz ) const
  */
 real_t Box::getRelDepth( real_t px, real_t py, real_t pz ) const
 {
-   const real_t xdepth( std::fabs(px)-real_t(0.5)*lengths_[0] );
-   const real_t ydepth( std::fabs(py)-real_t(0.5)*lengths_[1] );
-   const real_t zdepth( std::fabs(pz)-real_t(0.5)*lengths_[2] );
+   const real_t xdepth( std::fabs(px)-0.5_r*lengths_[0] );
+   const real_t ydepth( std::fabs(py)-0.5_r*lengths_[1] );
+   const real_t zdepth( std::fabs(pz)-0.5_r*lengths_[2] );
 
    // Calculating the depth for relative points outside the box
-   if( xdepth >= real_t(0) ) {
-      if( ydepth >= real_t(0) ) {
-         if( zdepth >= real_t(0) ) {
+   if( xdepth >= 0_r ) {
+      if( ydepth >= 0_r ) {
+         if( zdepth >= 0_r ) {
             return -std::sqrt( math::sq(xdepth) + math::sq(ydepth) + math::sq(zdepth) );
          }
          else return -std::sqrt( math::sq(xdepth) + math::sq(ydepth) );
       }
-      else if( zdepth >= real_t(0) ) {
+      else if( zdepth >= 0_r ) {
          return -std::sqrt( math::sq(xdepth) + math::sq(zdepth) );
       }
       else return -xdepth;
    }
-   else if( ydepth >= real_t(0) ) {
-      if( zdepth >= real_t(0) ) {
+   else if( ydepth >= 0_r ) {
+      if( zdepth >= 0_r ) {
          return -std::sqrt( math::sq(ydepth) + math::sq(zdepth) );
       }
       else return -ydepth;
    }
-   else if( zdepth >= real_t(0) ) {
+   else if( zdepth >= 0_r ) {
       return -zdepth;
    }
 
@@ -303,9 +303,9 @@ void Box::calcBoundingBox()
 {
    using std::fabs;
 
-   const real_t xlength( real_t(0.5) * ( fabs(R_[0]*lengths_[0]) + fabs(R_[1]*lengths_[1]) + fabs(R_[2]*lengths_[2]) ) + contactThreshold );
-   const real_t ylength( real_t(0.5) * ( fabs(R_[3]*lengths_[0]) + fabs(R_[4]*lengths_[1]) + fabs(R_[5]*lengths_[2]) ) + contactThreshold );
-   const real_t zlength( real_t(0.5) * ( fabs(R_[6]*lengths_[0]) + fabs(R_[7]*lengths_[1]) + fabs(R_[8]*lengths_[2]) ) + contactThreshold );
+   const real_t xlength( 0.5_r * ( fabs(R_[0]*lengths_[0]) + fabs(R_[1]*lengths_[1]) + fabs(R_[2]*lengths_[2]) ) + contactThreshold );
+   const real_t ylength( 0.5_r * ( fabs(R_[3]*lengths_[0]) + fabs(R_[4]*lengths_[1]) + fabs(R_[5]*lengths_[2]) ) + contactThreshold );
+   const real_t zlength( 0.5_r * ( fabs(R_[6]*lengths_[0]) + fabs(R_[7]*lengths_[1]) + fabs(R_[8]*lengths_[2]) ) + contactThreshold );
    aabb_ = math::AABB(
             gpos_[0] - xlength,
          gpos_[1] - ylength,

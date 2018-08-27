@@ -138,7 +138,7 @@ public:
                   const BlockDataID & boundaryHandlingID, const BlockDataID & bodyFieldID, real_t sphereRadius) :
          blocks_( blocks ), bodyStorageID_( bodyStorageID ), globalBodyStorage_( globalBodyStorage ),
          boundaryHandlingID_( boundaryHandlingID ), bodyFieldID_( bodyFieldID ),
-         sphereVolume_( math::M_PI * real_t(4) / real_t(3) * sphereRadius * sphereRadius * sphereRadius )
+         sphereVolume_( math::M_PI * 4_r / 3_r * sphereRadius * sphereRadius * sphereRadius )
    { }
 
    // check the mapping in the inner domain of the block and check mapped volume against real sphere volume
@@ -200,7 +200,7 @@ public:
       }
       // mapped volume has to be - approximately - the same as the real volume
       real_t mappedVolume = real_c(cellCounter); // dx=1
-      WALBERLA_CHECK(std::fabs( mappedVolume - sphereVolume_ ) / sphereVolume_ <= real_t(0.1),
+      WALBERLA_CHECK(std::fabs( mappedVolume - sphereVolume_ ) / sphereVolume_ <= 0.1_r,
                      "Mapped volume " << mappedVolume << " does not fit to real sphere volume " << sphereVolume_ << ".");
    }
 
@@ -425,9 +425,9 @@ int main( int argc, char **argv )
    ///////////////////////////
 
    bool writeVTK = false;
-   const real_t omega  = real_t(1);
-   const real_t dx     = real_t(1);
-   const real_t radius = real_t(5);
+   const real_t omega  = 1_r;
+   const real_t dx     = 1_r;
+   const real_t radius = 5_r;
 
    ///////////////////////////
    // DATA STRUCTURES SETUP //
@@ -450,7 +450,7 @@ int main( int argc, char **argv )
 
    // add PDF field ( uInit = <0.1,0,0>, rhoInit = 1 )
    BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (zyxf)", latticeModel,
-                                                                         Vector3<real_t>(real_t(0)), real_t(1),
+                                                                         Vector3<real_t>(0_r), 1_r,
                                                                          FieldGhostLayers, field::zyxf );
 
    // add flag field
@@ -466,7 +466,7 @@ int main( int argc, char **argv )
    pe::SetBodyTypeIDs<BodyTypeTuple>::execute();
    shared_ptr<pe::BodyStorage> globalBodyStorage = make_shared<pe::BodyStorage>();
    auto bodyStorageID = blocks->addBlockData(pe::createStorageDataHandling<BodyTypeTuple>(), "Storage");
-   auto sphereMaterialID = pe::createMaterial( "sphereMat", real_t(1) , real_t(0.3), real_t(0.2), real_t(0.2), real_t(0.24), real_t(200), real_t(200), real_t(0), real_t(0) );
+   auto sphereMaterialID = pe::createMaterial( "sphereMat", 1_r , 0.3_r, 0.2_r, 0.2_r, 0.24_r, 200_r, 200_r, 0_r, 0_r );
 
    // pe coupling
    const real_t overlap = real_t( 1.5 ) * dx;
@@ -483,9 +483,9 @@ int main( int argc, char **argv )
 
 
    // sphere positions for test scenarios
-   Vector3<real_t> positionInsideBlock(real_t(10), real_t(10), real_t(10));
-   Vector3<real_t> positionAtBlockBoarder(real_t(19), real_t(10), real_t(10));
-   Vector3<real_t> positionAtPeriodicBoarder(real_t(1), real_t(10), real_t(10));
+   Vector3<real_t> positionInsideBlock(10_r, 10_r, 10_r);
+   Vector3<real_t> positionAtBlockBoarder(19_r, 10_r, 10_r);
+   Vector3<real_t> positionAtPeriodicBoarder(1_r, 10_r, 10_r);
 
    /////////////////////
    // NO SLIP MAPPING //
@@ -689,7 +689,7 @@ int main( int argc, char **argv )
 
       //NOTE: global bodies are not communicated, thus they do not follow periodicity!!!
       //workaround: create the periodic copy explicitly
-      Vector3<real_t> positionAtPeriodicBoarderCopy(real_t(1) + real_c(blocksPerDirection[0]) * real_c(cellsPerBlock[0]), real_t(10), real_t(10));
+      Vector3<real_t> positionAtPeriodicBoarderCopy(1_r + real_c(blocksPerDirection[0]) * real_c(cellsPerBlock[0]), 10_r, 10_r);
       pe::SphereID sp2 = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                                           positionAtPeriodicBoarderCopy, radius, sphereMaterialID, true, false, true);
 
@@ -1074,7 +1074,7 @@ int main( int argc, char **argv )
 
       //NOTE: global bodies are not communicated, thus they do not follow periodicity!!!
       //workaround: create the periodic copy explicitly
-      Vector3<real_t> positionAtPeriodicBoarderCopy(real_t(1) + real_c(blocksPerDirection[0]) * real_c(cellsPerBlock[0]), real_t(10), real_t(10));
+      Vector3<real_t> positionAtPeriodicBoarderCopy(1_r + real_c(blocksPerDirection[0]) * real_c(cellsPerBlock[0]), 10_r, 10_r);
       pe::SphereID sp2 = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                                           positionAtPeriodicBoarderCopy, radius, sphereMaterialID, true, false, true);
 

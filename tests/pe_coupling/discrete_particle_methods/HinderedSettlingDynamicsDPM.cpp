@@ -248,12 +248,12 @@ uint_t createSpheresRandomly( StructuredBlockForest & forest, pe::BodyStorage & 
 {
    real_t domainVolume = generationDomain.volume();
    real_t totalSphereVolume = domainVolume * solidVolumeFraction;
-   real_t sphereVolume = diameter * diameter * diameter * math::M_PI / real_t(6);
+   real_t sphereVolume = diameter * diameter * diameter * math::M_PI / 6_r;
    uint_t numberOfSpheres = uint_c( totalSphereVolume / sphereVolume );
 
-   real_t xParticle = real_t(0);
-   real_t yParticle = real_t(0);
-   real_t zParticle = real_t(0);
+   real_t xParticle = 0_r;
+   real_t yParticle = 0_r;
+   real_t zParticle = 0_r;
 
    for( uint_t nSphere = 0; nSphere < numberOfSpheres; ++nSphere )
    {
@@ -273,10 +273,10 @@ uint_t createSpheresRandomly( StructuredBlockForest & forest, pe::BodyStorage & 
       }
 
 
-      pe::SphereID sp = pe::createSphere( globalBodyStorage, forest.getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( xParticle, yParticle, zParticle ), diameter * real_t(0.5), material );
+      pe::SphereID sp = pe::createSphere( globalBodyStorage, forest.getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( xParticle, yParticle, zParticle ), diameter * 0.5_r, material );
       if( sp != nullptr )
       {
-         sp->setLinearVel(Vector3<real_t>(real_t(0),real_t(0),initialZVelocity));
+         sp->setLinearVel(Vector3<real_t>(0_r,0_r,initialZVelocity));
       }
    }
 
@@ -287,7 +287,7 @@ uint_t createSphereLattice( StructuredBlockForest & forest, pe::BodyStorage & gl
                             const BlockDataID & bodyStorageID, const AABB & generationDomain,
                             real_t diameter, real_t solidVolumeFraction, pe::MaterialID & material, real_t initialZVelocity )
 {
-   real_t sphereVolume = math::M_PI * diameter * diameter * diameter / real_t(6);
+   real_t sphereVolume = math::M_PI * diameter * diameter * diameter / 6_r;
    real_t numSpheresDesired = solidVolumeFraction * generationDomain.volume() / sphereVolume;
    uint_t spheresPerDirection = uint_c(std::cbrt(numSpheresDesired) );
 
@@ -295,17 +295,17 @@ uint_t createSphereLattice( StructuredBlockForest & forest, pe::BodyStorage & gl
 
    WALBERLA_ASSERT( spacing >= diameter );
 
-   Vector3<real_t> generationOrigin( generationDomain.xMin() + spacing * real_t(0.5), generationDomain.yMin() + spacing * real_t(0.5), generationDomain.zMin() + spacing * real_t(0.5));
+   Vector3<real_t> generationOrigin( generationDomain.xMin() + spacing * 0.5_r, generationDomain.yMin() + spacing * 0.5_r, generationDomain.zMin() + spacing * 0.5_r);
 
    uint_t numSpheres( 0 );
 
    for( auto it = grid_generator::SCIterator(generationDomain, generationOrigin, spacing); it != grid_generator::SCIterator(); ++it )
    {
-      pe::SphereID sp = pe::createSphere( globalBodyStorage, forest.getBlockStorage(), bodyStorageID, 0, *it, diameter * real_t(0.5), material );
+      pe::SphereID sp = pe::createSphere( globalBodyStorage, forest.getBlockStorage(), bodyStorageID, 0, *it, diameter * 0.5_r, material );
 
       if( sp != nullptr )
       {
-         sp->setLinearVel(Vector3<real_t>(real_t(0),real_t(0),initialZVelocity));
+         sp->setLinearVel(Vector3<real_t>(0_r,0_r,initialZVelocity));
          ++numSpheres;
       }
    }
@@ -315,7 +315,7 @@ uint_t createSphereLattice( StructuredBlockForest & forest, pe::BodyStorage & gl
       mpi::allReduceInplace( numSpheres, mpi::SUM );
    }
 
-   WALBERLA_LOG_INFO_ON_ROOT("Created spheres in lattice arrangement with a center-to-center spacing of " << spacing << " ( " << real_t(100)*spacing/diameter << "% of diameter )" );
+   WALBERLA_LOG_INFO_ON_ROOT("Created spheres in lattice arrangement with a center-to-center spacing of " << spacing << " ( " << 100_r*spacing/diameter << "% of diameter )" );
 
    return numSpheres;
 }
@@ -326,7 +326,7 @@ void resetSphereVelocities( const shared_ptr<StructuredBlockForest> & blocks, co
    {
       for( auto bodyIt = pe::BodyIterator::begin< pe::Sphere >( *blockIt, bodyStorageID); bodyIt != pe::BodyIterator::end<pe::Sphere>(); ++bodyIt )
       {
-         bodyIt->setAngularVel(real_t(0),real_t(0),real_t(0));
+         bodyIt->setAngularVel(0_r,0_r,0_r);
          bodyIt->setLinearVel(vel);
       }
    }
@@ -493,14 +493,14 @@ private:
 
 Vector3<real_t> getGNSMeanFluidVelocity( const shared_ptr<StructuredBlockStorage> & blocks, BlockDataID pdfFieldID, BlockDataID svfFieldID, real_t domainVolume )
 {
-   Vector3<real_t> velocity( real_t(0) );
+   Vector3<real_t> velocity( 0_r );
    for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
    {
       PdfField_T* pdfField = blockIt->getData< PdfField_T >( pdfFieldID );
       ScalarField_T* svfField = blockIt->getData< ScalarField_T >( svfFieldID );
       WALBERLA_FOR_ALL_CELLS_XYZ( pdfField,
          real_t svf = svfField->get(x,y,z);
-         velocity += pdfField->getVelocity(x,y,z) / (real_t(1) - svf );
+         velocity += pdfField->getVelocity(x,y,z) / (1_r - svf );
       );
    }
    WALBERLA_MPI_SECTION()
@@ -530,7 +530,7 @@ void logSingleResultToFile( const std::string & fileName, const real_t & solidVo
 class CollisionPropertiesEvaluator
 {
 public:
-   CollisionPropertiesEvaluator( pe::cr::ICR & collisionResponse ) : collisionResponse_( collisionResponse ), maximumPenetration_(real_t(0))
+   CollisionPropertiesEvaluator( pe::cr::ICR & collisionResponse ) : collisionResponse_( collisionResponse ), maximumPenetration_(0_r)
    {}
 
    void operator()()
@@ -548,7 +548,7 @@ public:
    }
    void resetMaximumPenetration()
    {
-      maximumPenetration_ = real_t(0);
+      maximumPenetration_ = 0_r;
    }
 private:
    pe::cr::ICR & collisionResponse_;
@@ -634,12 +634,12 @@ int main( int argc, char **argv )
    uint_t vtkWriteFrequency = 0;
    std::string baseFolder = "vtk_out_HinderedSettlingDPM";
 
-   real_t densityRatio = real_t(2500) / real_t(1000);
-   real_t gravity = real_t(0.002); // has to be small enough to keep settling velocities small
-   real_t diameter = real_t(0.5);
+   real_t densityRatio = 2500_r / 1000_r;
+   real_t gravity = 0.002_r; // has to be small enough to keep settling velocities small
+   real_t diameter = 0.5_r;
    uint_t interactionSubCycles = uint_t(1); // number of subcycles that involve evaluation of the interaction force -> around 3 for stability with added mass
    uint_t peSubSteps = uint_t(1); // number of pe only calls in each subcycle
-   real_t solidVolumeFraction = real_t(0.05);
+   real_t solidVolumeFraction = 0.05_r;
 
    DPMethod dpm = DPMethod::GNS;
    Interpolation interpol = Interpolation::IKernel;
@@ -650,17 +650,17 @@ int main( int argc, char **argv )
    EffectiveViscosity effVisc = EffectiveViscosity::None;
 
    bool useTurbulenceModel = false;
-   const real_t smagorinskyConstant = real_t(0.1); //for turbulence model
+   const real_t smagorinskyConstant = 0.1_r; //for turbulence model
 
-   real_t lubricationCutOffDistance = real_t(0); //0 switches it off
+   real_t lubricationCutOffDistance = 0_r; //0 switches it off
    bool useLubricationCorrection = false; // false: use full lubrication force, true: use only correction part
 
    bool createSpheresInLattice = false;
    bool initialSimulationToAdjustFluidForcing = false;
 
-   real_t initialSphereVelocityZ( real_t(0) );
+   real_t initialSphereVelocityZ( 0_r );
 
-   real_t relativeVelDiffLimit( real_t(1e-5) ); //set negative to avoid convergence before 30 dimensionless timesteps
+   real_t relativeVelDiffLimit( 1e-5_r ); //set negative to avoid convergence before 30 dimensionless timesteps
 
    for( int i = 1; i < argc; ++i )
    {
@@ -692,11 +692,11 @@ int main( int argc, char **argv )
 
    if( vtkWriteFrequency > 0 ) vtkIO = true;
 
-   WALBERLA_CHECK( diameter <= real_t(1), "Diameter is not allowed to be > 1!" );
-   WALBERLA_CHECK( solidVolumeFraction <= real_t(0.65), "Solid volume fraction is not allowed to be > 0.65!" );
+   WALBERLA_CHECK( diameter <= 1_r, "Diameter is not allowed to be > 1!" );
+   WALBERLA_CHECK( solidVolumeFraction <= 0.65_r, "Solid volume fraction is not allowed to be > 0.65!" );
    WALBERLA_CHECK( interactionSubCycles > uint_t(0), "Number of interaction sub cycles has to be at least 1!");
    WALBERLA_CHECK( peSubSteps > uint_t(0), "Number of pe sub steps has to be at least 1!");
-   WALBERLA_CHECK( lubricationCutOffDistance >= real_t(0), "Lubrication cut off distance has to be non-negative!");
+   WALBERLA_CHECK( lubricationCutOffDistance >= 0_r, "Lubrication cut off distance has to be non-negative!");
 
    if( funcTest )
    {
@@ -716,50 +716,50 @@ int main( int argc, char **argv )
    //                           //
    ///////////////////////////////
 
-   const uint_t xlength = uint_c( real_t(32) * diameter )  ;
+   const uint_t xlength = uint_c( 32_r * diameter )  ;
    const uint_t ylength = xlength;
    const uint_t zlength = xlength;
 
-   if( solidVolumeFraction < real_t(1e-10) )
+   if( solidVolumeFraction < 1e-10_r )
    {
       // create only a single sphere
-      solidVolumeFraction = math::M_PI * diameter * diameter * diameter / ( real_t(6) * real_c( xlength * ylength * zlength));
+      solidVolumeFraction = math::M_PI * diameter * diameter * diameter / ( 6_r * real_c( xlength * ylength * zlength));
    }
 
-   const real_t diameter_SI = real_t(0.00035); // m, Finn et al, Tab 5
-   const real_t gravity_SI = real_t(9.81); // m/s^2
+   const real_t diameter_SI = 0.00035_r; // m, Finn et al, Tab 5
+   const real_t gravity_SI = 9.81_r; // m/s^2
 
    const real_t dx_SI = diameter_SI / diameter;
-   const real_t dx = real_t(1);
-   const real_t viscosity_SI = real_t(1e-3); // kg/(ms)
-   const real_t densityFluid_SI = real_t(1e3); // kg/m^3
+   const real_t dx = 1_r;
+   const real_t viscosity_SI = 1e-3_r; // kg/(ms)
+   const real_t densityFluid_SI = 1e3_r; // kg/m^3
 
    const real_t dt_SI = std::sqrt(gravity * dx_SI / gravity_SI);
    const real_t viscosity = ( viscosity_SI/densityFluid_SI ) * dt_SI / ( dx_SI * dx_SI );
-   const real_t tau = real_t(1) / lbm::collision_model::omegaFromViscosity( viscosity );
+   const real_t tau = 1_r / lbm::collision_model::omegaFromViscosity( viscosity );
 
-   real_t gravitationalForce = - gravity * ( densityRatio - real_t(1) ) * diameter * diameter * diameter * math::PI / real_t(6);
+   real_t gravitationalForce = - gravity * ( densityRatio - 1_r ) * diameter * diameter * diameter * math::PI / 6_r;
 
    // unhindered settling velocity of a single sphere in infinite fluid, would come from experiments or DNS, NOT Stokes settling velocity, from Finn et al, Tab 5
-   const real_t velUnhindered_SI = real_t(-0.048); // m/s
+   const real_t velUnhindered_SI = -0.048_r; // m/s
 
-   const real_t velStokes = -( densityRatio - real_t(1) ) * diameter * diameter * gravity / ( real_t(18) * viscosity );
+   const real_t velStokes = -( densityRatio - 1_r ) * diameter * diameter * gravity / ( 18_r * viscosity );
    const real_t velUnhindered = velUnhindered_SI * dt_SI / dx_SI;
 
-   const real_t dt_DEM = real_t(1) / real_c(interactionSubCycles * peSubSteps);
+   const real_t dt_DEM = 1_r / real_c(interactionSubCycles * peSubSteps);
 
-   const real_t dt = real_t(1);
+   const real_t dt = 1_r;
    const real_t dtInteractionSubCycle = dt / real_c(interactionSubCycles);
    const real_t dtBodyVelocityTimeDerivativeEvaluation = dtInteractionSubCycle;
 
-   const uint_t tStokes = uint_c(densityRatio * diameter * diameter / ( real_t(18) * viscosity ));
+   const uint_t tStokes = uint_c(densityRatio * diameter * diameter / ( 18_r * viscosity ));
 
    const uint_t timesteps = (funcTest) ? uint_t(10) : uint_t(30) * tStokes; // total number of time steps for the whole simulation
 
-   const Vector3<real_t> initialFluidVelocity( real_t(0) );
+   const Vector3<real_t> initialFluidVelocity( 0_r );
 
-   const std::string fileNameLoggingInit = baseFolder+"/evalHinderedSettlingDynamicsSubgrid_eps"+std::to_string(uint_c(real_t(100) * solidVolumeFraction))+"_d"+std::to_string(uint_c(real_t(100) * diameter))+"_init.txt";
-   const std::string fileNameLogging = baseFolder+"/evalHinderedSettlingDynamicsSubgrid_eps"+std::to_string(uint_c(real_t(100) * solidVolumeFraction))+"_d"+std::to_string(uint_c(real_t(100) * diameter))+".txt";
+   const std::string fileNameLoggingInit = baseFolder+"/evalHinderedSettlingDynamicsSubgrid_eps"+std::to_string(uint_c(100_r * solidVolumeFraction))+"_d"+std::to_string(uint_c(100_r * diameter))+"_init.txt";
+   const std::string fileNameLogging = baseFolder+"/evalHinderedSettlingDynamicsSubgrid_eps"+std::to_string(uint_c(100_r * solidVolumeFraction))+"_d"+std::to_string(uint_c(100_r * diameter))+".txt";
 
    if( !funcTest ) {
       WALBERLA_LOG_INFO_ON_ROOT("Lx x Ly x Lz = " << xlength << " x " << ylength << " x " << zlength);
@@ -781,7 +781,7 @@ int main( int argc, char **argv )
       WALBERLA_LOG_INFO_ON_ROOT("pe sub steps = " << peSubSteps);
       WALBERLA_LOG_INFO_ON_ROOT("lubrication cut off distance = " << lubricationCutOffDistance);
       WALBERLA_LOG_INFO_ON_ROOT("use lubrication correction term instead of full formula = " << (useLubricationCorrection ? "yes" : "no"));
-      WALBERLA_LOG_INFO_ON_ROOT("Ga = " << std::sqrt((densityRatio - real_t(1)) * gravity * diameter * diameter * diameter) / viscosity);
+      WALBERLA_LOG_INFO_ON_ROOT("Ga = " << std::sqrt((densityRatio - 1_r) * gravity * diameter * diameter * diameter) / viscosity);
       WALBERLA_LOG_INFO_ON_ROOT("dx_SI = " << dx_SI << ", dt_SI = " << dt_SI);
       WALBERLA_LOG_INFO_ON_ROOT("dt_DEM = " << dt_DEM);
       WALBERLA_LOG_INFO_ON_ROOT("t_ref = " << tStokes << " simulation steps");
@@ -824,18 +824,18 @@ int main( int argc, char **argv )
    pe::cr::DEM cr_dem(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID );
    cr = &cr_dem;
 
-   const real_t restitutionCoeff = real_t(0.88);
-   const real_t frictionCoeff = real_t(0.25);
+   const real_t restitutionCoeff = 0.88_r;
+   const real_t frictionCoeff = 0.25_r;
 
-   real_t sphereVolume = diameter * diameter * diameter * math::M_PI / real_t(6);
+   real_t sphereVolume = diameter * diameter * diameter * math::M_PI / 6_r;
    const real_t particleMass = densityRatio * sphereVolume;
-   const real_t Mij = particleMass * particleMass / ( real_t(2) * particleMass );
+   const real_t Mij = particleMass * particleMass / ( 2_r * particleMass );
    const real_t lnDryResCoeff = std::log(restitutionCoeff);
-   const real_t collisionTime = real_t(0.5);
-   const real_t stiffnessCoeff = math::M_PI * math::M_PI * Mij / ( collisionTime * collisionTime * ( real_t(1) - lnDryResCoeff * lnDryResCoeff / ( math::M_PI * math::M_PI + lnDryResCoeff* lnDryResCoeff ) ) );
-   const real_t dampingCoeff = - real_t(2) * std::sqrt( Mij * stiffnessCoeff ) *
+   const real_t collisionTime = 0.5_r;
+   const real_t stiffnessCoeff = math::M_PI * math::M_PI * Mij / ( collisionTime * collisionTime * ( 1_r - lnDryResCoeff * lnDryResCoeff / ( math::M_PI * math::M_PI + lnDryResCoeff* lnDryResCoeff ) ) );
+   const real_t dampingCoeff = - 2_r * std::sqrt( Mij * stiffnessCoeff ) *
                                ( std::log(restitutionCoeff) / std::sqrt( math::M_PI * math::M_PI + (std::log(restitutionCoeff) * std::log(restitutionCoeff) ) ) );
-   const real_t contactDuration = real_t(2) * math::M_PI * Mij / ( std::sqrt( real_t(4) * Mij * stiffnessCoeff - dampingCoeff * dampingCoeff )); //formula from Uhlman
+   const real_t contactDuration = 2_r * math::M_PI * Mij / ( std::sqrt( 4_r * Mij * stiffnessCoeff - dampingCoeff * dampingCoeff )); //formula from Uhlman
 
    if( !funcTest ) {
       WALBERLA_LOG_INFO_ON_ROOT("Created sediment material with:\n"
@@ -845,7 +845,7 @@ int main( int argc, char **argv )
                                       << " - damping coefficient cdn = " << dampingCoeff << "\n"
                                       << " - contact time Tc = " << contactDuration);
    }
-   auto peMaterial = pe::createMaterial( "sedimentMat", densityRatio, restitutionCoeff, frictionCoeff, frictionCoeff, real_t(0), real_t(200), stiffnessCoeff, dampingCoeff, dampingCoeff );
+   auto peMaterial = pe::createMaterial( "sedimentMat", densityRatio, restitutionCoeff, frictionCoeff, frictionCoeff, 0_r, 200_r, stiffnessCoeff, dampingCoeff, dampingCoeff );
 
    /////////////////
    // PE COUPLING //
@@ -861,20 +861,20 @@ int main( int argc, char **argv )
 
    if ( createSpheresInLattice )
    {
-      numSpheres = createSphereLattice( *blocks, *globalBodyStorage, bodyStorageID, AABB( real_t(0), real_t(0), real_t(0), real_c(xlength), real_c(ylength), real_c(zlength) ),
-                                        diameter, solidVolumeFraction, peMaterial, real_t(0) );
+      numSpheres = createSphereLattice( *blocks, *globalBodyStorage, bodyStorageID, AABB( 0_r, 0_r, 0_r, real_c(xlength), real_c(ylength), real_c(zlength) ),
+                                        diameter, solidVolumeFraction, peMaterial, 0_r );
       syncCall();
 
    } else {
-      numSpheres = createSpheresRandomly( *blocks, *globalBodyStorage, bodyStorageID, AABB( real_t(0), real_t(0), real_t(0), real_c(xlength), real_c(ylength), real_c(zlength) ),
-                                          diameter, solidVolumeFraction, peMaterial, real_t(0) );
+      numSpheres = createSpheresRandomly( *blocks, *globalBodyStorage, bodyStorageID, AABB( 0_r, 0_r, 0_r, real_c(xlength), real_c(ylength), real_c(zlength) ),
+                                          diameter, solidVolumeFraction, peMaterial, 0_r );
       syncCall();
 
       const uint_t initialPeSteps = uint_t(50000);
-      const real_t dt_DEM_init = collisionTime / real_t(10);
-      const real_t overlapLimit = real_t(0.05) * diameter;
+      const real_t dt_DEM_init = collisionTime / 10_r;
+      const real_t overlapLimit = 0.05_r * diameter;
       
-      WALBERLA_LOG_INFO_ON_ROOT("Sphere creation done --- resolving overlaps with goal all < " << overlapLimit / diameter * real_t(100) << "%");
+      WALBERLA_LOG_INFO_ON_ROOT("Sphere creation done --- resolving overlaps with goal all < " << overlapLimit / diameter * 100_r << "%");
       
       for( uint_t pet = uint_t(1); pet <= initialPeSteps; ++pet )
       {
@@ -889,43 +889,43 @@ int main( int argc, char **argv )
          }else{
             if( pet % uint_t(200) == uint_t(0) )
             {
-               WALBERLA_LOG_INFO_ON_ROOT(pet << " - current max overlap = " << maxPen / diameter * real_t(100) << "%");
+               WALBERLA_LOG_INFO_ON_ROOT(pet << " - current max overlap = " << maxPen / diameter * 100_r << "%");
             }
          }
          collisionPropertiesEvaluator->resetMaximumPenetration();
       }
    }
 
-   Vector3<real_t> initialSphereVelocity(real_t(0), real_t(0), initialSphereVelocityZ);
+   Vector3<real_t> initialSphereVelocity(0_r, 0_r, initialSphereVelocityZ);
    WALBERLA_LOG_INFO_ON_ROOT("Resetting sphere velocity to " << initialSphereVelocity );
    resetSphereVelocities( blocks, bodyStorageID, initialSphereVelocity );
 
 
    const real_t domainVolume = real_c( xlength * ylength * zlength );
-   real_t actualSolidVolumeFraction = real_c( numSpheres ) * diameter * diameter * diameter * math::M_PI / ( real_t(6) * domainVolume );
+   real_t actualSolidVolumeFraction = real_c( numSpheres ) * diameter * diameter * diameter * math::M_PI / ( 6_r * domainVolume );
    real_t ReynoldsNumber = std::fabs(velUnhindered) * diameter / viscosity;
 
    // apply external forcing on fluid to approximately balance the force from the settling particles to avoid too large fluid or particle velocities
-   const real_t extForceZ = actualSolidVolumeFraction * gravity * (densityRatio - real_t(1));
-   Vector3<real_t> extForce = Vector3<real_t>(real_t(0), real_t(0), extForceZ );
+   const real_t extForceZ = actualSolidVolumeFraction * gravity * (densityRatio - 1_r);
+   Vector3<real_t> extForce = Vector3<real_t>(0_r, 0_r, extForceZ );
 
    // apply estimate by Richardson & Zaki (1954) for unbounded flow (DomainLength->infty)
    real_t n = 0;
-   if( ReynoldsNumber < real_t(0.2) )
+   if( ReynoldsNumber < 0.2_r )
    {
-      n = real_t(4.65);
-   } else if ( ReynoldsNumber < real_t(1) )
+      n = 4.65_r;
+   } else if ( ReynoldsNumber < 1_r )
    {
-      n = real_t(4.35) * std::pow( ReynoldsNumber, real_t(-0.03) );
-   } else if ( ReynoldsNumber < real_t(500) )
+      n = 4.35_r * std::pow( ReynoldsNumber, -0.03_r );
+   } else if ( ReynoldsNumber < 500_r )
    {
-      n = real_t(4.45) * std::pow( ReynoldsNumber, real_t(-0.1) );
+      n = 4.45_r * std::pow( ReynoldsNumber, -0.1_r );
    } else
    {
-      n = real_t(2.39);
+      n = 2.39_r;
    }
 
-   real_t expectedVelocity = velUnhindered * std::pow( ( real_t(1) - actualSolidVolumeFraction ), n );
+   real_t expectedVelocity = velUnhindered * std::pow( ( 1_r - actualSolidVolumeFraction ), n );
 
    WALBERLA_LOG_INFO_ON_ROOT("solid volume fraction = " << actualSolidVolumeFraction );
    WALBERLA_LOG_INFO_ON_ROOT("number of spheres = " << numSpheres );
@@ -934,7 +934,7 @@ int main( int argc, char **argv )
    WALBERLA_LOG_INFO_ON_ROOT("Re = " << ReynoldsNumber );
    WALBERLA_LOG_INFO_ON_ROOT("expected settling velocity = " << expectedVelocity <<" = " << expectedVelocity * dx_SI / dt_SI << " m/s" );
    WALBERLA_LOG_INFO_ON_ROOT("external forcing on fluid = " << extForce );
-   WALBERLA_LOG_INFO_ON_ROOT("total external forcing applied on all fluid cells = " << extForce[2] * (real_t(1) - actualSolidVolumeFraction) * real_c( xlength * ylength * zlength ) );
+   WALBERLA_LOG_INFO_ON_ROOT("total external forcing applied on all fluid cells = " << extForce[2] * (1_r - actualSolidVolumeFraction) * real_c( xlength * ylength * zlength ) );
    WALBERLA_LOG_INFO_ON_ROOT("total external (gravity & buoyancy) force on all spheres = " << gravitationalForce * real_c(numSpheres) );
 
    //////////////////////
@@ -944,20 +944,20 @@ int main( int argc, char **argv )
    //////////////////////
 
    // create force field
-   BlockDataID forceFieldID = field::addToStorage< Vec3Field_T >( blocks, "force field", Vector3<real_t>(real_t(0)), field::zyxf, FieldGhostLayers );
+   BlockDataID forceFieldID = field::addToStorage< Vec3Field_T >( blocks, "force field", Vector3<real_t>(0_r), field::zyxf, FieldGhostLayers );
 
-   BlockDataID dragForceFieldID = field::addToStorage< Vec3Field_T >( blocks, "drag force field", Vector3<real_t>(real_t(0)), field::zyxf, FieldGhostLayers );
-   BlockDataID amForceFieldID = field::addToStorage< Vec3Field_T >( blocks, "am force field", Vector3<real_t>(real_t(0)), field::zyxf, FieldGhostLayers );
-   BlockDataID liftForceFieldID = field::addToStorage< Vec3Field_T >( blocks, "lift force field", Vector3<real_t>(real_t(0)), field::zyxf, FieldGhostLayers );
+   BlockDataID dragForceFieldID = field::addToStorage< Vec3Field_T >( blocks, "drag force field", Vector3<real_t>(0_r), field::zyxf, FieldGhostLayers );
+   BlockDataID amForceFieldID = field::addToStorage< Vec3Field_T >( blocks, "am force field", Vector3<real_t>(0_r), field::zyxf, FieldGhostLayers );
+   BlockDataID liftForceFieldID = field::addToStorage< Vec3Field_T >( blocks, "lift force field", Vector3<real_t>(0_r), field::zyxf, FieldGhostLayers );
 
    // create omega field
-   BlockDataID omegaFieldID = field::addToStorage< ScalarField_T >( blocks, "omega field", real_t(0), field::zyxf, FieldGhostLayers );
+   BlockDataID omegaFieldID = field::addToStorage< ScalarField_T >( blocks, "omega field", 0_r, field::zyxf, FieldGhostLayers );
 
    // create the lattice model
    LatticeModel_T latticeModel = LatticeModel_T( omegaFieldID, ForceModel_T( forceFieldID ) );
 
    // add PDF field
-   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage( blocks, "pdf field (zyxf)", latticeModel, initialFluidVelocity, real_t(1), FieldGhostLayers, field::zyxf );
+   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage( blocks, "pdf field (zyxf)", latticeModel, initialFluidVelocity, 1_r, FieldGhostLayers, field::zyxf );
 
    // add flag field
    BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field" );
@@ -971,10 +971,10 @@ int main( int argc, char **argv )
    BlockDataID swappedOldVelocityFieldID = field::addToStorage< Vec3Field_T >( blocks, "swapped old velocity field", initialFluidVelocity, field::zyxf, FieldGhostLayers );
 
    // create pressure field
-   BlockDataID pressureFieldID = field::addToStorage< ScalarField_T >( blocks, "pressure field", real_t(0), field::zyxf, FieldGhostLayers );
+   BlockDataID pressureFieldID = field::addToStorage< ScalarField_T >( blocks, "pressure field", 0_r, field::zyxf, FieldGhostLayers );
 
    // create solid volume fraction field
-   BlockDataID svfFieldID = field::addToStorage< ScalarField_T >( blocks, "svf field", real_t(0), field::zyxf, FieldGhostLayers );
+   BlockDataID svfFieldID = field::addToStorage< ScalarField_T >( blocks, "svf field", 0_r, field::zyxf, FieldGhostLayers );
 
    // field to store pressure gradient
    BlockDataID pressureGradientFieldID = field::addToStorage< Vec3Field_T >( blocks, "pressure gradient field", Vector3<real_t>(real_c(0)), field::zyxf, FieldGhostLayers );
@@ -1325,7 +1325,7 @@ int main( int argc, char **argv )
 
    // function to evaluate lubrication forces
    std::function<void(void)> lubricationEvaluationFunction;
-   if( lubricationCutOffDistance > real_t(0) )
+   if( lubricationCutOffDistance > 0_r )
    {
       if( useLubricationCorrection )
       {
@@ -1358,7 +1358,7 @@ int main( int argc, char **argv )
    // if this force is approximately converged, see if it matches the gravitational force
    // if not, change the external force accordingly
 
-   if( solidVolumeFraction > real_t(0.01) && initialSimulationToAdjustFluidForcing )
+   if( solidVolumeFraction > 0.01_r && initialSimulationToAdjustFluidForcing )
    {
       WALBERLA_LOG_INFO_ON_ROOT("===================================================================================" );
       WALBERLA_LOG_INFO_ON_ROOT("Starting initial simulation to equilibrate fluid forcing and interaction force");
@@ -1470,9 +1470,9 @@ int main( int argc, char **argv )
       // execute simulation
       WcTimingPool timeloopInitTiming;
 
-      real_t oldInteractionForce( real_t(0) );
-      real_t curInteractionForce( real_t(0) );
-      real_t relativeForceDiffLimit( real_t(1e-4) );
+      real_t oldInteractionForce( 0_r );
+      real_t curInteractionForce( 0_r );
+      real_t relativeForceDiffLimit( 1e-4_r );
       real_t relativeForceConvergenceLimit( real_t( 1e-3 ) );
       for( uint_t t = 0; t <= timesteps; ++t )
       {
@@ -1488,9 +1488,9 @@ int main( int argc, char **argv )
                WALBERLA_LOG_INFO_ON_ROOT("initial simulation ended with relative difference of interaction forces of " << relativeForceDiffLimit << " after " << t << " time steps.");
 
 
-               real_t actingExternalForceOnSpheres = real_c(numSpheres) * ( ( - gravity * densityRatio * diameter * diameter * diameter * math::PI / real_t(6)  ) +
-                                                                            ( gravity * real_t(1) * diameter * diameter * diameter * math::PI / real_t(6) ) +
-                                                                            ( extForce[2] * real_t(1) * diameter * diameter * diameter * math::PI / real_t(6) ) );
+               real_t actingExternalForceOnSpheres = real_c(numSpheres) * ( ( - gravity * densityRatio * diameter * diameter * diameter * math::PI / 6_r  ) +
+                                                                            ( gravity * 1_r * diameter * diameter * diameter * math::PI / 6_r ) +
+                                                                            ( extForce[2] * 1_r * diameter * diameter * diameter * math::PI / 6_r ) );
                WALBERLA_LOG_INFO_ON_ROOT("f_interaction_z = " << curInteractionForce << ", f_ext_z = " << actingExternalForceOnSpheres );
                if( std::fabs( ( std::fabs( curInteractionForce ) - std::fabs( actingExternalForceOnSpheres ) )/ std::fabs( curInteractionForce ) ) < relativeForceConvergenceLimit )
                {
@@ -1504,7 +1504,7 @@ int main( int argc, char **argv )
                   extForce[2] = extForce[2] * ( std::fabs( actingExternalForceOnSpheres ) / std::fabs( curInteractionForce ) );
                   gnsExternalForceOnForceFieldAdder->reset(extForce);
                   WALBERLA_LOG_INFO_ON_ROOT("restarting initial simulation with new external force = " << extForce[2]);
-                  curInteractionForce = real_t(0);
+                  curInteractionForce = 0_r;
                }
             }
             oldInteractionForce = curInteractionForce;
@@ -1521,7 +1521,7 @@ int main( int argc, char **argv )
    WALBERLA_LOG_INFO_ON_ROOT("===================================================================================" );
    WALBERLA_LOG_INFO_ON_ROOT("Starting simulation with:" );
    WALBERLA_LOG_INFO_ON_ROOT("external forcing on fluid = " << extForce );
-   WALBERLA_LOG_INFO_ON_ROOT("total external forces on all particles = " << real_c(numSpheres) * ( - gravity * ( densityRatio - real_t(1) ) + extForce[2] ) * diameter * diameter * diameter * math::PI / real_t(6) );
+   WALBERLA_LOG_INFO_ON_ROOT("total external forces on all particles = " << real_c(numSpheres) * ( - gravity * ( densityRatio - 1_r ) + extForce[2] ) * diameter * diameter * diameter * math::PI / 6_r );
    WALBERLA_LOG_INFO_ON_ROOT("simulating " << timesteps << " time steps" );
 
 
@@ -1539,7 +1539,7 @@ int main( int argc, char **argv )
    {
       (*collisionPropertiesEvaluator)();
       real_t maxPen = collisionPropertiesEvaluator->getMaximumPenetrationInSimulation();
-      WALBERLA_LOG_INFO_ON_ROOT("maximum penetration before the simulation (maxPen) = " <<  maxPen << ", maxPen / D = " << real_t(100) * maxPen / diameter << "%");
+      WALBERLA_LOG_INFO_ON_ROOT("maximum penetration before the simulation (maxPen) = " <<  maxPen << ", maxPen / D = " << 100_r * maxPen / diameter << "%");
    }
    collisionPropertiesEvaluator->resetMaximumPenetration();
 
@@ -1642,9 +1642,9 @@ int main( int argc, char **argv )
 
       // ext forces on bodies
       timeloop.add() << Sweep( DummySweep(), "Dummy Sweep ")
-                     << AfterFunction( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, Vector3<real_t>(0,0,- gravity * densityRatio * diameter * diameter * diameter * math::PI / real_t(6) )  ), "Gravitational Force Add" )
-                     << AfterFunction( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, Vector3<real_t>(0,0,gravity * real_t(1) * diameter * diameter * diameter * math::PI / real_t(6) ) ), "Buoyancy Force (due to gravity) Add" )
-                     << AfterFunction( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, Vector3<real_t>(0,0,extForce[2] * real_t(1) * diameter * diameter * diameter * math::PI / real_t(6) ) ), "Buoyancy Force (due to external fluid force) Add" )
+                     << AfterFunction( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, Vector3<real_t>(0,0,- gravity * densityRatio * diameter * diameter * diameter * math::PI / 6_r )  ), "Gravitational Force Add" )
+                     << AfterFunction( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, Vector3<real_t>(0,0,gravity * 1_r * diameter * diameter * diameter * math::PI / 6_r ) ), "Buoyancy Force (due to gravity) Add" )
+                     << AfterFunction( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, Vector3<real_t>(0,0,extForce[2] * 1_r * diameter * diameter * diameter * math::PI / 6_r ) ), "Buoyancy Force (due to external fluid force) Add" )
                      << AfterFunction( pe_coupling::TimeStep( blocks, bodyStorageID, *cr, syncCall, dtInteractionSubCycle, peSubSteps, lubricationEvaluationFunction ), "Pe Time Step" );
 
       timeloop.add() << Sweep( DummySweep(), "Dummy Sweep ")
@@ -1707,8 +1707,8 @@ int main( int argc, char **argv )
    // execute simulation
    WcTimingPool timeloopTiming;
 
-   real_t oldSettlingVel( real_t(0) );
-   real_t curSettlingVel( real_t(0) );
+   real_t oldSettlingVel( 0_r );
+   real_t curSettlingVel( 0_r );
    for( uint_t t = 0; t < timesteps; ++t )
    {
       timeloop.singleStep( timeloopTiming );
@@ -1737,13 +1737,13 @@ int main( int argc, char **argv )
    WALBERLA_LOG_INFO_ON_ROOT(" - simulated settling velocity = " << curSettlingVel << ", us/uT = " << curSettlingVel / velUnhindered);
    WALBERLA_LOG_INFO_ON_ROOT(" - expected settling velocity = " << expectedVelocity << ", ue/uT = " << expectedVelocity / velUnhindered);
    WALBERLA_LOG_INFO_ON_ROOT("detailed overview:");
-   WALBERLA_LOG_INFO_ON_ROOT(" - mean particle velocity  = " << meanParticleVel << " = " << meanParticleVel * dx_SI/dt_SI << " m/s ( " << std::fabs(meanParticleVel/curSettlingVel)*real_t(100) << "% of settling vel)");
-   WALBERLA_LOG_INFO_ON_ROOT(" - mean fluid velocity     = " << meanFluidVel << " = " << meanFluidVel * dx_SI/dt_SI << " m/s ( " << std::fabs(meanFluidVel/curSettlingVel)*real_t(100) << "% of settling vel)");
+   WALBERLA_LOG_INFO_ON_ROOT(" - mean particle velocity  = " << meanParticleVel << " = " << meanParticleVel * dx_SI/dt_SI << " m/s ( " << std::fabs(meanParticleVel/curSettlingVel)*100_r << "% of settling vel)");
+   WALBERLA_LOG_INFO_ON_ROOT(" - mean fluid velocity     = " << meanFluidVel << " = " << meanFluidVel * dx_SI/dt_SI << " m/s ( " << std::fabs(meanFluidVel/curSettlingVel)*100_r << "% of settling vel)");
    WALBERLA_LOG_INFO_ON_ROOT(" - mean relative velocity  = " << curSettlingVel << " = " << curSettlingVel * dx_SI/dt_SI << " m/s");
    WALBERLA_LOG_INFO_ON_ROOT(" - expected velocity (R&Z) = " << expectedVelocity << " = " << expectedVelocity * dx_SI/dt_SI << " m/s");
    
    real_t maxPen = collisionPropertiesEvaluator->getMaximumPenetrationInSimulation();
-   WALBERLA_LOG_INFO_ON_ROOT(" - maximum penetration (maxPen) = " <<  maxPen << ", maxPen / D = " << real_t(100) * maxPen / diameter << "%");
+   WALBERLA_LOG_INFO_ON_ROOT(" - maximum penetration (maxPen) = " <<  maxPen << ", maxPen / D = " << 100_r * maxPen / diameter << "%");
 
 
    if ( fileIO ) {

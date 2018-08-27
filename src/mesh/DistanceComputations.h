@@ -43,11 +43,11 @@ struct DistanceProperties
    typedef math::Matrix3<Scalar> Matrix;
 
    // Dummy constructor to suppress GCC 7 warnings
-   DistanceProperties() : e0(real_t(0)), e1(real_t(0)), e2(real_t(0)),
-                          e1_normal(real_t(0)), e2_normal(real_t(0)),
-                          e1_normalized(real_t(0)), e2_normalized(real_t(0)), e0_normalized(real_t(0)),
-                          e0l(real_t(0)), e1l(real_t(0)), e2l(real_t(0)),
-                          translation(real_t(0))
+   DistanceProperties() : e0(0_r), e1(0_r), e2(0_r),
+                          e1_normal(0_r), e2_normal(0_r),
+                          e1_normalized(0_r), e2_normalized(0_r), e0_normalized(0_r),
+                          e0l(0_r), e1l(0_r), e2l(0_r),
+                          translation(0_r)
    {}
 
    Vec2 e0, e1, e2;

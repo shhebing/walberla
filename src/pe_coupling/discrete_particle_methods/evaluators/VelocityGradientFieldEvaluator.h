@@ -62,7 +62,7 @@ public:
       TensorField_T* velocityGradientField = block->getData< TensorField_T >( velocityGradientFieldID_ );
       const BoundaryHandling_T * boundaryHandling = block->getData< BoundaryHandling_T >( boundaryHandlingID_ );
 
-      Matrix3<real_t> velocityGradient( real_t(0) );
+      Matrix3<real_t> velocityGradient( 0_r );
 
       WALBERLA_FOR_ALL_CELLS_XYZ( velocityGradientField,
          if( boundaryHandling->isDomain(x,y,z) )
@@ -83,7 +83,7 @@ private:
    void getVelocityGradient( const Cell & cell, const VectorField_T * velocityField, const BoundaryHandling_T * boundaryHandling, Matrix3<real_t> & velocityGradient )
    {
 
-      std::vector< Vector3<real_t> > velocityValues( Stencil_T::Size, Vector3<real_t>(real_t(0)) );
+      std::vector< Vector3<real_t> > velocityValues( Stencil_T::Size, Vector3<real_t>(0_r) );
 
       Vector3<real_t> velocityInCenterCell = velocityField->get( cell );
 
@@ -102,8 +102,8 @@ private:
       // obtain the matrix grad(u) with the help of the gradient formula from
       // See: Ramadugu et al - Lattice differential operators for computational physics (2013)
       // with T = c_s**2
-      const real_t inv_c_s_sqr = real_t(3);
-      velocityGradient = real_t(0);
+      const real_t inv_c_s_sqr = 3_r;
+      velocityGradient = 0_r;
       for( auto dir = Stencil_T::beginNoCenter(); dir != Stencil_T::end(); ++dir)
       {
          real_t cx = real_c(dir.cx());

@@ -275,7 +275,7 @@ public:
    void assignAllBlocksToRootProcess();
 
    void balanceLoad( const TargetProcessAssignmentFunction & function,
-                     const uint_t numberOfProcesses, const real_t minBufferProcessesFraction = real_t(0),
+                     const uint_t numberOfProcesses, const real_t minBufferProcessesFraction = 0_r,
                      const memory_t perProcessMemoryLimit = memory_t(0),
                      const bool reorderProcessesByBFS = false, const bool insertBufferProcesses = false );
                      

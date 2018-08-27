@@ -225,7 +225,7 @@ class CellwiseSweep
          const real_t velYTerm = vN + vNW; \
          \
          const real_t rho = vC + vS + vW + vB + vSW + velXTerm + velYTerm; \
-         const real_t invRho = real_t(1.0) / rho; \
+         const real_t invRho = 1.0_r / rho; \
          \
          const real_t velX = invRho * ( velXTerm - vW  - vNW - vSW ); \
          const real_t velY = invRho * ( velYTerm + vNE - vS  - vSW - vSE );
@@ -291,7 +291,7 @@ class CellwiseSweep
          const real_t velZTerm = vT + vTS + vTW; \
          \
          const real_t rho = vC + vS + vW + vB + vSW + vBS + vBW + velXTerm + velYTerm + velZTerm; \
-         const real_t invRho = real_t(1.0) / rho; \
+         const real_t invRho = 1.0_r / rho; \
          \
          const real_t velX = invRho * ( velXTerm - vW  - vNW - vSW - vTW - vBW ); \
          const real_t velY = invRho * ( velYTerm + vNE - vS  - vSW - vSE - vTS - vBS ); \
@@ -374,7 +374,7 @@ class CellwiseSweep
          const real_t velZTerm = vT + vTS + vTW + vTSW; \
          \
          const real_t rho = vC + vS + vW + vB + vSW + vBS + vBW + vBSW + velXTerm + velYTerm + velZTerm; \
-         const real_t invRho = real_t(1.0) / rho; \
+         const real_t invRho = 1.0_r / rho; \
          \
          const real_t velX = invRho * ( velXTerm - vW  - vNW - vSW - vTW - vBW - vTNW - vTSW - vBNW - vBSW ); \
          const real_t velY = invRho * ( velYTerm + vNE + vTNE + vBNE - vS  - vSW - vSE - vTS - vBS  - vTSE - vTSW - vBSE - vBSW ); \

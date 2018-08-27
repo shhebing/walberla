@@ -81,9 +81,9 @@ const FlagUID NoSlip_Flag( "no slip" );
 
 const uint_t FieldSize        = uint_t(10);
 const uint_t FieldGhostLayers = uint_t(1);
-const real_t GlobalOmega      = real_t(1.4);
-const real_t GlobalLambdaE    = real_t(1.8);
-const real_t GlobalLambdaD    = real_t(1.7);
+const real_t GlobalOmega      = 1.4_r;
+const real_t GlobalLambdaE    = 1.8_r;
+const real_t GlobalLambdaD    = 1.7_r;
 
 
 
@@ -166,7 +166,7 @@ void addTest( shared_ptr< StructuredBlockForest > & blocks, SweepTimeloop & time
               const char * fieldName )
 {
    fieldIds.push_back( lbm::addPdfFieldToStorage( blocks, std::string("pdf field ") + std::string(fieldName),
-                                                  latticeModel, Vector3<real_t>( velocity, velocity / real_t(2), velocity / real_t(4) ), real_t(1),
+                                                  latticeModel, Vector3<real_t>( velocity, velocity / 2_r, velocity / 4_r ), 1_r,
                                                   FieldGhostLayers, layout ) );
 
    BlockDataID boundaryHandlingId = blocks->addStructuredBlockData< typename MyBoundaryHandling< LatticeModel_T >::BoundaryHandling_T >(
@@ -353,7 +353,7 @@ int main( int argc, char ** argv )
 
    std::vector< std::vector< BlockDataID > > fieldIds;
 
-   const real_t velocity = real_t(0.05);
+   const real_t velocity = 0.05_r;
 
    #ifdef TEST_USES_VTK_OUTPUT
    auto pdfFieldVTKWriter = vtk::createVTKOutput_BlockData( blocks, "pdf_field", uint_t(10) );

@@ -1159,9 +1159,9 @@ void VTKOutput::writeVTIPiece_sampling( std::ostream& ofs, const IBlock& block )
    WALBERLA_ASSERT_NOT_NULLPTR( blockStorage_ );
    WALBERLA_ASSERT_EQUAL( ghostLayers_, 0 );
 
-   WALBERLA_ASSERT_GREATER( samplingDx_, real_t(0) );
-   WALBERLA_ASSERT_GREATER( samplingDy_, real_t(0) );
-   WALBERLA_ASSERT_GREATER( samplingDz_, real_t(0) );
+   WALBERLA_ASSERT_GREATER( samplingDx_, 0_r );
+   WALBERLA_ASSERT_GREATER( samplingDy_, 0_r );
+   WALBERLA_ASSERT_GREATER( samplingDz_, 0_r );
 
    const AABB&  blockBB = block.getAABB();
    const AABB&  domain = blockStorage_->getDomain();
@@ -1177,9 +1177,9 @@ void VTKOutput::writeVTIPiece_sampling( std::ostream& ofs, const IBlock& block )
    CellVector cells;
    for( auto it = cellBB.begin(); it != cellBB.end(); ++it )
    {
-      Vector3<real_t> world( domain.xMin() + ( real_c( it->x() ) + real_t(0.5) ) * samplingDx_,
-         domain.yMin() + ( real_c( it->y() ) + real_t(0.5) ) * samplingDy_,
-         domain.zMin() + ( real_c( it->z() ) + real_t(0.5) ) * samplingDz_ );
+      Vector3<real_t> world( domain.xMin() + ( real_c( it->x() ) + 0.5_r ) * samplingDx_,
+         domain.yMin() + ( real_c( it->y() ) + 0.5_r ) * samplingDy_,
+         domain.zMin() + ( real_c( it->z() ) + 0.5_r ) * samplingDz_ );
 
       Cell cell;
       blockStorage_->getCell( cell, world[0], world[1], world[2], level );
@@ -1756,9 +1756,9 @@ void VTKOutput::writePVTI( const uint_t collector ) const
 void VTKOutput::writePVTI_sampled( const uint_t collector ) const
 {
    WALBERLA_ASSERT_NOT_NULLPTR( blockStorage_ );
-   WALBERLA_ASSERT_GREATER( samplingDx_, real_t(0) );
-   WALBERLA_ASSERT_GREATER( samplingDy_, real_t(0) );
-   WALBERLA_ASSERT_GREATER( samplingDz_, real_t(0) );
+   WALBERLA_ASSERT_GREATER( samplingDx_, 0_r );
+   WALBERLA_ASSERT_GREATER( samplingDy_, 0_r );
+   WALBERLA_ASSERT_GREATER( samplingDz_, 0_r );
 
    std::ostringstream collection;
    collection << baseFolder_ << "/" << identifier_ << "/" << executionFolder_ << "_" << collector << ".pvti";
@@ -2038,9 +2038,9 @@ void VTKOutput::writePCellData( std::ofstream& ofs ) const
 
 CellInterval VTKOutput::getSampledCellInterval( const AABB & aabb ) const
 {
-   WALBERLA_ASSERT_GREATER( samplingDx_, real_t(0) );
-   WALBERLA_ASSERT_GREATER( samplingDy_, real_t(0) );
-   WALBERLA_ASSERT_GREATER( samplingDz_, real_t(0) );
+   WALBERLA_ASSERT_GREATER( samplingDx_, 0_r );
+   WALBERLA_ASSERT_GREATER( samplingDy_, 0_r );
+   WALBERLA_ASSERT_GREATER( samplingDz_, 0_r );
 
    const AABB& domain = blockStorage_->getDomain();
 

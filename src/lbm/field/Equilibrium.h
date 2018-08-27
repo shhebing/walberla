@@ -67,26 +67,26 @@ struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_<
 
    template< typename FieldPtrOrIterator >
    static void set( FieldPtrOrIterator & it,
-                    const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                    const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
-      const real_t dir_independent = (rho - real_t(1.0)) - real_t(1.5) * velocity.sqrLength();
+      const real_t dir_independent = (rho - 1.0_r) - 1.5_r * velocity.sqrLength();
       for( auto d = LatticeModel_T::Stencil::begin(); d != LatticeModel_T::Stencil::end(); ++d )
       {
          const real_t vel = real_c(d.cx()) * velocity[0] + real_c(d.cy()) * velocity[1] + real_c(d.cz()) * velocity[2];
-         it[ d.toIdx() ] = real_c(LatticeModel_T::w[ d.toIdx() ]) * ( dir_independent + real_t(3.0)*vel + real_t(4.5)*vel*vel );
+         it[ d.toIdx() ] = real_c(LatticeModel_T::w[ d.toIdx() ]) * ( dir_independent + 3.0_r*vel + 4.5_r*vel*vel );
       }
    }
 
    template< typename PdfField_T >
    static void set( PdfField_T & pdf, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
-                    const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                    const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       real_t & xyz0 = pdf(x,y,z,0);
-      const real_t dir_independent = (rho - real_t(1.0)) - real_t(1.5) * velocity.sqrLength();
+      const real_t dir_independent = (rho - 1.0_r) - 1.5_r * velocity.sqrLength();
       for( auto d = LatticeModel_T::Stencil::begin(); d != LatticeModel_T::Stencil::end(); ++d )
       {
          const real_t vel = real_c(d.cx()) * velocity[0] + real_c(d.cy()) * velocity[1] + real_c(d.cz()) * velocity[2];
-         pdf.getF( &xyz0, d.toIdx() ) = real_c(LatticeModel_T::w[ d.toIdx() ]) * ( dir_independent + real_t(3.0)*vel + real_t(4.5)*vel*vel );
+         pdf.getF( &xyz0, d.toIdx() ) = real_c(LatticeModel_T::w[ d.toIdx() ]) * ( dir_independent + 3.0_r*vel + 4.5_r*vel*vel );
       }
    }
 };
@@ -104,26 +104,26 @@ struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_<
 
    template< typename FieldPtrOrIterator >
    static void set( FieldPtrOrIterator & it,
-                    const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                    const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
-      const real_t dir_independent = rho - real_t(1.0);
+      const real_t dir_independent = rho - 1.0_r;
       for( auto d = LatticeModel_T::Stencil::begin(); d != LatticeModel_T::Stencil::end(); ++d )
       {
          const real_t vel = real_c(d.cx()) * velocity[0] + real_c(d.cy()) * velocity[1] + real_c(d.cz()) * velocity[2];
-         it[ d.toIdx() ] = real_c(LatticeModel_T::w[ d.toIdx() ]) * ( dir_independent + real_t(3.0)*vel );
+         it[ d.toIdx() ] = real_c(LatticeModel_T::w[ d.toIdx() ]) * ( dir_independent + 3.0_r*vel );
       }
    }
 
    template< typename PdfField_T >
    static void set( PdfField_T & pdf, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
-                    const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                    const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       real_t & xyz0 = pdf(x,y,z,0);
-      const real_t dir_independent = rho - real_t(1.0);
+      const real_t dir_independent = rho - 1.0_r;
       for( auto d = LatticeModel_T::Stencil::begin(); d != LatticeModel_T::Stencil::end(); ++d )
       {
          const real_t vel = real_c(d.cx()) * velocity[0] + real_c(d.cy()) * velocity[1] + real_c(d.cz()) * velocity[2];
-         pdf.getF( &xyz0, d.toIdx() ) = real_c(LatticeModel_T::w[ d.toIdx() ]) * ( dir_independent + real_t(3.0)*vel );
+         pdf.getF( &xyz0, d.toIdx() ) = real_c(LatticeModel_T::w[ d.toIdx() ]) * ( dir_independent + 3.0_r*vel );
       }
    }
 };
@@ -142,26 +142,26 @@ struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_<
 
    template< typename FieldPtrOrIterator >
    static void set( FieldPtrOrIterator & it,
-                    const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                    const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
-      const real_t dir_independent = real_t(1.0) - real_t(1.5) * velocity.sqrLength();
+      const real_t dir_independent = 1.0_r - 1.5_r * velocity.sqrLength();
       for( auto d = LatticeModel_T::Stencil::begin(); d != LatticeModel_T::Stencil::end(); ++d )
       {
          const real_t vel = real_c(d.cx()) * velocity[0] + real_c(d.cy()) * velocity[1] + real_c(d.cz()) * velocity[2];
-         it[ d.toIdx() ] = real_c(LatticeModel_T::w[ d.toIdx() ]) * rho * ( dir_independent + real_t(3.0)*vel + real_t(4.5)*vel*vel );
+         it[ d.toIdx() ] = real_c(LatticeModel_T::w[ d.toIdx() ]) * rho * ( dir_independent + 3.0_r*vel + 4.5_r*vel*vel );
       }
    }
 
    template< typename PdfField_T >
    static void set( PdfField_T & pdf, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
-                    const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                    const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       real_t & xyz0 = pdf(x,y,z,0);
-      const real_t dir_independent = real_t(1.0) - real_t(1.5) * velocity.sqrLength();
+      const real_t dir_independent = 1.0_r - 1.5_r * velocity.sqrLength();
       for( auto d = LatticeModel_T::Stencil::begin(); d != LatticeModel_T::Stencil::end(); ++d )
       {
          const real_t vel = real_c(d.cx()) * velocity[0] + real_c(d.cy()) * velocity[1] + real_c(d.cz()) * velocity[2];
-         pdf.getF( &xyz0, d.toIdx() ) = real_c(LatticeModel_T::w[ d.toIdx() ]) * rho * ( dir_independent + real_t(3.0)*vel + real_t(4.5)*vel*vel );
+         pdf.getF( &xyz0, d.toIdx() ) = real_c(LatticeModel_T::w[ d.toIdx() ]) * rho * ( dir_independent + 3.0_r*vel + 4.5_r*vel*vel );
       }
    }
 };
@@ -179,24 +179,24 @@ struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_<
 
    template< typename FieldPtrOrIterator >
    static void set( FieldPtrOrIterator & it,
-                    const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                    const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       for( auto d = LatticeModel_T::Stencil::begin(); d != LatticeModel_T::Stencil::end(); ++d )
       {
          const real_t vel = real_c(d.cx()) * velocity[0] + real_c(d.cy()) * velocity[1] + real_c(d.cz()) * velocity[2];
-         it[ d.toIdx() ] = real_c(LatticeModel_T::w[ d.toIdx() ]) * rho * ( real_t(1.0) + real_t(3.0)*vel );
+         it[ d.toIdx() ] = real_c(LatticeModel_T::w[ d.toIdx() ]) * rho * ( 1.0_r + 3.0_r*vel );
       }
    }
 
    template< typename PdfField_T >
    static void set( PdfField_T & pdf, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
-                    const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                    const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       real_t & xyz0 = pdf(x,y,z,0);
       for( auto d = LatticeModel_T::Stencil::begin(); d != LatticeModel_T::Stencil::end(); ++d )
       {
          const real_t vel = real_c(d.cx()) * velocity[0] + real_c(d.cy()) * velocity[1] + real_c(d.cz()) * velocity[2];
-         pdf.getF( &xyz0, d.toIdx() ) = real_c(LatticeModel_T::w[ d.toIdx() ]) * rho * ( real_t(1.0) + real_t(3.0)*vel );
+         pdf.getF( &xyz0, d.toIdx() ) = real_c(LatticeModel_T::w[ d.toIdx() ]) * rho * ( 1.0_r + 3.0_r*vel );
       }
    }
 };
@@ -217,7 +217,7 @@ struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_<
 
    template< typename FieldPtrOrIterator >
    static void set( FieldPtrOrIterator & it,
-                    const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                    const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       using namespace stencil;
 
@@ -225,15 +225,15 @@ struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_<
       const real_t velYY = velocity[1] * velocity[1];
       const real_t velZZ = velocity[2] * velocity[2];
 
-      const real_t dir_indep_trm = ( real_t(1) / real_t(3) ) * (rho - real_t(1.0)) - real_t(0.5) * ( velXX + velYY + velZZ );
+      const real_t dir_indep_trm = ( 1_r / 3_r ) * (rho - 1.0_r) - 0.5_r * ( velXX + velYY + velZZ );
 
       it[ Stencil::idx[C] ] = dir_indep_trm;
 
-      const real_t vel_trm_E_W = dir_indep_trm + real_t(1.5) * velXX;
-      const real_t vel_trm_N_S = dir_indep_trm + real_t(1.5) * velYY;
-      const real_t vel_trm_T_B = dir_indep_trm + real_t(1.5) * velZZ;
+      const real_t vel_trm_E_W = dir_indep_trm + 1.5_r * velXX;
+      const real_t vel_trm_N_S = dir_indep_trm + 1.5_r * velYY;
+      const real_t vel_trm_T_B = dir_indep_trm + 1.5_r * velZZ;
 
-      const real_t w1 = real_t(3.0) / real_t(18.0);
+      const real_t w1 = 3.0_r / 18.0_r;
 
       it[ Stencil::idx[E] ] = w1 * ( vel_trm_E_W + velocity[0] );
       it[ Stencil::idx[W] ] = w1 * ( vel_trm_E_W - velocity[0] );
@@ -243,39 +243,39 @@ struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_<
       it[ Stencil::idx[B] ] = w1 * ( vel_trm_T_B - velocity[2] );
 
       const real_t velXmY = velocity[0] - velocity[1];
-      const real_t vel_trm_NW_SE = dir_indep_trm + real_t(1.5) * velXmY * velXmY;
+      const real_t vel_trm_NW_SE = dir_indep_trm + 1.5_r * velXmY * velXmY;
 
-      const real_t w2 = real_t(3.0) / real_t(36.0);
+      const real_t w2 = 3.0_r / 36.0_r;
 
       it[ Stencil::idx[NW] ] = w2 * ( vel_trm_NW_SE - velXmY );
       it[ Stencil::idx[SE] ] = w2 * ( vel_trm_NW_SE + velXmY );
 
       const real_t velXpY = velocity[0] + velocity[1];
-      const real_t vel_trm_NE_SW = dir_indep_trm + real_t(1.5) * velXpY * velXpY;
+      const real_t vel_trm_NE_SW = dir_indep_trm + 1.5_r * velXpY * velXpY;
 
       it[ Stencil::idx[NE] ] = w2 * ( vel_trm_NE_SW + velXpY );
       it[ Stencil::idx[SW] ] = w2 * ( vel_trm_NE_SW - velXpY );
 
       const real_t velXmZ = velocity[0] - velocity[2];
-      const real_t vel_trm_TW_BE = dir_indep_trm + real_t(1.5) * velXmZ * velXmZ;
+      const real_t vel_trm_TW_BE = dir_indep_trm + 1.5_r * velXmZ * velXmZ;
 
       it[ Stencil::idx[TW] ] = w2 * ( vel_trm_TW_BE - velXmZ );
       it[ Stencil::idx[BE] ] = w2 * ( vel_trm_TW_BE + velXmZ );
 
       const real_t velXpZ = velocity[0] + velocity[2];
-      const real_t vel_trm_TE_BW = dir_indep_trm + real_t(1.5) * velXpZ * velXpZ;
+      const real_t vel_trm_TE_BW = dir_indep_trm + 1.5_r * velXpZ * velXpZ;
 
       it[ Stencil::idx[TE] ] = w2 * ( vel_trm_TE_BW + velXpZ );
       it[ Stencil::idx[BW] ] = w2 * ( vel_trm_TE_BW - velXpZ );
 
       const real_t velYmZ = velocity[1] - velocity[2];
-      const real_t vel_trm_TS_BN = dir_indep_trm + real_t(1.5) * velYmZ * velYmZ;
+      const real_t vel_trm_TS_BN = dir_indep_trm + 1.5_r * velYmZ * velYmZ;
 
       it[ Stencil::idx[TS] ] = w2 * ( vel_trm_TS_BN - velYmZ );
       it[ Stencil::idx[BN] ] = w2 * ( vel_trm_TS_BN + velYmZ );
 
       const real_t velYpZ = velocity[1] + velocity[2];
-      const real_t vel_trm_TN_BS = dir_indep_trm + real_t(1.5) * velYpZ * velYpZ;
+      const real_t vel_trm_TN_BS = dir_indep_trm + 1.5_r * velYpZ * velYpZ;
 
       it[ Stencil::idx[TN] ] = w2 * ( vel_trm_TN_BS + velYpZ );
       it[ Stencil::idx[BS] ] = w2 * ( vel_trm_TN_BS - velYpZ );
@@ -283,7 +283,7 @@ struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_<
 
    template< typename PdfField_T >
    static void set( PdfField_T & pdf, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
-                    const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                    const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       using namespace stencil;
 
@@ -293,15 +293,15 @@ struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_<
       const real_t velYY = velocity[1] * velocity[1];
       const real_t velZZ = velocity[2] * velocity[2];
 
-      const real_t dir_indep_trm = ( real_t(1) / real_t(3) ) * (rho - real_t(1.0)) - real_t(0.5) * ( velXX + velYY + velZZ );
+      const real_t dir_indep_trm = ( 1_r / 3_r ) * (rho - 1.0_r) - 0.5_r * ( velXX + velYY + velZZ );
 
       pdf.getF( &xyz0, Stencil::idx[C] ) = dir_indep_trm;
 
-      const real_t vel_trm_E_W = dir_indep_trm + real_t(1.5) * velXX;
-      const real_t vel_trm_N_S = dir_indep_trm + real_t(1.5) * velYY;
-      const real_t vel_trm_T_B = dir_indep_trm + real_t(1.5) * velZZ;
+      const real_t vel_trm_E_W = dir_indep_trm + 1.5_r * velXX;
+      const real_t vel_trm_N_S = dir_indep_trm + 1.5_r * velYY;
+      const real_t vel_trm_T_B = dir_indep_trm + 1.5_r * velZZ;
 
-      const real_t w1 = real_t(3.0) / real_t(18.0);
+      const real_t w1 = 3.0_r / 18.0_r;
 
       pdf.getF( &xyz0, Stencil::idx[E] ) = w1 * ( vel_trm_E_W + velocity[0] );
       pdf.getF( &xyz0, Stencil::idx[W] ) = w1 * ( vel_trm_E_W - velocity[0] );
@@ -311,39 +311,39 @@ struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_<
       pdf.getF( &xyz0, Stencil::idx[B] ) = w1 * ( vel_trm_T_B - velocity[2] );
 
       const real_t velXmY = velocity[0] - velocity[1];
-      const real_t vel_trm_NW_SE = dir_indep_trm + real_t(1.5) * velXmY * velXmY;
+      const real_t vel_trm_NW_SE = dir_indep_trm + 1.5_r * velXmY * velXmY;
 
-      const real_t w2 = real_t(3.0) / real_t(36.0);
+      const real_t w2 = 3.0_r / 36.0_r;
 
       pdf.getF( &xyz0, Stencil::idx[NW] ) = w2 * ( vel_trm_NW_SE - velXmY );
       pdf.getF( &xyz0, Stencil::idx[SE] ) = w2 * ( vel_trm_NW_SE + velXmY );
 
       const real_t velXpY = velocity[0] + velocity[1];
-      const real_t vel_trm_NE_SW = dir_indep_trm + real_t(1.5) * velXpY * velXpY;
+      const real_t vel_trm_NE_SW = dir_indep_trm + 1.5_r * velXpY * velXpY;
 
       pdf.getF( &xyz0, Stencil::idx[NE] ) = w2 * ( vel_trm_NE_SW + velXpY );
       pdf.getF( &xyz0, Stencil::idx[SW] ) = w2 * ( vel_trm_NE_SW - velXpY );
 
       const real_t velXmZ = velocity[0] - velocity[2];
-      const real_t vel_trm_TW_BE = dir_indep_trm + real_t(1.5) * velXmZ * velXmZ;
+      const real_t vel_trm_TW_BE = dir_indep_trm + 1.5_r * velXmZ * velXmZ;
 
       pdf.getF( &xyz0, Stencil::idx[TW] ) = w2 * ( vel_trm_TW_BE - velXmZ );
       pdf.getF( &xyz0, Stencil::idx[BE] ) = w2 * ( vel_trm_TW_BE + velXmZ );
 
       const real_t velXpZ = velocity[0] + velocity[2];
-      const real_t vel_trm_TE_BW = dir_indep_trm + real_t(1.5) * velXpZ * velXpZ;
+      const real_t vel_trm_TE_BW = dir_indep_trm + 1.5_r * velXpZ * velXpZ;
 
       pdf.getF( &xyz0, Stencil::idx[TE] ) = w2 * ( vel_trm_TE_BW + velXpZ );
       pdf.getF( &xyz0, Stencil::idx[BW] ) = w2 * ( vel_trm_TE_BW - velXpZ );
 
       const real_t velYmZ = velocity[1] - velocity[2];
-      const real_t vel_trm_TS_BN = dir_indep_trm + real_t(1.5) * velYmZ * velYmZ;
+      const real_t vel_trm_TS_BN = dir_indep_trm + 1.5_r * velYmZ * velYmZ;
 
       pdf.getF( &xyz0, Stencil::idx[TS] ) = w2 * ( vel_trm_TS_BN - velYmZ );
       pdf.getF( &xyz0, Stencil::idx[BN] ) = w2 * ( vel_trm_TS_BN + velYmZ );
 
       const real_t velYpZ = velocity[1] + velocity[2];
-      const real_t vel_trm_TN_BS = dir_indep_trm + real_t(1.5) * velYpZ * velYpZ;
+      const real_t vel_trm_TN_BS = dir_indep_trm + 1.5_r * velYpZ * velYpZ;
 
       pdf.getF( &xyz0, Stencil::idx[TN] ) = w2 * ( vel_trm_TN_BS + velYpZ );
       pdf.getF( &xyz0, Stencil::idx[BS] ) = w2 * ( vel_trm_TN_BS - velYpZ );
@@ -366,7 +366,7 @@ struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_<
 
    template< typename FieldPtrOrIterator >
    static void set( FieldPtrOrIterator & it,
-                    const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                    const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       using namespace stencil;
 
@@ -374,15 +374,15 @@ struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_<
       const real_t velYY = velocity[1] * velocity[1];
       const real_t velZZ = velocity[2] * velocity[2];
 
-      const real_t dir_indep_trm = ( real_t(1) / real_t(3) ) - real_t(0.5) * ( velXX + velYY + velZZ );
+      const real_t dir_indep_trm = ( 1_r / 3_r ) - 0.5_r * ( velXX + velYY + velZZ );
 
       it[ Stencil::idx[C] ] = rho * dir_indep_trm;
 
-      const real_t vel_trm_E_W = dir_indep_trm + real_t(1.5) * velXX;
-      const real_t vel_trm_N_S = dir_indep_trm + real_t(1.5) * velYY;
-      const real_t vel_trm_T_B = dir_indep_trm + real_t(1.5) * velZZ;
+      const real_t vel_trm_E_W = dir_indep_trm + 1.5_r * velXX;
+      const real_t vel_trm_N_S = dir_indep_trm + 1.5_r * velYY;
+      const real_t vel_trm_T_B = dir_indep_trm + 1.5_r * velZZ;
 
-      const real_t w1_rho = rho * real_t(3.0) / real_t(18.0);
+      const real_t w1_rho = rho * 3.0_r / 18.0_r;
 
       it[ Stencil::idx[E] ] = w1_rho * ( vel_trm_E_W + velocity[0] );
       it[ Stencil::idx[W] ] = w1_rho * ( vel_trm_E_W - velocity[0] );
@@ -392,39 +392,39 @@ struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_<
       it[ Stencil::idx[B] ] = w1_rho * ( vel_trm_T_B - velocity[2] );
 
       const real_t velXmY = velocity[0] - velocity[1];
-      const real_t vel_trm_NW_SE = dir_indep_trm + real_t(1.5) * velXmY * velXmY;
+      const real_t vel_trm_NW_SE = dir_indep_trm + 1.5_r * velXmY * velXmY;
 
-      const real_t w2_rho = rho * real_t(3.0) / real_t(36.0);
+      const real_t w2_rho = rho * 3.0_r / 36.0_r;
 
       it[ Stencil::idx[NW] ] = w2_rho * ( vel_trm_NW_SE - velXmY );
       it[ Stencil::idx[SE] ] = w2_rho * ( vel_trm_NW_SE + velXmY );
 
       const real_t velXpY = velocity[0] + velocity[1];
-      const real_t vel_trm_NE_SW = dir_indep_trm + real_t(1.5) * velXpY * velXpY;
+      const real_t vel_trm_NE_SW = dir_indep_trm + 1.5_r * velXpY * velXpY;
 
       it[ Stencil::idx[NE] ] = w2_rho * ( vel_trm_NE_SW + velXpY );
       it[ Stencil::idx[SW] ] = w2_rho * ( vel_trm_NE_SW - velXpY );
 
       const real_t velXmZ = velocity[0] - velocity[2];
-      const real_t vel_trm_TW_BE = dir_indep_trm + real_t(1.5) * velXmZ * velXmZ;
+      const real_t vel_trm_TW_BE = dir_indep_trm + 1.5_r * velXmZ * velXmZ;
 
       it[ Stencil::idx[TW] ] = w2_rho * ( vel_trm_TW_BE - velXmZ );
       it[ Stencil::idx[BE] ] = w2_rho * ( vel_trm_TW_BE + velXmZ );
 
       const real_t velXpZ = velocity[0] + velocity[2];
-      const real_t vel_trm_TE_BW = dir_indep_trm + real_t(1.5) * velXpZ * velXpZ;
+      const real_t vel_trm_TE_BW = dir_indep_trm + 1.5_r * velXpZ * velXpZ;
 
       it[ Stencil::idx[TE] ] = w2_rho * ( vel_trm_TE_BW + velXpZ );
       it[ Stencil::idx[BW] ] = w2_rho * ( vel_trm_TE_BW - velXpZ );
 
       const real_t velYmZ = velocity[1] - velocity[2];
-      const real_t vel_trm_TS_BN = dir_indep_trm + real_t(1.5) * velYmZ * velYmZ;
+      const real_t vel_trm_TS_BN = dir_indep_trm + 1.5_r * velYmZ * velYmZ;
 
       it[ Stencil::idx[TS] ] = w2_rho * ( vel_trm_TS_BN - velYmZ );
       it[ Stencil::idx[BN] ] = w2_rho * ( vel_trm_TS_BN + velYmZ );
 
       const real_t velYpZ = velocity[1] + velocity[2];
-      const real_t vel_trm_TN_BS = dir_indep_trm + real_t(1.5) * velYpZ * velYpZ;
+      const real_t vel_trm_TN_BS = dir_indep_trm + 1.5_r * velYpZ * velYpZ;
 
       it[ Stencil::idx[TN] ] = w2_rho * ( vel_trm_TN_BS + velYpZ );
       it[ Stencil::idx[BS] ] = w2_rho * ( vel_trm_TN_BS - velYpZ );
@@ -432,7 +432,7 @@ struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_<
 
    template< typename PdfField_T >
    static void set( PdfField_T & pdf, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
-                    const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                    const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       using namespace stencil;
 
@@ -442,15 +442,15 @@ struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_<
       const real_t velYY = velocity[1] * velocity[1];
       const real_t velZZ = velocity[2] * velocity[2];
 
-      const real_t dir_indep_trm = ( real_t(1) / real_t(3) ) - real_t(0.5) * ( velXX + velYY + velZZ );
+      const real_t dir_indep_trm = ( 1_r / 3_r ) - 0.5_r * ( velXX + velYY + velZZ );
 
       pdf.getF( &xyz0, Stencil::idx[C] ) = rho * dir_indep_trm;
 
-      const real_t vel_trm_E_W = dir_indep_trm + real_t(1.5) * velXX;
-      const real_t vel_trm_N_S = dir_indep_trm + real_t(1.5) * velYY;
-      const real_t vel_trm_T_B = dir_indep_trm + real_t(1.5) * velZZ;
+      const real_t vel_trm_E_W = dir_indep_trm + 1.5_r * velXX;
+      const real_t vel_trm_N_S = dir_indep_trm + 1.5_r * velYY;
+      const real_t vel_trm_T_B = dir_indep_trm + 1.5_r * velZZ;
 
-      const real_t w1_rho = rho * real_t(3.0) / real_t(18.0);
+      const real_t w1_rho = rho * 3.0_r / 18.0_r;
 
       pdf.getF( &xyz0, Stencil::idx[E] ) = w1_rho * ( vel_trm_E_W + velocity[0] );
       pdf.getF( &xyz0, Stencil::idx[W] ) = w1_rho * ( vel_trm_E_W - velocity[0] );
@@ -460,39 +460,39 @@ struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_<
       pdf.getF( &xyz0, Stencil::idx[B] ) = w1_rho * ( vel_trm_T_B - velocity[2] );
 
       const real_t velXmY = velocity[0] - velocity[1];
-      const real_t vel_trm_NW_SE = dir_indep_trm + real_t(1.5) * velXmY * velXmY;
+      const real_t vel_trm_NW_SE = dir_indep_trm + 1.5_r * velXmY * velXmY;
 
-      const real_t w2_rho = rho * real_t(3.0) / real_t(36.0);
+      const real_t w2_rho = rho * 3.0_r / 36.0_r;
 
       pdf.getF( &xyz0, Stencil::idx[NW] ) = w2_rho * ( vel_trm_NW_SE - velXmY );
       pdf.getF( &xyz0, Stencil::idx[SE] ) = w2_rho * ( vel_trm_NW_SE + velXmY );
 
       const real_t velXpY = velocity[0] + velocity[1];
-      const real_t vel_trm_NE_SW = dir_indep_trm + real_t(1.5) * velXpY * velXpY;
+      const real_t vel_trm_NE_SW = dir_indep_trm + 1.5_r * velXpY * velXpY;
 
       pdf.getF( &xyz0, Stencil::idx[NE] ) = w2_rho * ( vel_trm_NE_SW + velXpY );
       pdf.getF( &xyz0, Stencil::idx[SW] ) = w2_rho * ( vel_trm_NE_SW - velXpY );
 
       const real_t velXmZ = velocity[0] - velocity[2];
-      const real_t vel_trm_TW_BE = dir_indep_trm + real_t(1.5) * velXmZ * velXmZ;
+      const real_t vel_trm_TW_BE = dir_indep_trm + 1.5_r * velXmZ * velXmZ;
 
       pdf.getF( &xyz0, Stencil::idx[TW] ) = w2_rho * ( vel_trm_TW_BE - velXmZ );
       pdf.getF( &xyz0, Stencil::idx[BE] ) = w2_rho * ( vel_trm_TW_BE + velXmZ );
 
       const real_t velXpZ = velocity[0] + velocity[2];
-      const real_t vel_trm_TE_BW = dir_indep_trm + real_t(1.5) * velXpZ * velXpZ;
+      const real_t vel_trm_TE_BW = dir_indep_trm + 1.5_r * velXpZ * velXpZ;
 
       pdf.getF( &xyz0, Stencil::idx[TE] ) = w2_rho * ( vel_trm_TE_BW + velXpZ );
       pdf.getF( &xyz0, Stencil::idx[BW] ) = w2_rho * ( vel_trm_TE_BW - velXpZ );
 
       const real_t velYmZ = velocity[1] - velocity[2];
-      const real_t vel_trm_TS_BN = dir_indep_trm + real_t(1.5) * velYmZ * velYmZ;
+      const real_t vel_trm_TS_BN = dir_indep_trm + 1.5_r * velYmZ * velYmZ;
 
       pdf.getF( &xyz0, Stencil::idx[TS] ) = w2_rho * ( vel_trm_TS_BN - velYmZ );
       pdf.getF( &xyz0, Stencil::idx[BN] ) = w2_rho * ( vel_trm_TS_BN + velYmZ );
 
       const real_t velYpZ = velocity[1] + velocity[2];
-      const real_t vel_trm_TN_BS = dir_indep_trm + real_t(1.5) * velYpZ * velYpZ;
+      const real_t vel_trm_TN_BS = dir_indep_trm + 1.5_r * velYpZ * velYpZ;
 
       pdf.getF( &xyz0, Stencil::idx[TN] ) = w2_rho * ( vel_trm_TN_BS + velYpZ );
       pdf.getF( &xyz0, Stencil::idx[BS] ) = w2_rho * ( vel_trm_TN_BS - velYpZ );
@@ -518,15 +518,15 @@ struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ, typename boost::enabl
                                                                                                         boost::mpl::equal_to< boost::mpl::int_< LatticeModel_T::equilibriumAccuracyOrder >, boost::mpl::int_< 2 > > > >::type >
 {
    static void set( FieldIteratorXYZ & begin, const FieldIteratorXYZ & end,
-                    const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                    const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       std::vector< real_t > value( stencil::NR_OF_DIRECTIONS );
 
-      const real_t dir_independent = (rho - real_t(1.0)) - real_t(1.5) * velocity.sqrLength();
+      const real_t dir_independent = (rho - 1.0_r) - 1.5_r * velocity.sqrLength();
       for( auto d = LatticeModel_T::Stencil::begin(); d != LatticeModel_T::Stencil::end(); ++d )
       {
          const real_t vel =  real_c(d.cx()) * velocity[0] +  real_c(d.cy()) * velocity[1] +  real_c(d.cz()) * velocity[2];
-         value[ d.toIdx() ] = real_c(LatticeModel_T::w[ d.toIdx() ]) * ( dir_independent + real_t(3.0)*vel + real_t(4.5)*vel*vel );
+         value[ d.toIdx() ] = real_c(LatticeModel_T::w[ d.toIdx() ]) * ( dir_independent + 3.0_r*vel + 4.5_r*vel*vel );
       }
 
       for( auto cell = begin; cell != end; ++cell )
@@ -540,15 +540,15 @@ struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ, typename boost::enabl
                                                                                                         boost::mpl::equal_to< boost::mpl::int_< LatticeModel_T::equilibriumAccuracyOrder >, boost::mpl::int_<1> > > >::type >
 {
    static void set( FieldIteratorXYZ & begin, const FieldIteratorXYZ & end,
-                    const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                    const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       std::vector< real_t > value( stencil::NR_OF_DIRECTIONS );
 
-      const real_t dir_independent = rho - real_t(1.0);
+      const real_t dir_independent = rho - 1.0_r;
       for( auto d = LatticeModel_T::Stencil::begin(); d != LatticeModel_T::Stencil::end(); ++d )
       {
          const real_t vel =  real_c(d.cx()) * velocity[0] +  real_c(d.cy()) * velocity[1] +  real_c(d.cz()) * velocity[2];
-         value[ d.toIdx() ] = real_c(LatticeModel_T::w[ d.toIdx() ]) * ( dir_independent + real_t(3.0)*vel );
+         value[ d.toIdx() ] = real_c(LatticeModel_T::w[ d.toIdx() ]) * ( dir_independent + 3.0_r*vel );
       }
 
       for( auto cell = begin; cell != end; ++cell )
@@ -562,15 +562,15 @@ struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ, typename boost::enabl
                                                                                                         boost::mpl::equal_to< boost::mpl::int_<LatticeModel_T::equilibriumAccuracyOrder>, boost::mpl::int_<2> > > >::type >
 {
    static void set( FieldIteratorXYZ & begin, const FieldIteratorXYZ & end,
-                    const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                    const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       std::vector< real_t > value( stencil::NR_OF_DIRECTIONS );
 
-      const real_t dir_independent = real_t(1.0) - real_t(1.5) * velocity.sqrLength();
+      const real_t dir_independent = 1.0_r - 1.5_r * velocity.sqrLength();
       for( auto d = LatticeModel_T::Stencil::begin(); d != LatticeModel_T::Stencil::end(); ++d )
       {
          const real_t vel = real_c(d.cx()) * velocity[0] + real_c(d.cy()) * velocity[1] + real_c(d.cz()) * velocity[2];
-         value[ d.toIdx() ] = real_c(LatticeModel_T::w[ d.toIdx() ]) * rho * ( dir_independent + real_t(3.0)*vel + real_t(4.5)*vel*vel );
+         value[ d.toIdx() ] = real_c(LatticeModel_T::w[ d.toIdx() ]) * rho * ( dir_independent + 3.0_r*vel + 4.5_r*vel*vel );
       }
 
       for( auto cell = begin; cell != end; ++cell )
@@ -584,15 +584,15 @@ struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ, typename boost::enabl
                                                                                                         boost::mpl::equal_to< boost::mpl::int_<LatticeModel_T::equilibriumAccuracyOrder>, boost::mpl::int_<1> > > >::type >
 {
    static void set( FieldIteratorXYZ & begin, const FieldIteratorXYZ & end,
-                    const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
+                    const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r )
    {
       std::vector< real_t > value( stencil::NR_OF_DIRECTIONS );
 
-      const real_t dir_independent = real_t(1.0);
+      const real_t dir_independent = 1.0_r;
       for( auto d = LatticeModel_T::Stencil::begin(); d != LatticeModel_T::Stencil::end(); ++d )
       {
          const real_t vel = real_c(d.cx()) * velocity[0] + real_c(d.cy()) * velocity[1] + real_c(d.cz()) * velocity[2];
-         value[ d.toIdx() ] = real_c(LatticeModel_T::w[ d.toIdx() ]) * rho * ( dir_independent + real_t(3.0)*vel );
+         value[ d.toIdx() ] = real_c(LatticeModel_T::w[ d.toIdx() ]) * rho * ( dir_independent + 3.0_r*vel );
       }
 
       for( auto cell = begin; cell != end; ++cell )

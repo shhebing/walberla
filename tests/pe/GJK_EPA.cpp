@@ -44,7 +44,7 @@ int main( int argc, char ** argv )
    real_t radius            = real_c(1);
    real_t overlap           = real_c(0.2);
    unsigned long iterations = 100;
-   real_t epaTolerance      = real_t(0.000001);
+   real_t epaTolerance      = 0.000001_r;
 
    if (argc != 5)
    {
@@ -62,7 +62,7 @@ int main( int argc, char ** argv )
 
 
    Sphere s0( 0, 0, Vec3( 0, 0, 0 ), Vec3(), Quat(), real_t( radius ), 0, false, true, false );
-   Sphere s1( 1, 0, Vec3( 1, 1, 1 ).getNormalized() * ( real_t(2) - overlap ) * radius, Vec3(), Quat(), real_t( radius ), 0, false, true, false );
+   Sphere s1( 1, 0, Vec3( 1, 1, 1 ).getNormalized() * ( 2_r - overlap ) * radius, Vec3(), Quat(), real_t( radius ), 0, false, true, false );
 
    Vec3   contactPoint;
    Vec3   normal;
@@ -80,7 +80,7 @@ int main( int argc, char ** argv )
    WcTimer timer;
    timer.start();
    timer.end();
-   while (timer.last() < real_t(1))
+   while (timer.last() < 1_r)
    {
       iter *= 2;
       timer.start();
@@ -94,7 +94,7 @@ int main( int argc, char ** argv )
    iter = 1000;
    timer.start();
    timer.end();
-   while (timer.last() < real_t(1))
+   while (timer.last() < 1_r)
    {
       iter *= 2;
       timer.start();
@@ -108,7 +108,7 @@ int main( int argc, char ** argv )
 
    for (auto dir = stencil::D3Q27::beginNoCenter(); dir != stencil::D3Q27::end(); ++dir)
    {
-      Vec3 pos = Vec3( real_c(dir.cx()), real_c(dir.cy()), real_c(dir.cz()) ).getNormalized() * ( real_t(2) - overlap ) * radius;
+      Vec3 pos = Vec3( real_c(dir.cx()), real_c(dir.cy()), real_c(dir.cz()) ).getNormalized() * ( 2_r - overlap ) * radius;
       s1.setPosition(pos);
 
       if (!collide(&s0, &s1, contactPoint, normal, penetrationDepth))
@@ -124,7 +124,7 @@ int main( int argc, char ** argv )
          WALBERLA_ABORT("no collision detected! (GJK & EPA)");
       }
 
-      WALBERLA_ASSERT_FLOAT_EQUAL( normalGJK.length(), real_t(1));
+      WALBERLA_ASSERT_FLOAT_EQUAL( normalGJK.length(), 1_r);
 
 //      WALBERLA_LOG_INFO("**** (" << dir.cx() << ", " << dir.cy() << ", " << dir.cz() << ") ****");
 //      WALBERLA_LOG_INFO("deltaPoint : |" << contactPoint - contactPointGJK << "| = " << (contactPoint - contactPointGJK).length() );

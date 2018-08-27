@@ -55,8 +55,8 @@ Vector3<real_t> getPSMMacroscopicVelocity( const IBlock & block,
 
    const real_t ralaxationTime = real_c(1) / pdfField->latticeModel().collisionModel().omega( cell.x(), cell.y(), cell.z() );
 
-   Vector3<real_t> velocity( real_t(0) );
-   real_t totalSolidWeightingInCell = real_t(0);
+   Vector3<real_t> velocity( 0_r );
+   real_t totalSolidWeightingInCell = 0_r;
 
    for( auto bodyFracIt = bodyAndVolumeFractionField->get( cell ).begin(); bodyFracIt != bodyAndVolumeFractionField->get( cell ).end(); ++bodyFracIt )
    {
@@ -110,8 +110,8 @@ void initializeDomainForPSM( StructuredBlockStorage & blockStorage,
 
          const real_t ralaxationTime = real_c(1) / pdfField->latticeModel().collisionModel().omega( cell.x(), cell.y(), cell.z() );
 
-         Vector3<real_t> weightedAverageBodyVelocityInCell( real_t(0) );
-         real_t totalSolidWeightingInCell = real_t(0);
+         Vector3<real_t> weightedAverageBodyVelocityInCell( 0_r );
+         real_t totalSolidWeightingInCell = 0_r;
 
          for( auto bodyFracIt = bodyAndVolumeFractionField->get(cell).begin(); bodyFracIt != bodyAndVolumeFractionField->get(cell).end(); ++bodyFracIt )
          {
@@ -126,9 +126,9 @@ void initializeDomainForPSM( StructuredBlockStorage & blockStorage,
             totalSolidWeightingInCell += Bs;
          }
 
-         if( totalSolidWeightingInCell > real_t(0) )
+         if( totalSolidWeightingInCell > 0_r )
          {
-            Vector3< real_t > fluidVelocityInCell( real_t(0) );
+            Vector3< real_t > fluidVelocityInCell( 0_r );
             const real_t rho = pdfField->getDensityAndVelocity( fluidVelocityInCell, cell );
 
             // set the PDFs to equilibrium with the density rho and the average velocity of all intersecting bodies

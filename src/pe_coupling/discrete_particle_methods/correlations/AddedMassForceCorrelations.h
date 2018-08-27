@@ -40,13 +40,13 @@ Vector3<real_t> addedMassForceFinn( const Vector3<real_t> & timeDerivativeFluidV
                                     const real_t & bodyVolume, const real_t & fluidDensity )
 {
    // formula from Finn et al(2016)
-   const real_t Coeffam = real_t(0.5);
+   const real_t Coeffam = 0.5_r;
    return bodyVolume * fluidDensity * Coeffam * ( timeDerivativeFluidVel - timeDerivativeBodyVel );
 }
 
 Vector3<real_t> noAddedMassForce( const Vector3<real_t> &, const Vector3<real_t> &, const real_t &, const real_t & )
 {
-   return Vector3<real_t>(real_t(0));
+   return Vector3<real_t>(0_r);
 }
 
 } // namespace discrete_particle_methods

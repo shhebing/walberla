@@ -146,7 +146,7 @@ public:
                        const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
       blocks_( blocks ), fieldId_( fieldId ), solution_( solution ), filter_( filter ),
       executionCounter_( uint_t(0) ), plotFrequency_( plotFrequency ), logFrequency_( logFrequency ),
-      filename_( internal::accuracyEvaluationFilename ), normalizationFactor_( real_t(1) ),
+      filename_( internal::accuracyEvaluationFilename ), normalizationFactor_( 1_r ),
       requiredSelectors_(requiredSelectors), incompatibleSelectors_( incompatibleSelectors )
    {}
 
@@ -157,8 +157,8 @@ public:
                        const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
       blocks_( blocks ), fieldId_( fieldId ), solution_( solution ), filter_( Filter_T() ),
       executionCounter_( uint_t(0) ), plotFrequency_( plotFrequency ), logFrequency_( logFrequency ),
-      filename_( internal::accuracyEvaluationFilename ), normalizationFactor_( real_t(1) ),
-      L1_( real_t(0) ), L2_( real_t(0) ), Lmax_( real_t(0) ),
+      filename_( internal::accuracyEvaluationFilename ), normalizationFactor_( 1_r ),
+      L1_( 0_r ), L2_( 0_r ), Lmax_( 0_r ),
       requiredSelectors_(requiredSelectors), incompatibleSelectors_( incompatibleSelectors )
    {
       static_assert( (boost::is_same< Filter_T, DefaultEvaluationFilter >::value),
@@ -221,9 +221,9 @@ void AccuracyEvaluation< Field_T, SolutionFunction_T, Filter_T >::operator()()
 
    const auto & domainAABB = blocks->getDomain();
 
-   real_t _L1( real_t(0) );
-   real_t _L2( real_t(0) );
-   real_t _Lmax( real_t(0) );
+   real_t _L1( 0_r );
+   real_t _L2( 0_r );
+   real_t _Lmax( 0_r );
 
    for( auto block = blocks->begin( requiredSelectors_, incompatibleSelectors_ ); block != blocks->end(); ++block )
    {
@@ -236,7 +236,7 @@ void AccuracyEvaluation< Field_T, SolutionFunction_T, Filter_T >::operator()()
 
 #ifdef _OPENMP
 
-      std::vector< real_t > lmax( numeric_cast<size_t>( omp_get_max_threads() ), real_t(0) );
+      std::vector< real_t > lmax( numeric_cast<size_t>( omp_get_max_threads() ), 0_r );
 
       #pragma omp parallel
       {

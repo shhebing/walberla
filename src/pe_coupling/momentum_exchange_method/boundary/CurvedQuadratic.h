@@ -190,8 +190,8 @@ inline void CurvedQuadratic< LatticeModel_T, FlagField_T >::treatDirection( cons
    // depending on the implementation for the specific body, either an analytical formula (e.g. for the sphere) or a line search algorithm is used
    const real_t delta = lbm::intersectionRatio( body, cellCenter, direction, tolerance );
 
-   WALBERLA_ASSERT_LESS_EQUAL( delta, real_t(1));
-   WALBERLA_ASSERT_GREATER_EQUAL( delta, real_t(0));
+   WALBERLA_ASSERT_LESS_EQUAL( delta, 1_r);
+   WALBERLA_ASSERT_GREATER_EQUAL( delta, 0_r);
 
    bool useMR1full = false;
 

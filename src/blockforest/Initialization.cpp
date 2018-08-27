@@ -111,7 +111,7 @@ shared_ptr< StructuredBlockForest > createUniformBlockGridFromConfig( const Conf
                                                                       const bool keepGlobalBlockInformation )
 {
    const Vector3<bool> periodic = configBlock.getParameter<Vector3<bool> >( "periodic",  Vector3<bool> (false) );
-   const real_t        dx       = configBlock.getParameter<real_t        >( "dx",        real_t(1)             );
+   const real_t        dx       = configBlock.getParameter<real_t        >( "dx",        1_r             );
 
    Vector3<uint_t> cellsPerBlock;
    Vector3<uint_t> blocks;

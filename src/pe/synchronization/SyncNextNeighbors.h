@@ -250,7 +250,7 @@ void generateSynchonizationMessages(mpi::BufferSystem& bs, const Block& block, B
 }
 
 template <typename BodyTypeTuple>
-void syncNextNeighbors( BlockForest& forest, BlockDataID storageID, WcTimingTree* tt = NULL, const real_t dx = real_t(0), const bool syncNonCommunicatingBodies = false )
+void syncNextNeighbors( BlockForest& forest, BlockDataID storageID, WcTimingTree* tt = NULL, const real_t dx = 0_r, const bool syncNonCommunicatingBodies = false )
 {
    if (tt != NULL) tt->start("Sync");
    if (tt != NULL) tt->start("Assembling Body Synchronization");

@@ -67,8 +67,8 @@ int main( int argc, char **argv )
    // uncomment to have logging
    //logging::Logging::instance()->setLogLevel(logging::Logging::LogLevel::DETAIL);
 
-   const real_t dx     = real_t(1);
-   const real_t radius = real_t(5);
+   const real_t dx     = 1_r;
+   const real_t radius = 5_r;
 
    ///////////////////////////
    // DATA STRUCTURES SETUP //
@@ -91,7 +91,7 @@ int main( int argc, char **argv )
    pe::SetBodyTypeIDs<BodyTypeTuple>::execute();
    shared_ptr<pe::BodyStorage> globalBodyStorage = make_shared<pe::BodyStorage>();
    auto bodyStorageID = blocks->addBlockData(pe::createStorageDataHandling<BodyTypeTuple>(), "Storage");
-   auto sphereMaterialID = pe::createMaterial( "sphereMat", real_t(1) , real_t(0.3), real_t(0.2), real_t(0.2), real_t(0.24), real_t(200), real_t(200), real_t(0), real_t(0) );
+   auto sphereMaterialID = pe::createMaterial( "sphereMat", 1_r , 0.3_r, 0.2_r, 0.2_r, 0.24_r, 200_r, 200_r, 0_r, 0_r );
 
    auto ccdID = blocks->addBlockData(pe::ccd::createHashGridsDataHandling( globalBodyStorage, bodyStorageID ), "CCD");
    auto fcdID = blocks->addBlockData(pe::fcd::createGenericFCDDataHandling<BodyTypeTuple, pe::fcd::AnalyticCollideFunctor>(), "FCD");
@@ -103,15 +103,15 @@ int main( int argc, char **argv )
 
 
    // sphere positions for test scenarios
-   Vector3<real_t> positionInsideBlock(real_t(10), real_t(10), real_t(10));
-   Vector3<real_t> positionAtBlockBorder(real_t(19.9), real_t(10), real_t(10));
-   Vector3<real_t> positionAtBlockBorder2(real_t(20) + radius + overlap - real_t(0.1), real_t(10), real_t(10));
+   Vector3<real_t> positionInsideBlock(10_r, 10_r, 10_r);
+   Vector3<real_t> positionAtBlockBorder(19.9_r, 10_r, 10_r);
+   Vector3<real_t> positionAtBlockBorder2(20_r + radius + overlap - 0.1_r, 10_r, 10_r);
 
-   Vector3<real_t> testForce(real_t(2), real_t(1), real_t(0));
-   Vector3<real_t> torqueOffset = Vector3<real_t>(real_t(1), real_t(0), real_t(0));
+   Vector3<real_t> testForce(2_r, 1_r, 0_r);
+   Vector3<real_t> torqueOffset = Vector3<real_t>(1_r, 0_r, 0_r);
 
    uint_t peSubCycles( 10 );
-   real_t dtPe( real_t(10) );
+   real_t dtPe( 10_r );
    real_t dtPeSubCycle = dtPe / real_c(peSubCycles);
 
    pe_coupling::TimeStep timestep(blocks, bodyStorageID, cr, syncCall, dtPe, peSubCycles);
@@ -119,9 +119,9 @@ int main( int argc, char **argv )
    // evaluate how far the sphere will travel with a specific force applied which is the reference distance for later
    // (depends on the chosen time integrator in the DEM and thus can not generally be computed a priori here)
 
-   Vector3<real_t> expectedPosOffset(real_t(0));
-   Vector3<real_t> expectedLinearVel(real_t(0));
-   Vector3<real_t> expectedAngularVel(real_t(0));
+   Vector3<real_t> expectedPosOffset(0_r);
+   Vector3<real_t> expectedLinearVel(0_r);
+   Vector3<real_t> expectedAngularVel(0_r);
    {
 
       const Vector3<real_t>& startPos = positionInsideBlock;
@@ -204,9 +204,9 @@ int main( int argc, char **argv )
       timestep();
 
 
-      Vector3<real_t> curPosOffset(real_t(0));
-      Vector3<real_t> curLinearVel(real_t(0));
-      Vector3<real_t> curAngularVel(real_t(0));
+      Vector3<real_t> curPosOffset(0_r);
+      Vector3<real_t> curLinearVel(0_r);
+      Vector3<real_t> curAngularVel(0_r);
       for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
       {
          for( auto bodyIt = pe::LocalBodyIterator::begin( *blockIt, bodyStorageID); bodyIt != pe::LocalBodyIterator::end(); ++bodyIt )
@@ -271,9 +271,9 @@ int main( int argc, char **argv )
       timestep();
 
 
-      Vector3<real_t> curPosOffset(real_t(0));
-      Vector3<real_t> curLinearVel(real_t(0));
-      Vector3<real_t> curAngularVel(real_t(0));
+      Vector3<real_t> curPosOffset(0_r);
+      Vector3<real_t> curLinearVel(0_r);
+      Vector3<real_t> curAngularVel(0_r);
       for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
       {
          for( auto bodyIt = pe::LocalBodyIterator::begin( *blockIt, bodyStorageID); bodyIt != pe::LocalBodyIterator::end(); ++bodyIt )
@@ -331,16 +331,16 @@ int main( int argc, char **argv )
          for( auto bodyIt = pe::BodyIterator::begin( *blockIt, bodyStorageID); bodyIt != pe::BodyIterator::end(); ++bodyIt )
          {
             auto pos = bodyIt->getPosition();
-            bodyIt->addForceAtPos(real_t(0.5)*testForce, pos+torqueOffset);
+            bodyIt->addForceAtPos(0.5_r*testForce, pos+torqueOffset);
          }
       }
 
       timestep();
 
 
-      Vector3<real_t> curPosOffset(real_t(0));
-      Vector3<real_t> curLinearVel(real_t(0));
-      Vector3<real_t> curAngularVel(real_t(0));
+      Vector3<real_t> curPosOffset(0_r);
+      Vector3<real_t> curLinearVel(0_r);
+      Vector3<real_t> curAngularVel(0_r);
       for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
       {
          for( auto bodyIt = pe::LocalBodyIterator::begin( *blockIt, bodyStorageID); bodyIt != pe::LocalBodyIterator::end(); ++bodyIt )
@@ -404,9 +404,9 @@ int main( int argc, char **argv )
       timestep();
 
 
-      Vector3<real_t> curPosOffset(real_t(0));
-      Vector3<real_t> curLinearVel(real_t(0));
-      Vector3<real_t> curAngularVel(real_t(0));
+      Vector3<real_t> curPosOffset(0_r);
+      Vector3<real_t> curLinearVel(0_r);
+      Vector3<real_t> curAngularVel(0_r);
       for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
       {
          for( auto bodyIt = pe::LocalBodyIterator::begin( *blockIt, bodyStorageID); bodyIt != pe::LocalBodyIterator::end(); ++bodyIt )

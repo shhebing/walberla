@@ -202,7 +202,7 @@ public:
                                const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                                const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
       blocks_( blocks ), fieldId_( fieldId ), solution_( solution ), filter_( filter ), yAxis_( yAxis ),
-      relLinePoint_( Vector3<real_t>( real_c(0.5) ) ), normalizationFactor_( real_t(1) ),
+      relLinePoint_( Vector3<real_t>( real_c(0.5) ) ), normalizationFactor_( 1_r ),
       requiredSelectors_(requiredSelectors), incompatibleSelectors_( incompatibleSelectors )
    {
       auto _blocks = blocks_.lock();
@@ -215,7 +215,7 @@ public:
                                const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                                const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
       blocks_( blocks ), fieldId_( fieldId ), solution_( solution ), filter_( Filter_T() ), yAxis_( yAxis ),
-      relLinePoint_( Vector3<real_t>( real_c(0.5) ) ), normalizationFactor_( real_t(1) ),
+      relLinePoint_( Vector3<real_t>( real_c(0.5) ) ), normalizationFactor_( 1_r ),
       requiredSelectors_(requiredSelectors), incompatibleSelectors_( incompatibleSelectors )
    {
       static_assert( (boost::is_same< Filter_T, DefaultEvaluationFilter >::value),
@@ -469,7 +469,7 @@ inline void accuracyEvaluationLinePlotConfigParser( const shared_ptr< Config > &
 #define WALBERLA_FIELD_MAKE_ACCURACY_EVALUATION_LINE_PLOT_CONFIG_PARSER( config ) \
    bool defaultYAxis( true ); \
    Vector3<real_t> defaultRelLinePoint( real_c(0.5) ); \
-   real_t defaultNormalizationFactor( real_t(1) ); \
+   real_t defaultNormalizationFactor( 1_r ); \
    auto _blocks = blocks.lock(); \
    WALBERLA_CHECK_NOT_NULLPTR( _blocks, "Trying to execute 'makeAccuracyEvaluationLinePlot' for a block storage object that doesn't exist anymore" ); \
    math::AABB defaultDomainNormalization( _blocks->getDomain() ); \

@@ -71,51 +71,51 @@ protected:
 template< typename CM, bool C, typename FM, int EAO > const char*  D3Q19<CM,C,FM,EAO>::NAME = "D3Q19";
 
 
-template< typename CM, bool C, typename FM, int EAO > const real_t D3Q19<CM,C,FM,EAO>::w_0 = real_t(1.0) / real_t( 3.0);
-template< typename CM, bool C, typename FM, int EAO > const real_t D3Q19<CM,C,FM,EAO>::w_1 = real_t(1.0) / real_t(18.0);
-template< typename CM, bool C, typename FM, int EAO > const real_t D3Q19<CM,C,FM,EAO>::w_2 = real_t(1.0) / real_t(36.0);
+template< typename CM, bool C, typename FM, int EAO > const real_t D3Q19<CM,C,FM,EAO>::w_0 = 1.0_r / real_t( 3.0);
+template< typename CM, bool C, typename FM, int EAO > const real_t D3Q19<CM,C,FM,EAO>::w_1 = 1.0_r / 18.0_r;
+template< typename CM, bool C, typename FM, int EAO > const real_t D3Q19<CM,C,FM,EAO>::w_2 = 1.0_r / 36.0_r;
 
 // must match with the static array 'dir' in stencil::D3Q19
-template< typename CM, bool C, typename FM, int EAO > const real_t D3Q19<CM,C,FM,EAO>::w[19] = { real_t(1.0) / real_t( 3.0),   // C
-                                                                                                 real_t(1.0) / real_t(18.0),   // N
-                                                                                                 real_t(1.0) / real_t(18.0),   // S
-                                                                                                 real_t(1.0) / real_t(18.0),   // W
-                                                                                                 real_t(1.0) / real_t(18.0),   // E
-                                                                                                 real_t(1.0) / real_t(18.0),   // T
-                                                                                                 real_t(1.0) / real_t(18.0),   // B
-                                                                                                 real_t(1.0) / real_t(36.0),   // NW
-                                                                                                 real_t(1.0) / real_t(36.0),   // NE
-                                                                                                 real_t(1.0) / real_t(36.0),   // SW
-                                                                                                 real_t(1.0) / real_t(36.0),   // SE
-                                                                                                 real_t(1.0) / real_t(36.0),   // TN
-                                                                                                 real_t(1.0) / real_t(36.0),   // TS
-                                                                                                 real_t(1.0) / real_t(36.0),   // TW
-                                                                                                 real_t(1.0) / real_t(36.0),   // TE
-                                                                                                 real_t(1.0) / real_t(36.0),   // BN
-                                                                                                 real_t(1.0) / real_t(36.0),   // BS
-                                                                                                 real_t(1.0) / real_t(36.0),   // BW
-                                                                                                 real_t(1.0) / real_t(36.0) }; // BE
+template< typename CM, bool C, typename FM, int EAO > const real_t D3Q19<CM,C,FM,EAO>::w[19] = { 1.0_r / real_t( 3.0),   // C
+                                                                                                 1.0_r / 18.0_r,   // N
+                                                                                                 1.0_r / 18.0_r,   // S
+                                                                                                 1.0_r / 18.0_r,   // W
+                                                                                                 1.0_r / 18.0_r,   // E
+                                                                                                 1.0_r / 18.0_r,   // T
+                                                                                                 1.0_r / 18.0_r,   // B
+                                                                                                 1.0_r / 36.0_r,   // NW
+                                                                                                 1.0_r / 36.0_r,   // NE
+                                                                                                 1.0_r / 36.0_r,   // SW
+                                                                                                 1.0_r / 36.0_r,   // SE
+                                                                                                 1.0_r / 36.0_r,   // TN
+                                                                                                 1.0_r / 36.0_r,   // TS
+                                                                                                 1.0_r / 36.0_r,   // TW
+                                                                                                 1.0_r / 36.0_r,   // TE
+                                                                                                 1.0_r / 36.0_r,   // BN
+                                                                                                 1.0_r / 36.0_r,   // BS
+                                                                                                 1.0_r / 36.0_r,   // BW
+                                                                                                 1.0_r / 36.0_r }; // BE
 
 // must match with the static array 'dir' in stencil::D3Q19
 template< typename CM, bool C, typename FM, int EAO > const real_t D3Q19<CM,C,FM,EAO>::wInv[19] = { real_t( 3.0),   // C
-                                                                                                    real_t(18.0),   // N
-                                                                                                    real_t(18.0),   // S
-                                                                                                    real_t(18.0),   // W
-                                                                                                    real_t(18.0),   // E
-                                                                                                    real_t(18.0),   // T
-                                                                                                    real_t(18.0),   // B
-                                                                                                    real_t(36.0),   // NW
-                                                                                                    real_t(36.0),   // NE
-                                                                                                    real_t(36.0),   // SW
-                                                                                                    real_t(36.0),   // SE
-                                                                                                    real_t(36.0),   // TN
-                                                                                                    real_t(36.0),   // TS
-                                                                                                    real_t(36.0),   // TW
-                                                                                                    real_t(36.0),   // TE
-                                                                                                    real_t(36.0),   // BN
-                                                                                                    real_t(36.0),   // BS
-                                                                                                    real_t(36.0),   // BW
-                                                                                                    real_t(36.0) }; // BE
+                                                                                                    18.0_r,   // N
+                                                                                                    18.0_r,   // S
+                                                                                                    18.0_r,   // W
+                                                                                                    18.0_r,   // E
+                                                                                                    18.0_r,   // T
+                                                                                                    18.0_r,   // B
+                                                                                                    36.0_r,   // NW
+                                                                                                    36.0_r,   // NE
+                                                                                                    36.0_r,   // SW
+                                                                                                    36.0_r,   // SE
+                                                                                                    36.0_r,   // TN
+                                                                                                    36.0_r,   // TS
+                                                                                                    36.0_r,   // TW
+                                                                                                    36.0_r,   // TE
+                                                                                                    36.0_r,   // BN
+                                                                                                    36.0_r,   // BS
+                                                                                                    36.0_r,   // BW
+                                                                                                    36.0_r }; // BE
 
 
 

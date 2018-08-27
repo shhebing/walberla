@@ -66,8 +66,8 @@ Capsule::Capsule( id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const 
    // Since the capsule constructor is never directly called but only used in a small number
    // of functions that already check the capsule arguments, only asserts are used here to
    // double check the arguments.
-   WALBERLA_ASSERT_GREATER( radius, real_t(0), "Invalid capsule radius"  );
-   WALBERLA_ASSERT_GREATER( length, real_t(0), "Invalid capsule length"  );
+   WALBERLA_ASSERT_GREATER( radius, 0_r, "Invalid capsule radius"  );
+   WALBERLA_ASSERT_GREATER( length, 0_r, "Invalid capsule length"  );
 
    // Initializing the instantiated capsule
    gpos_   = gpos;
@@ -124,7 +124,7 @@ Capsule::~Capsule()
 bool Capsule::containsRelPointImpl( real_t px, real_t py, real_t pz ) const
 {
    const real_t xabs( std::fabs( px ) );         // Absolute x-distance
-   const real_t hlength( real_t(0.5) * length_ );  // Capsule half length
+   const real_t hlength( 0.5_r * length_ );  // Capsule half length
 
    if( xabs > hlength ) {
       return ( ( math::sq(xabs-hlength) + math::sq(py) + math::sq(pz) ) <= ( radius_ * radius_ ) );
@@ -148,7 +148,7 @@ bool Capsule::containsRelPointImpl( real_t px, real_t py, real_t pz ) const
 bool Capsule::isSurfaceRelPointImpl( real_t px, real_t py, real_t  pz ) const
 {
    const real_t  xabs( std::fabs( px ) );         // Absolute x-distance
-   const real_t  hlength( real_t(0.5) * length_ );  // Capsule half length
+   const real_t  hlength( 0.5_r * length_ );  // Capsule half length
 
    if( xabs > hlength ) {
       return ( std::fabs( math::sq(xabs-hlength) + math::sq(py) + math::sq(pz) - radius_*radius_ ) <= surfaceThreshold*surfaceThreshold );

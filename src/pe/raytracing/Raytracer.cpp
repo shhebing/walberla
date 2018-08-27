@@ -161,7 +161,7 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage>& forest, const BlockDataID s
    lookAtPoint_ = config.getParameter<Vec3>("lookAt");
    upVector_ = config.getParameter<Vec3>("upVector");
    lighting_ = Lighting(config.getBlock("Lighting"));
-   backgroundColor_ = config.getParameter<Color>("backgroundColor", Vec3(real_t(0.1), real_t(0.1), real_t(0.1)));
+   backgroundColor_ = config.getParameter<Color>("backgroundColor", Vec3(0.1_r, 0.1_r, 0.1_r));
 
    std::string raytracingAlgorithm = config.getParameter<std::string>("raytracingAlgorithm", "RAYTRACE_HASHGRIDS");
    if (raytracingAlgorithm == "RAYTRACE_HASHGRIDS") {
@@ -197,10 +197,10 @@ void Raytracer::setupView_() {
    // viewing plane setup
    d_ = (cameraPosition_ - lookAtPoint_).length();
    aspectRatio_ = real_t(pixelsHorizontal_) / real_t(pixelsVertical_);
-   real_t fov_vertical_rad = fov_vertical_ * math::M_PI / real_t(180.0);
-   viewingPlaneHeight_ = real_c(tan(fov_vertical_rad/real_t(2.))) * real_t(2.) * d_;
+   real_t fov_vertical_rad = fov_vertical_ * math::M_PI / 180.0_r;
+   viewingPlaneHeight_ = real_c(tan(fov_vertical_rad/2._r)) * 2._r * d_;
    viewingPlaneWidth_ = viewingPlaneHeight_ * aspectRatio_;
-   viewingPlaneOrigin_ = lookAtPoint_ - u_*viewingPlaneWidth_/real_t(2.) - v_*viewingPlaneHeight_/real_t(2.);
+   viewingPlaneOrigin_ = lookAtPoint_ - u_*viewingPlaneWidth_/2._r - v_*viewingPlaneHeight_/2._r;
    
    pixelWidth_ = viewingPlaneWidth_ / real_c(pixelsHorizontal_*antiAliasFactor_);
    pixelHeight_ = viewingPlaneHeight_ / real_c(pixelsVertical_*antiAliasFactor_);

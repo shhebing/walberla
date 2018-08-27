@@ -142,7 +142,7 @@ real_t EquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T >
    CellInterval localDomain = pdfField->xyzSize();
 
    uint_t nAverage = uint_t(0);
-   real_t averageDensity = real_t(0);
+   real_t averageDensity = 0_r;
    for( auto neighborDir = stencil::D3Q27::beginNoCenter(); neighborDir != stencil::D3Q27::end(); ++neighborDir )
    {
       Cell neighbor( x + neighborDir.cx(), y + neighborDir.cy(), z + neighborDir.cz() );
@@ -160,7 +160,7 @@ real_t EquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T >
       }
    }
 
-   return ( nAverage > uint_t( 0 ) ) ? averageDensity / real_c( nAverage ) : real_t(1.0);
+   return ( nAverage > uint_t( 0 ) ) ? averageDensity / real_c( nAverage ) : 1.0_r;
 }
 
 
@@ -382,15 +382,15 @@ void ExtrapolationReconstructor< LatticeModel_T, BoundaryHandling_T, Extrapolati
       // quadratic normal extrapolation
       for( auto d = LatticeModel_T::Stencil::begin(); d != LatticeModel_T::Stencil::end(); ++d )
       {
-         pdfField->get( x, y, z, d.toIdx() ) = real_t(3) * pdfField->get( x +   extrapolationDirection[0], y +   extrapolationDirection[1], z +   extrapolationDirection[2], d.toIdx() )
-                                             - real_t(3) * pdfField->get( x + 2*extrapolationDirection[0], y + 2*extrapolationDirection[1], z + 2*extrapolationDirection[2], d.toIdx() )
+         pdfField->get( x, y, z, d.toIdx() ) = 3_r * pdfField->get( x +   extrapolationDirection[0], y +   extrapolationDirection[1], z +   extrapolationDirection[2], d.toIdx() )
+                                             - 3_r * pdfField->get( x + 2*extrapolationDirection[0], y + 2*extrapolationDirection[1], z + 2*extrapolationDirection[2], d.toIdx() )
                                              +             pdfField->get( x + 3*extrapolationDirection[0], y + 3*extrapolationDirection[1], z + 3*extrapolationDirection[2], d.toIdx() );
       }
    } else { // numberOfCellsForExtrapolation == 2
       // linear normal extrapolation
       for( auto d = LatticeModel_T::Stencil::begin(); d != LatticeModel_T::Stencil::end(); ++d )
       {
-         pdfField->get( x, y, z, d.toIdx() ) = real_t(2) * pdfField->get( x +   extrapolationDirection[0], y +   extrapolationDirection[1], z +   extrapolationDirection[2], d.toIdx() )
+         pdfField->get( x, y, z, d.toIdx() ) = 2_r * pdfField->get( x +   extrapolationDirection[0], y +   extrapolationDirection[1], z +   extrapolationDirection[2], d.toIdx() )
                                              -             pdfField->get( x + 2*extrapolationDirection[0], y + 2*extrapolationDirection[1], z + 2*extrapolationDirection[2], d.toIdx() );
       }
    }
@@ -419,18 +419,18 @@ void ExtrapolationReconstructor< LatticeModel_T, BoundaryHandling_T, Extrapolati
    WALBERLA_ASSERT( !math::isnan(bodyVelocity) );
 
    // transforms to moment space (see MRT collision model) to set the body's velocity in cell without affecting other moments
-   const real_t _1_2  = real_t(1) / real_t(2);
-   const real_t _1_3  = real_t(1) / real_t(3);
-   const real_t _1_4  = real_t(1) / real_t(4);
-   const real_t _1_6  = real_t(1) / real_t(6);
-   const real_t _1_8  = real_t(1) / real_t(8);
-   const real_t _1_12 = real_t(1) / real_t(12);
-   const real_t _1_16 = real_t(1) / real_t(16);
-   const real_t _1_18 = real_t(1) / real_t(18);
-   const real_t _1_24 = real_t(1) / real_t(24);
-   const real_t _1_36 = real_t(1) / real_t(36);
-   const real_t _1_48 = real_t(1) / real_t(48);
-   const real_t _1_72 = real_t(1) / real_t(72);
+   const real_t _1_2  = 1_r / 2_r;
+   const real_t _1_3  = 1_r / 3_r;
+   const real_t _1_4  = 1_r / 4_r;
+   const real_t _1_6  = 1_r / 6_r;
+   const real_t _1_8  = 1_r / 8_r;
+   const real_t _1_12 = 1_r / 12_r;
+   const real_t _1_16 = 1_r / 16_r;
+   const real_t _1_18 = 1_r / 18_r;
+   const real_t _1_24 = 1_r / 24_r;
+   const real_t _1_36 = 1_r / 36_r;
+   const real_t _1_48 = 1_r / 48_r;
+   const real_t _1_72 = 1_r / 72_r;
 
    // restriction to D3Q19!
    const real_t vC  = pdfField->get( x, y, z, LatticeModel_T::Stencil::idx[stencil::C]  );
@@ -456,17 +456,17 @@ void ExtrapolationReconstructor< LatticeModel_T, BoundaryHandling_T, Extrapolati
    // transform to moment space and change momentum to body's velocity ( * rho_0 )
    const real_t m0  = vC + vN + vS + vW + vE + vT + vB + vNW + vNE + vSW + vSE + vTN + vTS + vTW + vTE + vBN + vBS + vBW + vBE;
    const real_t m1  = -vC  + vNW + vNE + vSW + vSE + vTN + vTS + vTW + vTE + vBN + vBS + vBW + vBE;
-   const real_t m2  = vC - real_t(2) * ( vN + vS + vW + vE + vT + vB ) + vNW + vNE + vSW + vSE + vTN + vTS + vTW + vTE + vBN + vBS + vBW + vBE;
+   const real_t m2  = vC - 2_r * ( vN + vS + vW + vE + vT + vB ) + vNW + vNE + vSW + vSE + vTN + vTS + vTW + vTE + vBN + vBS + vBW + vBE;
    const real_t m3  = bodyVelocity[0];
-   const real_t m4  = real_t(2) * vW - real_t(2) * vE - vNW + vNE - vSW + vSE - vTW + vTE - vBW + vBE;
+   const real_t m4  = 2_r * vW - 2_r * vE - vNW + vNE - vSW + vSE - vTW + vTE - vBW + vBE;
    const real_t m5  = bodyVelocity[1];
-   const real_t m6  = real_t(-2) * vN + real_t(2) * vS + vNW + vNE - vSW - vSE + vTN - vTS + vBN - vBS;
+   const real_t m6  = -2_r * vN + 2_r * vS + vNW + vNE - vSW - vSE + vTN - vTS + vBN - vBS;
    const real_t m7  = bodyVelocity[2];
-   const real_t m8  = real_t(-2) * vT + real_t(2) * vB + vTN + vTS + vTW + vTE - vBN - vBS - vBW - vBE;
-   const real_t m9  = -vN - vS + real_t(2) * vW + real_t(2) * vE - vT - vB + vNW + vNE + vSW + vSE - real_t(2) * vTN
-                      - real_t(2) * vTS + vTW + vTE - real_t(2) * vBN - real_t(2) * vBS + vBW + vBE;
-   const real_t m10 = vN + vS - real_t(2) * vW - real_t(2) * vE + vT + vB + vNW + vNE + vSW + vSE - real_t(2) * vTN
-                      - real_t(2) * vTS + vTW + vTE - real_t(2) * vBN - real_t(2) * vBS + vBW + vBE;
+   const real_t m8  = -2_r * vT + 2_r * vB + vTN + vTS + vTW + vTE - vBN - vBS - vBW - vBE;
+   const real_t m9  = -vN - vS + 2_r * vW + 2_r * vE - vT - vB + vNW + vNE + vSW + vSE - 2_r * vTN
+                      - 2_r * vTS + vTW + vTE - 2_r * vBN - 2_r * vBS + vBW + vBE;
+   const real_t m10 = vN + vS - 2_r * vW - 2_r * vE + vT + vB + vNW + vNE + vSW + vSE - 2_r * vTN
+                      - 2_r * vTS + vTW + vTE - 2_r * vBN - 2_r * vBS + vBW + vBE;
    const real_t m11 = vN  + vS  - vT  - vB  + vNW + vNE + vSW + vSE - vTW - vTE - vBW - vBE;
    const real_t m12 = -vN - vS  + vT  + vB  + vNW + vNE + vSW + vSE - vTW - vTE - vBW - vBE;
    const real_t m13 = -vNW + vNE + vSW - vSE;

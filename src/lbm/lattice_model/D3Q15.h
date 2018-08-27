@@ -71,26 +71,26 @@ protected:
 
 template< typename CM, bool C, typename FM, int EAO > const char*  D3Q15<CM,C,FM,EAO>::NAME = "D3Q15";
 
-template< typename CM, bool C, typename FM, int EAO > const real_t D3Q15<CM,C,FM,EAO>::w_0 = real_t(2.0) / real_t( 9.0);
-template< typename CM, bool C, typename FM, int EAO > const real_t D3Q15<CM,C,FM,EAO>::w_1 = real_t(1.0) / real_t( 9.0);
-template< typename CM, bool C, typename FM, int EAO > const real_t D3Q15<CM,C,FM,EAO>::w_2 = real_t(1.0) / real_t(72.0);
+template< typename CM, bool C, typename FM, int EAO > const real_t D3Q15<CM,C,FM,EAO>::w_0 = 2.0_r / real_t( 9.0);
+template< typename CM, bool C, typename FM, int EAO > const real_t D3Q15<CM,C,FM,EAO>::w_1 = 1.0_r / real_t( 9.0);
+template< typename CM, bool C, typename FM, int EAO > const real_t D3Q15<CM,C,FM,EAO>::w_2 = 1.0_r / 72.0_r;
 
 // must match with the static array 'dir' in stencil::D3Q15
-template< typename CM, bool C, typename FM, int EAO > const real_t D3Q15<CM,C,FM,EAO>::w[15] = { real_t(2.0) / real_t( 9.0),   // C
-                                                                                                 real_t(1.0) / real_t( 9.0),   // N
-                                                                                                 real_t(1.0) / real_t( 9.0),   // S
-                                                                                                 real_t(1.0) / real_t( 9.0),   // W
-                                                                                                 real_t(1.0) / real_t( 9.0),   // E
-                                                                                                 real_t(1.0) / real_t( 9.0),   // T
-                                                                                                 real_t(1.0) / real_t( 9.0),   // B
-                                                                                                 real_t(1.0) / real_t(72.0),   // TNE
-                                                                                                 real_t(1.0) / real_t(72.0),   // TNW
-                                                                                                 real_t(1.0) / real_t(72.0),   // TSE
-                                                                                                 real_t(1.0) / real_t(72.0),   // TSW
-                                                                                                 real_t(1.0) / real_t(72.0),   // BNE
-                                                                                                 real_t(1.0) / real_t(72.0),   // BNW
-                                                                                                 real_t(1.0) / real_t(72.0),   // BSE
-                                                                                                 real_t(1.0) / real_t(72.0) }; // BSW
+template< typename CM, bool C, typename FM, int EAO > const real_t D3Q15<CM,C,FM,EAO>::w[15] = { 2.0_r / real_t( 9.0),   // C
+                                                                                                 1.0_r / real_t( 9.0),   // N
+                                                                                                 1.0_r / real_t( 9.0),   // S
+                                                                                                 1.0_r / real_t( 9.0),   // W
+                                                                                                 1.0_r / real_t( 9.0),   // E
+                                                                                                 1.0_r / real_t( 9.0),   // T
+                                                                                                 1.0_r / real_t( 9.0),   // B
+                                                                                                 1.0_r / 72.0_r,   // TNE
+                                                                                                 1.0_r / 72.0_r,   // TNW
+                                                                                                 1.0_r / 72.0_r,   // TSE
+                                                                                                 1.0_r / 72.0_r,   // TSW
+                                                                                                 1.0_r / 72.0_r,   // BNE
+                                                                                                 1.0_r / 72.0_r,   // BNW
+                                                                                                 1.0_r / 72.0_r,   // BSE
+                                                                                                 1.0_r / 72.0_r }; // BSW
 
 // must match with the static array 'dir' in stencil::D3Q15
 template< typename CM, bool C, typename FM, int EAO > const real_t D3Q15<CM,C,FM,EAO>::wInv[15] = { real_t( 4.5),   // C
@@ -100,14 +100,14 @@ template< typename CM, bool C, typename FM, int EAO > const real_t D3Q15<CM,C,FM
                                                                                                     real_t( 9.0),   // E
                                                                                                     real_t( 9.0),   // T
                                                                                                     real_t( 9.0),   // B
-                                                                                                    real_t(72.0),   // TNE
-                                                                                                    real_t(72.0),   // TNW
-                                                                                                    real_t(72.0),   // TSE
-                                                                                                    real_t(72.0),   // TSW
-                                                                                                    real_t(72.0),   // BNE
-                                                                                                    real_t(72.0),   // BNW
-                                                                                                    real_t(72.0),   // BSE
-                                                                                                    real_t(72.0) }; // BSW
+                                                                                                    72.0_r,   // TNE
+                                                                                                    72.0_r,   // TNW
+                                                                                                    72.0_r,   // TSE
+                                                                                                    72.0_r,   // TSW
+                                                                                                    72.0_r,   // BNE
+                                                                                                    72.0_r,   // BNW
+                                                                                                    72.0_r,   // BSE
+                                                                                                    72.0_r }; // BSW
 
 
 

@@ -66,7 +66,7 @@ int main( int argc, char ** argv )
    walberla::Environment walberlaEnv( argc, argv );
 
    const real_t dx = real_c(0.1);
-   const walberla::uint_t cells = uint_c( real_t(1) / dx );
+   const walberla::uint_t cells = uint_c( 1_r / dx );
    const walberla::uint_t nrBlocks[] = { 2,2,1 };
 
    using blockforest::createUniformBlockGrid;
@@ -90,7 +90,7 @@ int main( int argc, char ** argv )
    const char * curveZ = "0.499 * sin(t) + 0.5";
    auto curvePackInfo = make_shared<CurveGatherPackInfo<GlField> >( blocks, fieldId,
                                                          curveX, curveY, curveZ,
-                                                         real_t(0), real_c(2 * 3.141),
+                                                         0_r, real_c(2 * 3.141),
                                                          uint_t(100), gnuplotWriter );
 
    MPIGatherScheme gatherScheme( blocks->getBlockStorage() );

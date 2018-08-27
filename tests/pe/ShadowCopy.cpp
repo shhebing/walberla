@@ -93,7 +93,7 @@ int main( int argc, char** argv )
             forest->getBlockStorage(),
             storageID,
             999999999,
-            Vec3(real_t(4.9),2,2),
+            Vec3(4.9_r,2,2),
             real_c(1.2));
    auto sid = sp->getSystemID();
    sp->setLinearVel(1,2,3);
@@ -105,7 +105,7 @@ int main( int argc, char** argv )
    WALBERLA_CHECK_NOT_NULLPTR(sp);
    WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(1,2,3) );
    WALBERLA_CHECK_FLOAT_EQUAL( sp->getAngularVel(), Vec3(1,2,3) );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp->getRadius(), real_t(1.2) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getRadius(), 1.2_r );
    destroyBodyBySID( *globalBodyStorage, forest->getBlockStorage(), storageID, sid );
 
    WALBERLA_LOG_PROGRESS_ON_ROOT( " *** SPHERE AT BLOCK EDGE *** ");
@@ -127,15 +127,15 @@ int main( int argc, char** argv )
 
    WALBERLA_LOG_PROGRESS_ON_ROOT( " *** UNION *** ");
    UnionT* un   = createUnion< boost::tuple<Sphere> >( *globalBodyStorage, forest->getBlockStorage(), storageID, 0, Vec3(2,2,2) );
-   auto sp1 = createSphere(un, 10, Vec3(real_t(4.9),2,2), real_t(1));
-   auto sp2 = createSphere(un, 11, Vec3(3,2,2), real_t(1.5));
-   un->setPosition( Vec3( real_t(4.9), 2, 2) );
+   auto sp1 = createSphere(un, 10, Vec3(4.9_r,2,2), 1_r);
+   auto sp2 = createSphere(un, 11, Vec3(3,2,2), 1.5_r);
+   un->setPosition( Vec3( 4.9_r, 2, 2) );
    auto relPosSp1 = sp1->getRelPosition();
    auto relPosSp2 = sp2->getRelPosition();
    sid = un->getSystemID();
    syncCall();
 
-   un->setPosition( Vec3( real_t(5.9), 2, 2) );
+   un->setPosition( Vec3( 5.9_r, 2, 2) );
    WALBERLA_LOG_PROGRESS_ON_ROOT( un->getPosition() );
    auto posUnion  = un->getPosition();
    syncCall();
@@ -147,38 +147,38 @@ int main( int argc, char** argv )
    WALBERLA_CHECK_NOT_NULLPTR(sp2);
    WALBERLA_CHECK_EQUAL( sp1->getTypeID(), Sphere::getStaticTypeID() );
    WALBERLA_CHECK_EQUAL( sp2->getTypeID(), Sphere::getStaticTypeID() );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp1->getRadius(), real_t(1.0) );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp2->getRadius(), real_t(1.5) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp1->getRadius(), 1.0_r );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp2->getRadius(), 1.5_r );
    WALBERLA_CHECK_FLOAT_EQUAL( un->getPosition(), posUnion );
    WALBERLA_CHECK_FLOAT_EQUAL( relPosSp1, sp1->getRelPosition() );
    WALBERLA_CHECK_FLOAT_EQUAL( relPosSp2, sp2->getRelPosition() );
 
-   un->setPosition(real_t(7.5),2,2);
+   un->setPosition(7.5_r,2,2);
    WALBERLA_LOG_PROGRESS_ON_ROOT( un->getPosition() );
    syncCall();
 
-   un->setPosition(real_t(9.9),2,2);
+   un->setPosition(9.9_r,2,2);
    WALBERLA_LOG_PROGRESS_ON_ROOT( un->getPosition() );
    syncCall();
 
-   un->setPosition(real_t(10.9),2,2);
+   un->setPosition(10.9_r,2,2);
    WALBERLA_LOG_PROGRESS_ON_ROOT( un->getPosition() );
    syncCall();
 
    un  = static_cast<UnionT*> (getBody( *globalBodyStorage, forest->getBlockStorage(), storageID, sid, StorageSelect::LOCAL ));
-   un->setPosition(real_t(12.5),2,2);
+   un->setPosition(12.5_r,2,2);
    WALBERLA_LOG_PROGRESS_ON_ROOT( un->getPosition() );
    syncCall();
 
-   un->setPosition(real_t(14.9),2,2);
+   un->setPosition(14.9_r,2,2);
    WALBERLA_LOG_PROGRESS_ON_ROOT( un->getPosition() );
    syncCall();
 
-   un->setPosition(real_t(15.9),2,2);
+   un->setPosition(15.9_r,2,2);
    WALBERLA_LOG_PROGRESS_ON_ROOT( un->getPosition() );
    syncCall();
 
-   posUnion = Vec3(real_t(0.9),2,2);
+   posUnion = Vec3(0.9_r,2,2);
    un  = static_cast<UnionT*> (getBody( *globalBodyStorage, forest->getBlockStorage(), storageID, sid, StorageSelect::LOCAL ));
    sp1 = static_cast<SphereID> (un->begin().getBodyID());
    sp2 = static_cast<SphereID> ((++(un->begin())).getBodyID());
@@ -186,8 +186,8 @@ int main( int argc, char** argv )
    WALBERLA_CHECK_NOT_NULLPTR(sp2);
    WALBERLA_CHECK_EQUAL( sp1->getTypeID(), Sphere::getStaticTypeID() );
    WALBERLA_CHECK_EQUAL( sp2->getTypeID(), Sphere::getStaticTypeID() );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp1->getRadius(), real_t(1.0) );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp2->getRadius(), real_t(1.5) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp1->getRadius(), 1.0_r );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp2->getRadius(), 1.5_r );
    WALBERLA_CHECK_FLOAT_EQUAL( un->getPosition(), posUnion );
    WALBERLA_CHECK_FLOAT_EQUAL( relPosSp1, sp1->getRelPosition() );
    WALBERLA_CHECK_FLOAT_EQUAL( relPosSp2, sp2->getRelPosition() );

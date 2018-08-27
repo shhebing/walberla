@@ -76,7 +76,7 @@ ConvexPolyhedron::ConvexPolyhedron( id_t sid, id_t uid, const Vec3& gpos, const 
 void ConvexPolyhedron::init( const Vec3& gpos, const Vec3& rpos, const Quat& q,
                              const bool global, const bool communicating, const bool infiniteMass )
 {
-   WALBERLA_ASSERT_FLOAT_EQUAL( (toWalberla( computeCentroid( mesh_ ) ) - Vec3() ).length(), real_t(0) );
+   WALBERLA_ASSERT_FLOAT_EQUAL( (toWalberla( computeCentroid( mesh_ ) ) - Vec3() ).length(), 0_r );
    WALBERLA_ASSERT_GREATER_EQUAL( mesh_.n_vertices(), 4 );
    
    mesh_.request_face_normals();
@@ -114,13 +114,13 @@ void ConvexPolyhedron::init( const Vec3& gpos, const Vec3& rpos, const Quat& q,
    ConvexPolyhedron::calcBoundingBox();
 
    octandVertices_[0] = supportVertex( TriangleMesh::Normal( real_t( 1), real_t( 1), real_t( 1) ), *mesh_.vertices_begin() );
-   octandVertices_[1] = supportVertex( TriangleMesh::Normal( real_t( 1), real_t( 1), real_t(-1) ), *mesh_.vertices_begin() );
-   octandVertices_[2] = supportVertex( TriangleMesh::Normal( real_t( 1), real_t(-1), real_t( 1) ), *mesh_.vertices_begin() );
-   octandVertices_[3] = supportVertex( TriangleMesh::Normal( real_t( 1), real_t(-1), real_t(-1) ), *mesh_.vertices_begin() );
-   octandVertices_[4] = supportVertex( TriangleMesh::Normal( real_t(-1), real_t( 1), real_t( 1) ), *mesh_.vertices_begin() );
-   octandVertices_[5] = supportVertex( TriangleMesh::Normal( real_t(-1), real_t( 1), real_t(-1) ), *mesh_.vertices_begin() );
-   octandVertices_[6] = supportVertex( TriangleMesh::Normal( real_t(-1), real_t(-1), real_t( 1) ), *mesh_.vertices_begin() );
-   octandVertices_[7] = supportVertex( TriangleMesh::Normal( real_t(-1), real_t(-1), real_t(-1) ), *mesh_.vertices_begin() );
+   octandVertices_[1] = supportVertex( TriangleMesh::Normal( real_t( 1), real_t( 1), -1_r ), *mesh_.vertices_begin() );
+   octandVertices_[2] = supportVertex( TriangleMesh::Normal( real_t( 1), -1_r, real_t( 1) ), *mesh_.vertices_begin() );
+   octandVertices_[3] = supportVertex( TriangleMesh::Normal( real_t( 1), -1_r, -1_r ), *mesh_.vertices_begin() );
+   octandVertices_[4] = supportVertex( TriangleMesh::Normal( -1_r, real_t( 1), real_t( 1) ), *mesh_.vertices_begin() );
+   octandVertices_[5] = supportVertex( TriangleMesh::Normal( -1_r, real_t( 1), -1_r ), *mesh_.vertices_begin() );
+   octandVertices_[6] = supportVertex( TriangleMesh::Normal( -1_r, -1_r, real_t( 1) ), *mesh_.vertices_begin() );
+   octandVertices_[7] = supportVertex( TriangleMesh::Normal( -1_r, -1_r, -1_r ), *mesh_.vertices_begin() );
 }
 
 
@@ -193,7 +193,7 @@ real_t ConvexPolyhedron::getSurfaceArea() const
  */
 Vec3 ConvexPolyhedron::support( const Vec3& d ) const
 {
-   if (math::equal(d.length(), real_t(0))) return Vec3(0,0,0);
+   if (math::equal(d.length(), 0_r)) return Vec3(0,0,0);
 
    TriangleMesh::Normal d_loc = toOpenMesh( vectorFromWFtoBF(d) );
    
@@ -302,7 +302,7 @@ bool ConvexPolyhedron::containsRelPointImpl( real_t px, real_t py, real_t pz ) c
       const TriangleMesh::Normal & n = mesh_.normal(fh); // Plane normal
       const TriangleMesh::Point & pp = mesh_.point(mesh_.to_vertex_handle(mesh_.halfedge_handle(fh))); // Point on plane
 
-      if( n[0] * (px - pp[0]) + n[1] * (py - pp[1]) + n[2] * (pz - pp[2]) >= real_t(0) )
+      if( n[0] * (px - pp[0]) + n[1] * (py - pp[1]) + n[2] * (pz - pp[2]) >= 0_r )
          return false;
    }
 

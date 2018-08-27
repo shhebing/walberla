@@ -47,22 +47,22 @@ namespace discrete_particle_methods {
 // Schiller, L., Naumann, A., 1935. A drag coefficient correlation. Vdi Zeitung 77, 318-320.
 real_t dragCoeffSchillerNaumann( real_t reynoldsNumber )
 {
-   WALBERLA_ASSERT_GREATER_EQUAL( reynoldsNumber, real_t(0) );
+   WALBERLA_ASSERT_GREATER_EQUAL( reynoldsNumber, 0_r );
 
-   return ( reynoldsNumber < real_t(1000) ) ? real_t(24) * ( real_t(1) + real_t(0.15) * std::pow(reynoldsNumber, real_t(0.687) ) ) / reynoldsNumber
-                                            : real_t(0.44);
+   return ( reynoldsNumber < 1000_r ) ? 24_r * ( 1_r + 0.15_r * std::pow(reynoldsNumber, 0.687_r ) ) / reynoldsNumber
+                                            : 0.44_r;
 }
 
 // Coefficient from Stokes' law for drag, only valid for Stokes regime (low Reynolds numbers)
 // = 3 * PI * mu * D * fluidVolumeFraction
 real_t dragCoeffStokes ( real_t fluidVolumeFraction, real_t diameter, real_t fluidDynamicViscosity )
 {
-   return real_t(3) * math::M_PI * diameter * fluidDynamicViscosity * fluidVolumeFraction;
+   return 3_r * math::M_PI * diameter * fluidDynamicViscosity * fluidVolumeFraction;
 }
 
 // threshold value for absolute relative velocity
 // if it is below this value, a drag force of 0 is set, to avoid instabilities stemming from divisions by this small value
-const real_t thresholdAbsoluteVelocityDifference = real_t(1e-10);
+const real_t thresholdAbsoluteVelocityDifference = 1e-10_r;
 
 
 //////////////////////
@@ -75,15 +75,15 @@ const real_t thresholdAbsoluteVelocityDifference = real_t(1e-10);
 Vector3<real_t> dragForceStokes( const Vector3<real_t> & fluidVel, const Vector3<real_t> & particleVel,
                                  real_t solidVolumeFraction, real_t diameter, real_t fluidDynamicViscosity, real_t /*fluidDensity*/ )
 {
-   WALBERLA_ASSERT_GREATER_EQUAL( solidVolumeFraction, real_t(0) );
-   WALBERLA_ASSERT_LESS_EQUAL( solidVolumeFraction, real_t(1) );
+   WALBERLA_ASSERT_GREATER_EQUAL( solidVolumeFraction, 0_r );
+   WALBERLA_ASSERT_LESS_EQUAL( solidVolumeFraction, 1_r );
 
    Vector3<real_t> velDiff = fluidVel - particleVel;
    real_t absVelDiff = velDiff.length();
 
-   if( absVelDiff < thresholdAbsoluteVelocityDifference ) return Vector3<real_t>(real_t(0));
+   if( absVelDiff < thresholdAbsoluteVelocityDifference ) return Vector3<real_t>(0_r);
 
-   real_t fluidVolumeFraction = real_t(1) - solidVolumeFraction;
+   real_t fluidVolumeFraction = 1_r - solidVolumeFraction;
 
    return dragCoeffStokes( fluidVolumeFraction, diameter, fluidDynamicViscosity ) * velDiff;
 }
@@ -95,28 +95,28 @@ Vector3<real_t> dragForceStokes( const Vector3<real_t> & fluidVel, const Vector3
 Vector3<real_t>  dragForceErgunWenYu( const Vector3<real_t> & fluidVel, const Vector3<real_t> & particleVel,
                                       real_t solidVolumeFraction, real_t diameter, real_t fluidDynamicViscosity, real_t fluidDensity )
 {
-   WALBERLA_ASSERT_GREATER_EQUAL( solidVolumeFraction, real_t(0) );
-   WALBERLA_ASSERT_LESS_EQUAL( solidVolumeFraction, real_t(1) );
+   WALBERLA_ASSERT_GREATER_EQUAL( solidVolumeFraction, 0_r );
+   WALBERLA_ASSERT_LESS_EQUAL( solidVolumeFraction, 1_r );
 
    Vector3<real_t> velDiff = fluidVel - particleVel;
    real_t absVelDiff = velDiff.length();
 
-   if( absVelDiff < thresholdAbsoluteVelocityDifference ) return Vector3<real_t>(real_t(0));
+   if( absVelDiff < thresholdAbsoluteVelocityDifference ) return Vector3<real_t>(0_r);
 
-   real_t fluidVolumeFraction = real_t(1) - solidVolumeFraction;
+   real_t fluidVolumeFraction = 1_r - solidVolumeFraction;
 
-   if( fluidVolumeFraction < real_t(0.8) )
+   if( fluidVolumeFraction < 0.8_r )
    {
       // Ergun relation
       real_t reynoldsNumber = fluidVolumeFraction * fluidDensity * absVelDiff * diameter / fluidDynamicViscosity;
-      real_t fDrag = real_t(150) * solidVolumeFraction / ( real_t(18) * fluidVolumeFraction * fluidVolumeFraction ) +
-                     real_t(1.75) / ( real_t(18) * fluidVolumeFraction * fluidVolumeFraction ) * reynoldsNumber;
+      real_t fDrag = 150_r * solidVolumeFraction / ( 18_r * fluidVolumeFraction * fluidVolumeFraction ) +
+                     1.75_r / ( 18_r * fluidVolumeFraction * fluidVolumeFraction ) * reynoldsNumber;
       return fDrag * dragCoeffStokes( fluidVolumeFraction, diameter, fluidDynamicViscosity ) * velDiff;
    } else
    {
       // Wen & Yu correlation
       real_t reynoldsNumber = fluidVolumeFraction * fluidDensity * absVelDiff * diameter / fluidDynamicViscosity;
-      real_t fDrag = dragCoeffSchillerNaumann( reynoldsNumber ) * reynoldsNumber / real_t(24) * std::pow( fluidVolumeFraction, real_t(-3.7) );
+      real_t fDrag = dragCoeffSchillerNaumann( reynoldsNumber ) * reynoldsNumber / 24_r * std::pow( fluidVolumeFraction, -3.7_r );
       return fDrag * dragCoeffStokes( fluidVolumeFraction, diameter, fluidDynamicViscosity ) * velDiff;
    }
 }
@@ -126,23 +126,23 @@ Vector3<real_t>  dragForceErgunWenYu( const Vector3<real_t> & fluidVel, const Ve
 Vector3<real_t> dragForceTang( const Vector3<real_t> & fluidVel, const Vector3<real_t> & particleVel,
                                real_t solidVolumeFraction, real_t diameter, real_t fluidDynamicViscosity, real_t fluidDensity )
 {
-   WALBERLA_ASSERT_GREATER_EQUAL( solidVolumeFraction, real_t(0) );
-   WALBERLA_ASSERT_LESS_EQUAL( solidVolumeFraction, real_t(1) );
+   WALBERLA_ASSERT_GREATER_EQUAL( solidVolumeFraction, 0_r );
+   WALBERLA_ASSERT_LESS_EQUAL( solidVolumeFraction, 1_r );
 
    Vector3<real_t> velDiff = fluidVel - particleVel;
    real_t absVelDiff = velDiff.length();
 
-   if( absVelDiff < thresholdAbsoluteVelocityDifference ) return Vector3<real_t>(real_t(0));
+   if( absVelDiff < thresholdAbsoluteVelocityDifference ) return Vector3<real_t>(0_r);
 
-   real_t fluidVolumeFraction = real_t(1) - solidVolumeFraction;
+   real_t fluidVolumeFraction = 1_r - solidVolumeFraction;
    real_t fluidVolumeFractionP2 = fluidVolumeFraction * fluidVolumeFraction;
-   real_t inv_fluidVolumeFractionP4 = real_t(1) / (fluidVolumeFractionP2 * fluidVolumeFractionP2);
+   real_t inv_fluidVolumeFractionP4 = 1_r / (fluidVolumeFractionP2 * fluidVolumeFractionP2);
    real_t reynoldsNumber = fluidVolumeFraction * fluidDensity * absVelDiff * diameter / fluidDynamicViscosity;
 
    // Eq.21 from the paper
-   real_t fDrag = real_t(10) * solidVolumeFraction / fluidVolumeFractionP2 + fluidVolumeFractionP2 * ( real_t(1) + real_t(1.5) * std::sqrt(solidVolumeFraction) )
-                + ( real_t(0.11) * solidVolumeFraction * ( real_t(1) + solidVolumeFraction ) - real_t(0.00456) * inv_fluidVolumeFractionP4
-                + ( real_t(0.169) * fluidVolumeFraction + real_t(0.0644) * inv_fluidVolumeFractionP4 ) * std::pow( reynoldsNumber, -real_t(0.343) ) ) * reynoldsNumber;
+   real_t fDrag = 10_r * solidVolumeFraction / fluidVolumeFractionP2 + fluidVolumeFractionP2 * ( 1_r + 1.5_r * std::sqrt(solidVolumeFraction) )
+                + ( 0.11_r * solidVolumeFraction * ( 1_r + solidVolumeFraction ) - 0.00456_r * inv_fluidVolumeFractionP4
+                + ( 0.169_r * fluidVolumeFraction + 0.0644_r * inv_fluidVolumeFractionP4 ) * std::pow( reynoldsNumber, -0.343_r ) ) * reynoldsNumber;
 
    return fDrag * dragCoeffStokes( fluidVolumeFraction, diameter, fluidDynamicViscosity ) * velDiff;
 
@@ -154,26 +154,26 @@ Vector3<real_t> dragForceTang( const Vector3<real_t> & fluidVel, const Vector3<r
 Vector3<real_t> dragForceFelice( const Vector3<real_t> & fluidVel, const Vector3<real_t> & particleVel,
                                  real_t solidVolumeFraction, real_t diameter, real_t fluidDynamicViscosity, real_t fluidDensity )
 {
-   WALBERLA_ASSERT_GREATER_EQUAL( solidVolumeFraction, real_t(0) );
-   WALBERLA_ASSERT_LESS_EQUAL( solidVolumeFraction, real_t(1) );
+   WALBERLA_ASSERT_GREATER_EQUAL( solidVolumeFraction, 0_r );
+   WALBERLA_ASSERT_LESS_EQUAL( solidVolumeFraction, 1_r );
 
    Vector3<real_t> velDiff = fluidVel - particleVel;
    real_t absVelDiff = velDiff.length();
 
-   if( absVelDiff < thresholdAbsoluteVelocityDifference ) return Vector3<real_t>(real_t(0));
+   if( absVelDiff < thresholdAbsoluteVelocityDifference ) return Vector3<real_t>(0_r);
 
-   real_t fluidVolumeFraction = real_t(1) - solidVolumeFraction;
+   real_t fluidVolumeFraction = 1_r - solidVolumeFraction;
 
    real_t reynoldsNumber = fluidVolumeFraction * fluidDensity * absVelDiff * diameter / fluidDynamicViscosity;
 
-   real_t temp1 = ( real_t(0.63) + real_t(4.8) / std::sqrt( reynoldsNumber ) );
+   real_t temp1 = ( 0.63_r + 4.8_r / std::sqrt( reynoldsNumber ) );
    real_t dragCoeff = temp1 * temp1;
 
-   real_t temp2 = real_t(1.5) - std::log10( reynoldsNumber );
-   real_t chi = real_t(3.7) - std::pow( real_t(0.65), (- real_t(0.5) * temp2 * temp2 ) );
+   real_t temp2 = 1.5_r - std::log10( reynoldsNumber );
+   real_t chi = 3.7_r - std::pow( 0.65_r, (- 0.5_r * temp2 * temp2 ) );
 
-   return real_t(0.125) * dragCoeff * fluidDensity * math::M_PI * diameter * diameter * absVelDiff *
-          std::pow( fluidVolumeFraction, real_t(2) - chi) * velDiff;
+   return 0.125_r * dragCoeff * fluidDensity * math::M_PI * diameter * diameter * absVelDiff *
+          std::pow( fluidVolumeFraction, 2_r - chi) * velDiff;
 
 }
 
@@ -183,30 +183,30 @@ Vector3<real_t> dragForceFelice( const Vector3<real_t> & fluidVel, const Vector3
 Vector3<real_t> dragForceTenneti( const Vector3<real_t> & fluidVel, const Vector3<real_t> & particleVel,
                                   real_t solidVolumeFraction, real_t diameter, real_t fluidDynamicViscosity, real_t fluidDensity )
 {
-   WALBERLA_ASSERT_GREATER_EQUAL( solidVolumeFraction, real_t(0) );
-   WALBERLA_ASSERT_LESS_EQUAL( solidVolumeFraction, real_t(1) );
+   WALBERLA_ASSERT_GREATER_EQUAL( solidVolumeFraction, 0_r );
+   WALBERLA_ASSERT_LESS_EQUAL( solidVolumeFraction, 1_r );
 
    Vector3<real_t> velDiff = fluidVel - particleVel;
    const real_t absVelDiff = velDiff.length();
 
-   if( absVelDiff < thresholdAbsoluteVelocityDifference ) return Vector3<real_t>(real_t(0));
+   if( absVelDiff < thresholdAbsoluteVelocityDifference ) return Vector3<real_t>(0_r);
 
-   const real_t fluidVolumeFraction = real_t(1) - solidVolumeFraction;
+   const real_t fluidVolumeFraction = 1_r - solidVolumeFraction;
 
    const real_t reynoldsNumber = fluidVolumeFraction * fluidDensity * absVelDiff * diameter / fluidDynamicViscosity;
 
    const real_t fvfCubed = fluidVolumeFraction * fluidVolumeFraction * fluidVolumeFraction;
-   const real_t A = real_t(5.81) * solidVolumeFraction / fvfCubed + real_t(0.48) * std::cbrt( solidVolumeFraction ) / ( fvfCubed * fluidVolumeFraction );
+   const real_t A = 5.81_r * solidVolumeFraction / fvfCubed + 0.48_r * std::cbrt( solidVolumeFraction ) / ( fvfCubed * fluidVolumeFraction );
 
    const real_t svfCubed = solidVolumeFraction * solidVolumeFraction * solidVolumeFraction;
-   const real_t B = svfCubed * reynoldsNumber * ( real_t(0.95) + real_t(0.61) * svfCubed / ( fluidVolumeFraction * fluidVolumeFraction ) );
+   const real_t B = svfCubed * reynoldsNumber * ( 0.95_r + 0.61_r * svfCubed / ( fluidVolumeFraction * fluidVolumeFraction ) );
 
    // version from Finn et al.
-   const real_t CdRe0Sphere = real_t(1) + real_t(0.15) *  std::pow( reynoldsNumber, real_t(0.687) );
+   const real_t CdRe0Sphere = 1_r + 0.15_r *  std::pow( reynoldsNumber, 0.687_r );
 
    const real_t CdRe = fluidVolumeFraction * ( CdRe0Sphere / fvfCubed + A + B );
 
-   return real_t(3) * math::M_PI * diameter * fluidDynamicViscosity * fluidVolumeFraction * CdRe * velDiff;
+   return 3_r * math::M_PI * diameter * fluidDynamicViscosity * fluidVolumeFraction * CdRe * velDiff;
 
 }
 
@@ -214,7 +214,7 @@ Vector3<real_t> dragForceTenneti( const Vector3<real_t> & fluidVel, const Vector
 Vector3<real_t> noDragForce( const Vector3<real_t> & /*fluidVel*/, const Vector3<real_t> & /*particleVel*/,
                              real_t /*solidVolumeFraction*/, real_t /*diameter*/, real_t /*fluidDynamicViscosity*/, real_t /*fluidDensity*/ )
 {
-   return Vector3<real_t>(real_t(0));
+   return Vector3<real_t>(0_r);
 }
 
 } // namespace discrete_particle_methods

@@ -41,21 +41,21 @@ Vector3<real_t> liftForceSaffman ( const Vector3<real_t> & fluidVel, const Vecto
                                    real_t diameter, real_t fluidDynamicViscosity, real_t fluidDensity )
 {
    const real_t absCurlVel = curlFluidVel.length();
-   if( absCurlVel < real_t(1e-10) ) return Vector3<real_t>(real_t(0));
+   if( absCurlVel < 1e-10_r ) return Vector3<real_t>(0_r);
 
    // Finn et al (2016) for spheres
-   const real_t Cl = real_t(1.61) * std::sqrt( ( fluidDynamicViscosity * fluidDensity) / absCurlVel );
+   const real_t Cl = 1.61_r * std::sqrt( ( fluidDynamicViscosity * fluidDensity) / absCurlVel );
    return Cl * diameter * diameter * ( ( fluidVel - particleVel ) % curlFluidVel );
 
    // Sun, Xiao (2016)
-   //const real_t Cl = real_t(1.6);
+   //const real_t Cl = 1.6_r;
    //return Cl * fluidDensity * std::sqrt( fluidDynamicViscosity / fluidDensity ) * diameter * diameter * ( ( fluidVel - particleVel ) % curlFluidVel );
 
 }
 
 Vector3<real_t> noLiftForce ( const Vector3<real_t> &, const Vector3<real_t> &, const Vector3<real_t> &, real_t, real_t, real_t )
 {
-   return Vector3<real_t>(real_t(0));
+   return Vector3<real_t>(0_r);
 }
 
 } // namespace discrete_particle_methods

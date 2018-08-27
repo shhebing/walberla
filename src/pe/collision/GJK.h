@@ -115,7 +115,7 @@ private:
 //*************************************************************************************************
 inline GJK::GJK() : simplex_(4), supportA_(4), supportB_(4), numPoints_(0)
 {
-   d_ = Vec3(real_t(0.0),real_t(0.6),real_t(0.8)); // just start with any vector of length 1
+   d_ = Vec3(0.0_r,0.6_r,0.8_r); // just start with any vector of length 1
 }
 //*************************************************************************************************
 
@@ -169,7 +169,7 @@ inline const std::vector<Vec3>& GJK::getSupportB() const
  */
 inline bool GJK::sameDirection(const Vec3& vec1, const Vec3& vec2) const
 {
-   return vec1 * vec2 > real_t(0.0);
+   return vec1 * vec2 > 0.0_r;
 }
 //*************************************************************************************************
 
@@ -194,7 +194,7 @@ inline const Vec3 GJK::putSupport(const GeomPrimitive &geom1, const GeomPrimitiv
                                   std::vector<Vec3> &simplex, std::vector<Vec3> &supportA, std::vector<Vec3> &supportB, size_t index){
    supportA[index] = geom1.support(dir);
    supportB[index] = geom2.support(-dir);
-   Vec3 supp = supportA[index]- supportB[index] + (real_t(2.0) * dir * margin);
+   Vec3 supp = supportA[index]- supportB[index] + (2.0_r * dir * margin);
    simplex[index] = supp;
    return supp;
 }

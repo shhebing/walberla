@@ -494,7 +494,7 @@ void exportBasic()
              ( arg("name")                              ),
              ( arg("latticeModel")                      ),
              ( arg("initialVelocity") = Vector3<real_t>() ),
-             ( arg("initialDensity")  = real_t(1)        ),
+             ( arg("initialDensity")  = 1_r        ),
              ( arg("ghostlayers")     = uint_t(1)        ),
              ( arg("layout")          = field::zyxf      ),
              ( arg("densityAdaptor")  = std::string()    ),

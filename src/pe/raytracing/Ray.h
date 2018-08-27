@@ -170,7 +170,7 @@ public:
     */
    inline void setDirection (const Vec3& direction) {
       // im kommentar verweis auf normalisierung
-      WALBERLA_CHECK_FLOAT_EQUAL(direction.length(), real_t(1));
+      WALBERLA_CHECK_FLOAT_EQUAL(direction.length(), 1_r);
       direction_ = direction;
       calcInvDirection();
    }

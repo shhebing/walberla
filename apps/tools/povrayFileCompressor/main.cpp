@@ -22,6 +22,7 @@
 #include "geometry/mesh/TriangleMeshIO.h"
 #include "core/Regex.h"
 #include "core/Filesystem.h"
+#include "core/DataTypes.h"
 
 #include <fstream>
 #include <iomanip>
@@ -58,14 +59,16 @@ int main(int argc, char** argv)
       return EXIT_SUCCESS;
    }
 
-   if( argc < 3 || argv[argc-1][0] == '-' || argv[argc-2][0] == '-' )
-      PRINT_ERR( "Usage: PovrayFileCompressor [-q|-v|-n|-s|-o ${count}] <inDir> <outDir>\n" )
+   if (argc < 3 || argv[argc - 1][0] == '-' || argv[argc - 2][0] == '-')
+      PRINT_ERR("Usage: PovrayFileCompressor [-q|-v|-n|-s|-o ${count}] <inDir> <outDir>\n")
+
+   using walberla::operator"" _r;
 
    verbose = false;
    quiet   = false;
    size_t n = 9000u;
    size_t s =    0u;
-   walberla::real_t o = walberla::real_t(0);
+   walberla::real_t o = 0_r;
 
    if( argc > 3 ) {
       for( walberla::uint_t i = 1; i < walberla::uint_c(argc-2); ++i ) {
@@ -153,7 +156,7 @@ int main(int argc, char** argv)
 
       PRINT_VER( "Remove Duplicate Vertices ... \n" )
       size_t removed;
-      if( o > walberla::real_t(0) )
+      if( o > 0_r )
          removed = mesh.removeDuplicateVertices( o );
       else
          removed = mesh.removeDuplicateVertices( );

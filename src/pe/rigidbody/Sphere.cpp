@@ -86,7 +86,7 @@ Sphere::Sphere( id_t const typeId, id_t sid, id_t uid, const Vec3& gpos, const V
    setGlobal( global );
    if (infiniteMass)
    {
-      setMassAndInertia( std::numeric_limits<real_t>::infinity(), Mat3(real_t(0)) );
+      setMassAndInertia( std::numeric_limits<real_t>::infinity(), Mat3(0_r) );
    } else
    {
       auto mass = calcMass( radius, Material::getDensity( material ) );

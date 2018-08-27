@@ -240,7 +240,7 @@ private:
    // calculate the average velocity in forcing direction (here: x) inside the domain (assuming dx=1)
    real_t computeAverageVel()
    {
-      real_t velocity_sum = real_t(0);
+      real_t velocity_sum = 0_r;
 
       for( auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt )
       {

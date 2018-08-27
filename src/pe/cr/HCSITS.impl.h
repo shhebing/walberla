@@ -1807,7 +1807,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::integratePositions( Body
             v = v * (edge * getSpeedLimitFactor() / dt / speed );
          }
 
-         const real_t maxPhi = real_t(2) * math::PI * getSpeedLimitFactor();
+         const real_t maxPhi = 2_r * math::PI * getSpeedLimitFactor();
          const real_t phi    = w.length() * dt;
          if (phi > maxPhi)
          {
@@ -1850,10 +1850,10 @@ void configure( const Config::BlockHandle& config, pe::cr::HCSITS& cr )
    int HCSITSmaxIterations = config.getParameter<int>("HCSITSmaxIterations", 10);
    WALBERLA_LOG_INFO_ON_ROOT("HCSITSmaxIterations: " << HCSITSmaxIterations);
 
-   real_t HCSITSRelaxationParameter = config.getParameter<real_t>("HCSITSRelaxationParameter", real_t(0.75) );
+   real_t HCSITSRelaxationParameter = config.getParameter<real_t>("HCSITSRelaxationParameter", 0.75_r );
    WALBERLA_LOG_INFO_ON_ROOT("HCSITSRelaxationParameter: " << HCSITSRelaxationParameter);
 
-   real_t HCSITSErrorReductionParameter = config.getParameter<real_t>("HCSITSErrorReductionParameter", real_t(0.8) );
+   real_t HCSITSErrorReductionParameter = config.getParameter<real_t>("HCSITSErrorReductionParameter", 0.8_r );
    WALBERLA_LOG_INFO_ON_ROOT("HCSITSErrorReductionParameter: " << HCSITSErrorReductionParameter);
 
    std::string HCSITSRelaxationModelStr = config.getParameter<std::string>("HCSITSRelaxationModelStr", "ApproximateInelasticCoulombContactByDecoupling" );

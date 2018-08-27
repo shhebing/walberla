@@ -39,84 +39,84 @@ void normalReactionTest(cr::HCSITS& cr, SphereID sp)
    // radius 1.1
    sp->setPosition(  Vec3(5,5,6) );
    sp->setLinearVel( Vec3(0,0,0) );
-   cr.setErrorReductionParameter( real_t(1.0) );
-   cr.timestep( real_c( real_t(1.0) ) );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,real_t(6.1)) );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,real_t(0.1)) );
+   cr.setErrorReductionParameter( 1.0_r );
+   cr.timestep( real_c( 1.0_r ) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,6.1_r) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,0.1_r) );
 
    sp->setPosition(  Vec3(5,5,6) );
    sp->setLinearVel( Vec3(0,0,0) );
-   cr.setErrorReductionParameter( real_t(0.5) );
-   cr.timestep( real_c( real_t(1.0) ) );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,real_t(6.05)) );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,real_t(0.05)) );
+   cr.setErrorReductionParameter( 0.5_r );
+   cr.timestep( real_c( 1.0_r ) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,6.05_r) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,0.05_r) );
 
    sp->setPosition(  Vec3(5,5,6) );
    sp->setLinearVel( Vec3(0,0,0) );
-   cr.setErrorReductionParameter( real_t(0.0) );
-   cr.timestep( real_c( real_t(1.0) ) );
+   cr.setErrorReductionParameter( 0.0_r );
+   cr.timestep( real_c( 1.0_r ) );
    WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,6) );
    WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,0) );
 
    sp->setPosition(  Vec3(5,5,6) );
    sp->setLinearVel( Vec3(0,0,-1) );
-   cr.setErrorReductionParameter( real_t(1.0) );
-   cr.timestep( real_c( real_t(1.0) ) );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,real_t(6.1)) );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,real_t(0.1)) );
+   cr.setErrorReductionParameter( 1.0_r );
+   cr.timestep( real_c( 1.0_r ) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,6.1_r) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,0.1_r) );
 
    sp->setPosition(  Vec3(5,5,6) );
    sp->setLinearVel( Vec3(0,0,-1) );
-   cr.setErrorReductionParameter( real_t(0.5) );
-   cr.timestep( real_c( real_t(1.0) ) );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,real_t(6.05)) );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,real_t(0.05)) );
+   cr.setErrorReductionParameter( 0.5_r );
+   cr.timestep( real_c( 1.0_r ) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,6.05_r) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,0.05_r) );
 
    sp->setPosition(  Vec3(5,5,6) );
    sp->setLinearVel( Vec3(0,0,-1) );
-   cr.setErrorReductionParameter( real_t(0.0) );
-   cr.timestep( real_c( real_t(1.0) ) );
+   cr.setErrorReductionParameter( 0.0_r );
+   cr.timestep( real_c( 1.0_r ) );
    WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,6) );
    WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,0) );
 
-   sp->setPosition(  Vec3(5,5,real_t(6.2)) );
-   sp->setLinearVel( Vec3(0,0,real_t(-0.2)) );
-   cr.setErrorReductionParameter( real_t(1.0) );
-   cr.timestep( real_c( real_t(1.0) ) );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,real_t(6.0)) );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,real_t(-0.2)) );
+   sp->setPosition(  Vec3(5,5,6.2_r) );
+   sp->setLinearVel( Vec3(0,0,-0.2_r) );
+   cr.setErrorReductionParameter( 1.0_r );
+   cr.timestep( real_c( 1.0_r ) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,6.0_r) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,-0.2_r) );
 
-   contactThreshold = real_t(1.0);
-   sp->setPosition(  Vec3(5,5,real_t(6.2)) );
-   sp->setLinearVel( Vec3(0,0,real_t(-0.2)) );
-   cr.setErrorReductionParameter( real_t(1.0) );
-   cr.timestep( real_c( real_t(1.0) ) );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,real_t(6.1)) );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,real_t(-0.1)) );
+   contactThreshold = 1.0_r;
+   sp->setPosition(  Vec3(5,5,6.2_r) );
+   sp->setLinearVel( Vec3(0,0,-0.2_r) );
+   cr.setErrorReductionParameter( 1.0_r );
+   cr.timestep( real_c( 1.0_r ) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,6.1_r) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,-0.1_r) );
 
-   cr.timestep( real_c( real_t(1.0) ) );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,real_t(6.1)) );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,real_t(0)) );
+   cr.timestep( real_c( 1.0_r ) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,6.1_r) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,0_r) );
    contactThreshold = Thresholds<real_t>::contactThreshold();
 }
 
 void speedLimiterTest(cr::HCSITS& cr, SphereID sp)
 {
-   cr.setErrorReductionParameter( real_t(1.0) );
+   cr.setErrorReductionParameter( 1.0_r );
 
    sp->setPosition(  Vec3(5,5,6) );
    sp->setLinearVel( Vec3(0,0,0) );
-   cr.setSpeedLimiter( true, real_t(0.2) );
-   cr.timestep( real_c( real_t(1.0) ) );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,real_t(6.1)) );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,real_t(0.1)) );
+   cr.setSpeedLimiter( true, 0.2_r );
+   cr.timestep( real_c( 1.0_r ) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,6.1_r) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,0.1_r) );
 
    sp->setPosition(  Vec3(5,5,5.5) );
    sp->setLinearVel( Vec3(0,0,0) );
-   cr.setSpeedLimiter( true, real_t(0.2) );
-   cr.timestep( real_c( real_t(1.0) ) );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,real_t(5.94)) );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,real_t(0.44)) );
+   cr.setSpeedLimiter( true, 0.2_r );
+   cr.timestep( real_c( 1.0_r ) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,5.94_r) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,0.44_r) );
 }
 
 int main( int argc, char** argv )
@@ -142,8 +142,8 @@ int main( int argc, char** argv )
    auto fcdID               = forest->addBlockData(fcd::createGenericFCDDataHandling<BodyTuple, fcd::AnalyticCollideFunctor>(), "FCD");
    cr::HCSITS cr(globalBodyStorage, forest->getBlockStoragePointer(), storageID, hccdID, fcdID);
    cr.setMaxIterations( 10 );
-   cr.setRelaxationParameter    ( real_t(0.7) );
-   cr.setErrorReductionParameter( real_t(1.0) );
+   cr.setRelaxationParameter    ( 0.7_r );
+   cr.setErrorReductionParameter( 1.0_r );
    cr.setGlobalLinearAcceleration( Vec3(0,0,0) );
 
    pe::createPlane( *globalBodyStorage, 0, Vec3(0, 0, 1), Vec3(5, 5, 5) );

@@ -58,7 +58,7 @@ void mapPSMBodyAndVolumeFraction( const pe::BodyID body, IBlock & block, Structu
       const real_t fraction = overlapFractionPe( *body, cellCenter, dxVec );
 
       // if the cell intersected with the body, store a pointer to that body and the corresponding volume fraction in the field
-      if( fraction > real_t(0) )
+      if( fraction > 0_r )
       {
          bodyAndVolumeFractionField->get(cell).emplace_back( body, fraction );
       }
@@ -156,7 +156,7 @@ void BodyAndVolumeFractionMapping::updatePSMBodyAndVolumeFraction( pe::BodyID bo
    WALBERLA_ASSERT_NOT_NULLPTR( oldBodyAndVolumeFractionField );
 
    // estimate traveled distance since last volume fraction update
-   real_t traveledSquaredDistance( real_t(0) );
+   real_t traveledSquaredDistance( 0_r );
    auto mapBodyIt = lastUpdatedPositionMap_.find( body->getSystemID() );
    if( mapBodyIt != lastUpdatedPositionMap_.end() )
    {
@@ -217,7 +217,7 @@ void BodyAndVolumeFractionMapping::updatePSMBodyAndVolumeFraction( pe::BodyID bo
                const real_t fraction = overlapFractionPe( *body, cellCenter, dxVec, superSamplingDepth_ );
 
                // if the cell intersected with the body, store a pointer to that body and the corresponding volume fraction in the field
-               if( fraction > real_t(0) )
+               if( fraction > 0_r )
                {
                   updatedBodyAndVolumeFractionField_->get(x,y,z).emplace_back( body, fraction );
                }

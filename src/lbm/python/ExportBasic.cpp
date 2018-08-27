@@ -226,7 +226,7 @@ void exportCollisionModels()
       real_t ( D3Q27Cumulant::*ptr_viscosity )() const = &D3Q27Cumulant::viscosity;
 
       class_< D3Q27Cumulant >( "D3Q27Cumulant", init<real_t, real_t, real_t, real_t, real_t, real_t, real_t, real_t, real_t,real_t, uint_t>(
-                                         ( arg("omega1"), arg("omega2")=real_t(1), arg("omega3")=real_t(1), arg("omega4")=real_t(1), arg("omega5")=real_t(1), arg("omega6")=real_t(1), arg("omega7")=real_t(1), arg("omega8")=real_t(1), arg("omega9")=real_t(1), arg("omega10")=real_t(1), arg("level")=uint_t(0) ) ))
+                                         ( arg("omega1"), arg("omega2")=1_r, arg("omega3")=1_r, arg("omega4")=1_r, arg("omega5")=1_r, arg("omega6")=1_r, arg("omega7")=1_r, arg("omega8")=1_r, arg("omega9")=1_r, arg("omega10")=1_r, arg("level")=uint_t(0) ) ))
           .add_property( "relaxationRates", getCumulantRelaxationRates )
           .add_property( "viscosity", ptr_viscosity )
        ;

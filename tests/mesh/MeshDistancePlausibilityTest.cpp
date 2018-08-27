@@ -82,7 +82,7 @@ int main( int argc, char * argv[] )
 
    auto meshAabb = computeAABB( *mesh );
 
-   auto domainAABB = meshAabb.getScaled( real_t(1.5) ); // AABB containing the test points
+   auto domainAABB = meshAabb.getScaled( 1.5_r ); // AABB containing the test points
 
    WALBERLA_LOG_INFO_ON_ROOT( "Preparing distance Information..." );
    auto triDist = make_shared< mesh::TriangleDistance<mesh::TriangleMesh> >( mesh );
@@ -98,7 +98,7 @@ int main( int argc, char * argv[] )
                           numeric_cast<uint_t>( std::ceil( domainAABB.ySize() / dx ) ),
                           numeric_cast<uint_t>( std::ceil( domainAABB.zSize() / dx ) ) );
 
-   domainAABB = AABB( real_t(0), real_t(0), real_t(0), real_c( cells[0] ) * dx, real_c( cells[1] ) * dx, real_c( cells[2] ) * dx );
+   domainAABB = AABB( 0_r, 0_r, 0_r, real_c( cells[0] ) * dx, real_c( cells[1] ) * dx, real_c( cells[2] ) * dx );
    domainAABB.translate( meshAabb.center() - domainAABB.center() );
 
    shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid( domainAABB,
@@ -110,7 +110,7 @@ int main( int argc, char * argv[] )
    WALBERLA_CHECK_FLOAT_EQUAL( blocks->dx(), blocks->dy() );
    WALBERLA_CHECK_FLOAT_EQUAL( blocks->dx(), blocks->dz() );
 
-   BlockDataID distanceFieldId    = field::addToStorage< DistanceField    >( blocks, "DistanceField"   , real_t(0)  );
+   BlockDataID distanceFieldId    = field::addToStorage< DistanceField    >( blocks, "DistanceField"   , 0_r  );
    BlockDataID errorMarkerFieldId = field::addToStorage< ErrorMarkerField >( blocks, "ErrorMarkerField", uint8_t(0) );
    BlockDataID faceHandleFieldId  = field::addToStorage< FaceHandleField  >( blocks, "FaceHandleField" );
 
@@ -131,7 +131,7 @@ int main( int argc, char * argv[] )
                Cell c( x, y, z );
                Vector3<real_t> p = blocks->getCellCenter( c );
                real_t d = distanceOctree.sqSignedDistance( toOpenMesh( p ), faceHandleField->get( c ) );
-               distanceField->get( c ) = d < real_t(0) ? -std::sqrt( -d ) : std::sqrt(d);
+               distanceField->get( c ) = d < 0_r ? -std::sqrt( -d ) : std::sqrt(d);
             }
          }
       WALBERLA_LOG_INFO( "Slice " << z + 1 << "/" << cell_idx_c( distanceField->zSize() ) + cell_idx_t(2) );

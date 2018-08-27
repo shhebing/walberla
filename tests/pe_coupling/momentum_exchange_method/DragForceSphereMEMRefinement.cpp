@@ -176,7 +176,7 @@ static shared_ptr< StructuredBlockForest > createBlockStructure( const Setup & s
    // calculate process distribution
    const memory_t memoryLimit = math::Limits< memory_t >::inf();
 
-   sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), uint_c( MPIManager::instance()->numProcesses() ), real_t(0), memoryLimit, true );
+   sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), uint_c( MPIManager::instance()->numProcesses() ), 0_r, memoryLimit, true );
 
    WALBERLA_LOG_INFO_ON_ROOT( sforest );
 
@@ -343,7 +343,7 @@ class ForceEval
       // calculate the average velocity in forcing direction (here: x) inside the domain
       real_t getAverageVel()
       {
-         real_t velocity_sum = real_t(0);
+         real_t velocity_sum = 0_r;
          // iterate all blocks stored locally on this process
          for( auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt )
          {

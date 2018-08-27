@@ -422,7 +422,7 @@ inline real_t Box::calcDensity( const Vec3& l, real_t mass )
 inline Vec3 Box::support( const Vec3& d ) const
 {
    auto len = d.sqrLength();
-   if (math::equal(len, real_t(0)))
+   if (math::equal(len, 0_r))
       return Vec3(0,0,0);
 
    const Vec3 bfD = vectorFromWFtoBF(d / sqrt(len)); //d in body frame coordinates
@@ -436,9 +436,9 @@ inline Vec3 Box::support( const Vec3& d ) const
    */
 
    //As it is save to say we have atleast one component of the d-vector != 0 we can use
-   Vec3 relativSupport = Vec3( math::sign(bfD[0])*lengths_[0]*real_t(0.5),
-                               math::sign(bfD[1])*lengths_[1]*real_t(0.5),
-                               math::sign(bfD[2])*lengths_[2]*real_t(0.5) );
+   Vec3 relativSupport = Vec3( math::sign(bfD[0])*lengths_[0]*0.5_r,
+                               math::sign(bfD[1])*lengths_[1]*0.5_r,
+                               math::sign(bfD[2])*lengths_[2]*0.5_r );
 
    return gpos_ + vectorFromBFtoWF(relativSupport);
 }
@@ -455,7 +455,7 @@ inline Vec3 Box::support( const Vec3& d ) const
 inline Vec3 Box::supportContactThreshold( const Vec3& d ) const
 {
    auto len = d.sqrLength();
-   if (math::equal(len, real_t(0)))
+   if (math::equal(len, 0_r))
       return Vec3(0,0,0);
 
    return support(d) + d*contactThreshold / sqrt(len);

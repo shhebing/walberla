@@ -43,32 +43,32 @@ namespace kernelweights
 inline real_t smoothedDeltaFunction( const real_t & r )
 {
    real_t rAbs = std::fabs(r);
-   if( rAbs <= real_t(0.5) )
+   if( rAbs <= 0.5_r )
    {
-      return (real_t(1) + std::sqrt( - real_t(3) * r * r + real_t(1) ) ) * (real_t(1) / real_t(3));
-   } else if ( rAbs < real_t(1.5) )
+      return (1_r + std::sqrt( - 3_r * r * r + 1_r ) ) * (1_r / 3_r);
+   } else if ( rAbs < 1.5_r )
    {
-      return (real_t(5) - real_t(3) * rAbs - std::sqrt( - real_t(3) * ( real_t(1) - rAbs ) * ( real_t(1) - rAbs ) + real_t(1) ) ) * ( real_t(1) / real_t(6) );
+      return (5_r - 3_r * rAbs - std::sqrt( - 3_r * ( 1_r - rAbs ) * ( 1_r - rAbs ) + 1_r ) ) * ( 1_r / 6_r );
    } else
    {
-      return real_t(0);
+      return 0_r;
    }
 
 }
 
 // X: Lagrangian position, x: Eulerian position (usually cell center), global coordinates
 // dx, dy, dz: mesh spacing
-inline real_t kernelWeightFunction( const real_t & X, const real_t & Y, const real_t & Z,
-                                    const real_t & x, const real_t & y, const real_t & z,
-                                    const real_t & dx = real_t(1), const real_t & dy = real_t(1), const real_t & dz = real_t(1) )
+real_t kernelWeightFunction( const real_t & X, const real_t & Y, const real_t & Z,
+                             const real_t & x, const real_t & y, const real_t & z,
+                             const real_t & dx = 1_r, const real_t & dy = 1_r, const real_t & dz = 1_r )
 {
    return smoothedDeltaFunction( ( X - x ) / dx ) * smoothedDeltaFunction( ( Y - y ) / dy ) * smoothedDeltaFunction( ( Z - z ) / dz );
 }
 
 // X: Lagrangian position, x: Eulerian position (usually cell center), global coordinates
 // dx, dy, dz: mesh spacing
-inline real_t kernelWeightFunction( const Vector3<real_t> & X, const Vector3<real_t> & x,
-                                    const real_t & dx = real_t(1), const real_t & dy = real_t(1), const real_t & dz = real_t(1) )
+real_t kernelWeightFunction( const Vector3<real_t> & X, const Vector3<real_t> & x,
+                             const real_t & dx = 1_r, const real_t & dy = 1_r, const real_t & dz = 1_r )
 {
    return smoothedDeltaFunction( ( X[0] - x[0] ) / dx ) * smoothedDeltaFunction( ( X[1] - x[1] ) / dy ) * smoothedDeltaFunction( ( X[2] - x[2] ) / dz );
 }
@@ -137,10 +137,10 @@ public:
 
       const uint_t kernelSizeOneDirection = uint_t(2) * neighborhoodSize + uint_t(1);
       // store the calculated weighting factors of the available cells, i.e. cells flagged by the evaluation mask
-      std::vector<real_t> weights( kernelSizeOneDirection * kernelSizeOneDirection * kernelSizeOneDirection, real_t(0) );
+      std::vector<real_t> weights( kernelSizeOneDirection * kernelSizeOneDirection * kernelSizeOneDirection, 0_r );
 
       // store the calculated weighting factors of the UNavailable cells, i.e. cells not included in the evaluation mask
-      std::vector<real_t> weightsUnavailable( kernelSizeOneDirection * kernelSizeOneDirection * kernelSizeOneDirection, real_t(0) );
+      std::vector<real_t> weightsUnavailable( kernelSizeOneDirection * kernelSizeOneDirection * kernelSizeOneDirection, 0_r );
 
       cell_idx_t cellIdx0x = cellNeighborhood.xMin();
       cell_idx_t cellIdx0y = cellNeighborhood.yMin();
@@ -183,46 +183,46 @@ public:
          int j = cy + 1;
          int k = cz + 1;
 
-         if( weightsUnavailable[k*nxy+j*nx+i] > real_t(0) )
+         if( weightsUnavailable[k*nxy+j*nx+i] > 0_r )
          {
             // check if we can distribute the non-fluid weight to nearby fluid weights that lie in one line inside the neighborhood
             // it should generally not matter in which direction it is distributed
             // check x direction
-            if( weights[k*nxy+j*nx+i-cx] > real_t(0) && weights[k*nxy+j*nx+i-2*cx] > real_t(0) )
+            if( weights[k*nxy+j*nx+i-cx] > 0_r && weights[k*nxy+j*nx+i-2*cx] > 0_r )
             {
-               weights[k*nxy+j*nx+i-cx] += real_t(2)*weightsUnavailable[k*nxy+j*nx+i];
+               weights[k*nxy+j*nx+i-cx] += 2_r*weightsUnavailable[k*nxy+j*nx+i];
                weights[k*nxy+j*nx+i-2*cx] -= weightsUnavailable[k*nxy+j*nx+i];
-               weightsUnavailable[k*nxy+j*nx+i] = real_t(0);
+               weightsUnavailable[k*nxy+j*nx+i] = 0_r;
                continue;
             }
             // check y direction
-            if( weights[k*nxy+(j-cy)*nx+i] > real_t(0) && weights[k*nxy+(j-2*cy)*nx+i] > real_t(0) )
+            if( weights[k*nxy+(j-cy)*nx+i] > 0_r && weights[k*nxy+(j-2*cy)*nx+i] > 0_r )
             {
-               weights[k*nxy+(j-cy)*nx+i] += real_t(2)*weightsUnavailable[k*nxy+j*nx+i];
+               weights[k*nxy+(j-cy)*nx+i] += 2_r*weightsUnavailable[k*nxy+j*nx+i];
                weights[k*nxy+(j-2*cy)*nx+i] -= weightsUnavailable[k*nxy+j*nx+i];
-               weightsUnavailable[k*nxy+j*nx+i] = real_t(0);
+               weightsUnavailable[k*nxy+j*nx+i] = 0_r;
                continue;
             }
             // check z direction
-            if( weights[(k-cz)*nxy+j*nx+i] > real_t(0) && weights[(k-2*cz)*nxy+j*nx+i] > real_t(0) )
+            if( weights[(k-cz)*nxy+j*nx+i] > 0_r && weights[(k-2*cz)*nxy+j*nx+i] > 0_r )
             {
-               weights[(k-cz)*nxy+j*nx+i] += real_t(2)*weightsUnavailable[k*nxy+j*nx+i];
+               weights[(k-cz)*nxy+j*nx+i] += 2_r*weightsUnavailable[k*nxy+j*nx+i];
                weights[(k-2*cz)*nxy+j*nx+i] -= weightsUnavailable[k*nxy+j*nx+i];
-               weightsUnavailable[k*nxy+j*nx+i] = real_t(0);
+               weightsUnavailable[k*nxy+j*nx+i] = 0_r;
                continue;
             }
          }
       }
 */
       // scale available weights by the total amount of unavailable weights such that afterwards sum over all weights is 1
-      const real_t sumOfWeightsUnavailable = std::accumulate(weightsUnavailable.begin(), weightsUnavailable.end(), real_t(0) );
-      const real_t sumOfWeights = std::accumulate(weights.begin(), weights.end(), real_t(0) );
+      const real_t sumOfWeightsUnavailable = std::accumulate(weightsUnavailable.begin(), weightsUnavailable.end(), 0_r );
+      const real_t sumOfWeights = std::accumulate(weights.begin(), weights.end(), 0_r );
 
       // check if at least one cell was available, to prevent division by 0
-      if( sumOfWeights <= real_t(0) )
+      if( sumOfWeights <= 0_r )
          return;
 
-      const real_t scalingFactor = real_t(1) + sumOfWeightsUnavailable / sumOfWeights;
+      const real_t scalingFactor = 1_r + sumOfWeightsUnavailable / sumOfWeights;
 
       for( auto weightIt = weights.begin(); weightIt != weights.end(); ++weightIt )
       {
@@ -237,7 +237,7 @@ public:
          {
             for( uint_t i = uint_t(0); i < kernelSizeOneDirection; ++i)
             {
-               if ( weights[k*nxy+j*nx+i] > real_t(0) )
+               if ( weights[k*nxy+j*nx+i] > 0_r )
                {
                   Cell curCell( cellIdx0x + cell_idx_c(i), cellIdx0y + cell_idx_c(j), cellIdx0z + cell_idx_c(k) );
                   addWeightedCellValue( interpolationResultBegin, curCell, weights[k*nxy+j*nx+i] );

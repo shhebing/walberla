@@ -138,7 +138,7 @@ private:
    /// returns relative error per point
    real_t compareToAnalyticalSolution( const std::vector<std::vector<real_t> > & data )
    {
-      real_t geometryFactor = pipeOrBox_ ? real_t(4) : real_t(2);
+      real_t geometryFactor = pipeOrBox_ ? 4_r : 2_r;
 
       size_t maxErrPosition = data.size()+5;
       real_t maxErr = -1;
@@ -214,10 +214,10 @@ int main( int argc, char** argv )
    real_t omega            = appConfig.getParameter<real_t> ("omega");
    real_t viscosity        = appConfig.getParameter<real_t> ("viscosity");
    uint_t nrOfCells [3]    =  { cellsPerDiameter + 2, cellsPerDiameter + 2, nrCellsZ +2 };
-   real_t dt               = ( real_t(2) - omega ) * dx * dx / ( real_t(6) * omega * viscosity );
+   real_t dt               = ( 2_r - omega ) * dx * dx / ( 6_r * omega * viscosity );
    //real_t viscosity_l      = viscosity * dt / ( dx * dx );
 
-   //real_t requiredAccuracy = appConfig.getParameter<real_t>("requiredAccuracy", real_t(0) );
+   //real_t requiredAccuracy = appConfig.getParameter<real_t>("requiredAccuracy", 0_r );
 
    // ----------------------------- Create Block Structure  ---------------------------------------------
 
@@ -261,7 +261,7 @@ int main( int argc, char** argv )
 
    auto latticeModel = LM ( SRT( omega ), GuoConstant( Vector3<real_t>() ) ); // force is set by initializer
 
-   BlockDataID pdfFieldID  = lbm::addPdfFieldToStorage( blocks, "PdfField", latticeModel, Vector3<real_t>(0), real_t(1) );
+   BlockDataID pdfFieldID  = lbm::addPdfFieldToStorage( blocks, "PdfField", latticeModel, Vector3<real_t>(0), 1_r );
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FField>( blocks, "Flag Field" );
 
 
@@ -276,7 +276,7 @@ int main( int argc, char** argv )
 
    const FlagUID fluidFlagUID( "Fluid" );
    BlockDataID boundaryHandlingId = BHFactory::addBoundaryHandlingToStorage( blocks, "boundary handling", flagFieldID, pdfFieldID, fluidFlagUID,
-                                                                             Vector3<real_t>(), Vector3<real_t>(), real_t(0), real_t(0) );
+                                                                             Vector3<real_t>(), Vector3<real_t>(), 0_r, 0_r );
 
 
    //typedef field::ComponentExtractionAdaptor< VelocityAdaptor, 0, 2 > ZVelExtractor;

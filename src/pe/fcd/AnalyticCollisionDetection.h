@@ -275,7 +275,7 @@ inline
 bool collide( SphereID s, BoxID b, Container& container )
 {
    //WALBERLA_ABORT(s << b);
-   const Vec3 l( real_t(0.5)*b->getLengths() );  // Box half side lengths
+   const Vec3 l( 0.5_r*b->getLengths() );  // Box half side lengths
    const Vec3& spos( s->getPosition() );       // Global position of the sphere
    const Vec3& bpos( b->getPosition() );       // Global position of the box
    const Mat3& R( b->getRotation() );          // Rotation of the box
@@ -404,12 +404,12 @@ bool collide( BoxID b1, BoxID b2, Container& container )
    const Vec3 b2_rPos( b1->getRotation().getTranspose() * ( b2->getPosition() - b1->getPosition() ) );
 
    // Calculating the half Lengths of both boxes
-   const real_t hl1[] = { real_t(0.5) * b1->getLengths()[0],
-                        real_t(0.5) * b1->getLengths()[1],
-                        real_t(0.5) * b1->getLengths()[2] };
-   const real_t hl2[] = { real_t(0.5) * b2->getLengths()[0],
-                        real_t(0.5) * b2->getLengths()[1],
-                        real_t(0.5) * b2->getLengths()[2] };
+   const real_t hl1[] = { 0.5_r * b1->getLengths()[0],
+                        0.5_r * b1->getLengths()[1],
+                        0.5_r * b1->getLengths()[2] };
+   const real_t hl2[] = { 0.5_r * b2->getLengths()[0],
+                        0.5_r * b2->getLengths()[1],
+                        0.5_r * b2->getLengths()[2] };
 
 
    //----- Testing the three axes of box 1 -----
@@ -427,7 +427,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
       maxDepth      = term1;
       contactNormal = Vec3( R1[0], R1[3], R1[6] );
       contactCase   = 1;
-      invertNormal  = ( b2_rPos[0] < real_t(0) );
+      invertNormal  = ( b2_rPos[0] < 0_r );
 
       WALBERLA_LOG_DETAIL(
                 "         Contact test 1 succeeded!\n" <<
@@ -445,7 +445,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
       maxDepth      = term1;
       contactNormal = Vec3( R1[1], R1[4], R1[7] );
       contactCase   = 2;
-      invertNormal  = ( b2_rPos[1] < real_t(0) );
+      invertNormal  = ( b2_rPos[1] < 0_r );
 
       WALBERLA_LOG_DETAIL(
                 "         Contact test 2 succeeded!\n" <<
@@ -463,7 +463,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
       maxDepth      = term1;
       contactNormal = Vec3( R1[2], R1[5], R1[8] );
       contactCase   = 3;
-      invertNormal  = ( b2_rPos[2] < real_t(0) );
+      invertNormal  = ( b2_rPos[2] < 0_r );
 
       WALBERLA_LOG_DETAIL(
                 "         Contact test 3 succeeded!\n" <<
@@ -487,7 +487,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
       maxDepth      = term2;
       contactNormal = Vec3( R2[0], R2[3], R2[6] );
       contactCase   = 4;
-      invertNormal  = ( term1 < real_t(0) );
+      invertNormal  = ( term1 < 0_r );
 
       WALBERLA_LOG_DETAIL(
                 "         Contact test 4 succeeded!\n" <<
@@ -506,7 +506,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
       maxDepth      = term2;
       contactNormal = Vec3( R2[1], R2[4], R2[7] );
       contactCase   = 5;
-      invertNormal  = ( term1 < real_t(0) );
+      invertNormal  = ( term1 < 0_r );
 
       WALBERLA_LOG_DETAIL(
                 "         Contact test 5 succeeded!\n" <<
@@ -525,7 +525,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
       maxDepth      = term2;
       contactNormal = Vec3( R2[2], R2[5], R2[8] );
       contactCase   = 6;
-      invertNormal  = ( term1 < real_t(0) );
+      invertNormal  = ( term1 < 0_r );
 
       WALBERLA_LOG_DETAIL(
                 "         Contact test 6 succeeded!\n" <<
@@ -558,7 +558,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
             maxDepth     = sum;
             normal_c     = Vec3( 0, -b2_rR[6]/length, b2_rR[3]/length );
             contactCase  = 7;
-            invertNormal = ( term1 < real_t(0) );
+            invertNormal = ( term1 < 0_r );
 
             WALBERLA_LOG_DETAIL(
                       "         Contact test 7 succeeded!\n" <<
@@ -585,7 +585,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
             maxDepth     = sum;
             normal_c     = Vec3( 0, -b2_rR[7]/length, b2_rR[4]/length );
             contactCase  = 8;
-            invertNormal = ( term1 < real_t(0) );
+            invertNormal = ( term1 < 0_r );
 
             WALBERLA_LOG_DETAIL(
                       "         Contact test 8 succeeded!\n" <<
@@ -612,7 +612,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
             maxDepth     = sum;
             normal_c     = Vec3( 0, -b2_rR[8]/length, b2_rR[5]/length );
             contactCase  = 9;
-            invertNormal = ( term1 < real_t(0) );
+            invertNormal = ( term1 < 0_r );
 
             WALBERLA_LOG_DETAIL(
                       "         Contact test 9 succeeded!\n" <<
@@ -639,7 +639,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
             maxDepth     = sum;
             normal_c     = Vec3( b2_rR[6]/length, 0, -b2_rR[0]/length );
             contactCase  = 10;
-            invertNormal = ( term1 < real_t(0) ) ;
+            invertNormal = ( term1 < 0_r ) ;
 
             WALBERLA_LOG_DETAIL(
                       "         Contact test 10 succeeded!\n" <<
@@ -666,7 +666,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
             maxDepth     = sum;
             normal_c     = Vec3( b2_rR[7]/length, 0, -b2_rR[1]/length );
             contactCase  = 11;
-            invertNormal = ( term1 < real_t(0) );
+            invertNormal = ( term1 < 0_r );
 
             WALBERLA_LOG_DETAIL(
                       "         Contact test 11 succeeded!\n" <<
@@ -693,7 +693,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
             maxDepth     = sum;
             normal_c     = Vec3( b2_rR[8]/length, 0, -b2_rR[2]/length );
             contactCase  = 12;
-            invertNormal = ( term1 < real_t(0) );
+            invertNormal = ( term1 < 0_r );
 
             WALBERLA_LOG_DETAIL(
                       "         Contact test 12 succeeded!\n" <<
@@ -720,7 +720,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
             maxDepth     = sum;
             normal_c     = Vec3( -b2_rR[3]/length, b2_rR[0]/length, 0 );
             contactCase  = 13;
-            invertNormal = ( term1 < real_t(0) );
+            invertNormal = ( term1 < 0_r );
 
             WALBERLA_LOG_DETAIL(
                       "         Contact test 13 succeeded!\n" <<
@@ -747,7 +747,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
             maxDepth     = sum;
             normal_c     = Vec3( -b2_rR[4]/length, b2_rR[1]/length, 0 );
             contactCase  = 14;
-            invertNormal = ( term1 < real_t(0) );
+            invertNormal = ( term1 < 0_r );
 
             WALBERLA_LOG_DETAIL(
                       "         Contact test 14 succeeded!\n" <<
@@ -774,7 +774,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
             maxDepth     = sum;
             normal_c     = Vec3( -b2_rR[5]/length, b2_rR[2]/length, 0 );
             contactCase  = 15;
-            invertNormal = ( term1 < real_t(0) );
+            invertNormal = ( term1 < 0_r );
 
             WALBERLA_LOG_DETAIL(
                       "         Contact test 15 succeeded!\n" <<
@@ -843,7 +843,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
       geometry::intersectLines( pB1, ua, pB2, ub, s, t );
       pB1 += s * ua;
       pB2 += t * ub;
-      Vec3 gpos = real_t(0.5) * ( pB1 + pB2 );
+      Vec3 gpos = 0.5_r * ( pB1 + pB2 );
       Vec3 normal = ( ua % ub ).getNormalized();
 
       WALBERLA_LOG_DETAIL(
@@ -863,7 +863,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
              << "            normal = " << normal << "\n\n" );
 
       // TEST
-      if( normal*contactNormal < real_t(0) ) {
+      if( normal*contactNormal < 0_r ) {
          WALBERLA_LOG_DETAIL(
                    "         Inverting ub!\n"
                 << "         ua = " << ua << "\n"
@@ -959,19 +959,19 @@ bool collide( BoxID b1, BoxID b2, Container& container )
    // Calculating the four vertices of the colliding face of box B in the frame of box B
    Vec3 vertexb[4];
 
-   vertexb[0][xb] = ( normalb[xb] > real_t(0) )?( -hlb[xb] ):( hlb[xb] );
+   vertexb[0][xb] = ( normalb[xb] > 0_r )?( -hlb[xb] ):( hlb[xb] );
    vertexb[0][yb] = -hlb[yb];
    vertexb[0][zb] = -hlb[zb];
 
-   vertexb[1][xb] = ( normalb[xb] > real_t(0) )?( -hlb[xb] ):( hlb[xb] );
+   vertexb[1][xb] = ( normalb[xb] > 0_r )?( -hlb[xb] ):( hlb[xb] );
    vertexb[1][yb] = hlb[yb];
    vertexb[1][zb] = -hlb[zb];
 
-   vertexb[2][xb] = ( normalb[xb] > real_t(0) )?( -hlb[xb] ):( hlb[xb] );
+   vertexb[2][xb] = ( normalb[xb] > 0_r )?( -hlb[xb] ):( hlb[xb] );
    vertexb[2][yb] = -hlb[yb];
    vertexb[2][zb] = hlb[zb];
 
-   vertexb[3][xb] = ( normalb[xb] > real_t(0) )?( -hlb[xb] ):( hlb[xb] );
+   vertexb[3][xb] = ( normalb[xb] > 0_r )?( -hlb[xb] ):( hlb[xb] );
    vertexb[3][yb] = hlb[yb];
    vertexb[3][zb] = hlb[zb];
 
@@ -987,7 +987,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
 
    //----- Calculating the line/line intersections between the two colliding faces -----
 
-   const real_t offseta( ( normala[xa] > real_t(0) )?( hla[xa] ):( -hla[xa] ) );
+   const real_t offseta( ( normala[xa] > 0_r )?( hla[xa] ):( -hla[xa] ) );
    real_t s, dist, tmp;
 
    // Intersection between v0--v1 with hla[ya]
@@ -999,7 +999,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
                 "            Treating case 1\n" <<
                 "               s = " << s );
 
-      if( s > real_t(0) && s < real_t(1) &&
+      if( s > 0_r && s < 1_r &&
           std::fabs( tmp = vertexba[0][za] + s*( vertexba[1][za] - vertexba[0][za] ) ) < hla[za] )
       {
          dist = std::fabs( vertexba[0][xa] + s*( vertexba[1][xa] - vertexba[0][xa] ) ) - hla[xa];
@@ -1030,7 +1030,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
                 "            Treating case 2\n" <<
                 "               s = " << s );
 
-      if( s > real_t(0) && s < real_t(1) &&
+      if( s > 0_r && s < 1_r &&
           std::fabs( tmp = vertexba[0][za] + s*( vertexba[1][za] - vertexba[0][za] ) ) < hla[za] )
       {
          dist = std::fabs( vertexba[0][xa] + s*( vertexba[1][xa] - vertexba[0][xa] ) ) - hla[xa];
@@ -1061,7 +1061,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
                 "            Treating case 3\n" <<
                 "               s = " << s );
 
-      if( s > real_t(0) && s < real_t(1) &&
+      if( s > 0_r && s < 1_r &&
           std::fabs( tmp = vertexba[0][ya] + s*( vertexba[1][ya] - vertexba[0][ya] ) ) < hla[ya] )
       {
          dist = std::fabs( vertexba[0][xa] + s*( vertexba[1][xa] - vertexba[0][xa] ) ) - hla[xa];
@@ -1092,7 +1092,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
                 "            Treating case 4\n" <<
                 "               s = " << s );
 
-      if( s > real_t(0) && s < real_t(1) &&
+      if( s > 0_r && s < 1_r &&
           std::fabs( tmp = vertexba[0][ya] + s*( vertexba[1][ya] - vertexba[0][ya] ) ) < hla[ya] )
       {
          dist = std::fabs( vertexba[0][xa] + s*( vertexba[1][xa] - vertexba[0][xa] ) ) - hla[xa];
@@ -1124,7 +1124,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
                 "            Treating case 5\n" <<
                 "               s = " << s );
 
-      if( s > real_t(0) && s < real_t(1) &&
+      if( s > 0_r && s < 1_r &&
           std::fabs( tmp = vertexba[0][za] + s*( vertexba[2][za] - vertexba[0][za] ) ) < hla[za] )
       {
          dist = std::fabs( vertexba[0][xa] + s*( vertexba[2][xa] - vertexba[0][xa] ) ) - hla[xa];
@@ -1155,7 +1155,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
                 "            Treating case 6\n" <<
                 "               s = " << s );
 
-      if( s > real_t(0) && s < real_t(1) &&
+      if( s > 0_r && s < 1_r &&
           std::fabs( tmp = vertexba[0][za] + s*( vertexba[2][za] - vertexba[0][za] ) ) < hla[za] )
       {
          dist = std::fabs( vertexba[0][xa] + s*( vertexba[2][xa] - vertexba[0][xa] ) ) - hla[xa];
@@ -1186,7 +1186,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
                 "            Treating case 7\n" <<
                 "               s = " << s );
 
-      if( s > real_t(0) && s < real_t(1) &&
+      if( s > 0_r && s < 1_r &&
           std::fabs( tmp = vertexba[0][ya] + s*( vertexba[2][ya] - vertexba[0][ya] ) ) < hla[ya] )
       {
          dist = std::fabs( vertexba[0][xa] + s*( vertexba[2][xa] - vertexba[0][xa] ) ) - hla[xa];
@@ -1217,7 +1217,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
                 "            Treating case 8\n" <<
                 "               s = " << s );
 
-      if( s > real_t(0) && s < real_t(1) &&
+      if( s > 0_r && s < 1_r &&
           std::fabs( tmp = vertexba[0][ya] + s*( vertexba[2][ya] - vertexba[0][ya] ) ) < hla[ya] )
       {
          dist = std::fabs( vertexba[0][xa] + s*( vertexba[2][xa] - vertexba[0][xa] ) ) - hla[xa];
@@ -1249,7 +1249,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
                 "            Treating case 9\n" <<
                 "               s = " << s );
 
-      if( s > real_t(0) && s < real_t(1) &&
+      if( s > 0_r && s < 1_r &&
           std::fabs( tmp = vertexba[3][za] + s*( vertexba[1][za] - vertexba[3][za] ) ) < hla[za] )
       {
          dist = std::fabs( vertexba[3][xa] + s*( vertexba[1][xa] - vertexba[3][xa] ) ) - hla[xa];
@@ -1280,7 +1280,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
                 "            Treating case 10\n" <<
                 "               s = " << s );
 
-      if( s > real_t(0) && s < real_t(1) &&
+      if( s > 0_r && s < 1_r &&
           std::fabs( tmp = vertexba[3][za] + s*( vertexba[1][za] - vertexba[3][za] ) ) < hla[za] )
       {
          dist = std::fabs( vertexba[3][xa] + s*( vertexba[1][xa] - vertexba[3][xa] ) ) - hla[xa];
@@ -1311,7 +1311,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
                 "            Treating case 11\n" <<
                 "               s = " << s );
 
-      if( s > real_t(0) && s < real_t(1) &&
+      if( s > 0_r && s < 1_r &&
           std::fabs( tmp = vertexba[3][ya] + s*( vertexba[1][ya] - vertexba[3][ya] ) ) < hla[ya] )
       {
          dist = std::fabs( vertexba[3][xa] + s*( vertexba[1][xa] - vertexba[3][xa] ) ) - hla[xa];
@@ -1342,7 +1342,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
                 "            Treating case 12\n" <<
                 "               s = " << s );
 
-      if( s > real_t(0) && s < real_t(1) &&
+      if( s > 0_r && s < 1_r &&
           std::fabs( tmp = vertexba[3][ya] + s*( vertexba[1][ya] - vertexba[3][ya] ) ) < hla[ya] )
       {
          dist = std::fabs( vertexba[3][xa] + s*( vertexba[1][xa] - vertexba[3][xa] ) ) - hla[xa];
@@ -1374,7 +1374,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
                 "            Treating case 13\n" <<
                 "               s = " << s );
 
-      if( s > real_t(0) && s < real_t(1) &&
+      if( s > 0_r && s < 1_r &&
           std::fabs( tmp = vertexba[3][za] + s*( vertexba[2][za] - vertexba[3][za] ) ) < hla[za] )
       {
          dist = std::fabs( vertexba[3][xa] + s*( vertexba[2][xa] - vertexba[3][xa] ) ) - hla[xa];
@@ -1405,7 +1405,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
                 "            Treating case 14\n" <<
                 "               s = " << s );
 
-      if( s > real_t(0) && s < real_t(1) &&
+      if( s > 0_r && s < 1_r &&
           std::fabs( tmp = vertexba[3][za] + s*( vertexba[2][za] - vertexba[3][za] ) ) < hla[za] )
       {
          dist = std::fabs( vertexba[3][xa] + s*( vertexba[2][xa] - vertexba[3][xa] ) ) - hla[xa];
@@ -1436,7 +1436,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
                 "            Treating case 15\n" <<
                 "               s = " << s );
 
-      if( s > real_t(0) && s < real_t(1) &&
+      if( s > 0_r && s < 1_r &&
           std::fabs( tmp = vertexba[3][ya] + s*( vertexba[2][ya] - vertexba[3][ya] ) ) < hla[ya] )
       {
          dist = std::fabs( vertexba[3][xa] + s*( vertexba[2][xa] - vertexba[3][xa] ) ) - hla[xa];
@@ -1467,7 +1467,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
                 "            Treating case 16\n" <<
                 "               s = " << s );
 
-      if( s > real_t(0) && s < real_t(1) &&
+      if( s > 0_r && s < 1_r &&
           std::fabs( tmp = vertexba[3][ya] + s*( vertexba[2][ya] - vertexba[3][ya] ) ) < hla[ya] )
       {
          dist = std::fabs( vertexba[3][xa] + s*( vertexba[2][xa] - vertexba[3][xa] ) ) - hla[xa];
@@ -1558,19 +1558,19 @@ bool collide( BoxID b1, BoxID b2, Container& container )
    // Calculating the four vertices of the colliding face of box B in the frame of box B
    Vec3 vertexa[4];
 
-   vertexa[0][xa] = ( normala[xa] > real_t(0) )?( hla[xa] ):( -hla[xa] );
+   vertexa[0][xa] = ( normala[xa] > 0_r )?( hla[xa] ):( -hla[xa] );
    vertexa[0][ya] = -hla[ya];
    vertexa[0][za] = -hla[za];
 
-   vertexa[1][xa] = ( normala[xa] > real_t(0) )?( hla[xa] ):( -hla[xa] );
+   vertexa[1][xa] = ( normala[xa] > 0_r )?( hla[xa] ):( -hla[xa] );
    vertexa[1][ya] = hla[ya];
    vertexa[1][za] = -hla[za];
 
-   vertexa[2][xa] = ( normala[xa] > real_t(0) )?( hla[xa] ):( -hla[xa] );
+   vertexa[2][xa] = ( normala[xa] > 0_r )?( hla[xa] ):( -hla[xa] );
    vertexa[2][ya] = -hla[ya];
    vertexa[2][za] = hla[za];
 
-   vertexa[3][xa] = ( normala[xa] > real_t(0) )?( hla[xa] ):( -hla[xa] );
+   vertexa[3][xa] = ( normala[xa] > 0_r )?( hla[xa] ):( -hla[xa] );
    vertexa[3][ya] = hla[ya];
    vertexa[3][za] = hla[za];
 
@@ -1857,8 +1857,8 @@ bool collide( CapsuleID c1, CapsuleID c2, Container& container )
    const Vec3 c2_up_dir( R2[0], R2[3], R2[6] );
 
    // Calculating the displacement of the center of the upper cap-spheres in world space coordinates
-   const Vec3 c1_up( real_t(0.5) * c1->getLength() * c1_up_dir );
-   const Vec3 c2_up( real_t(0.5) * c2->getLength() * c2_up_dir );
+   const Vec3 c1_up( 0.5_r * c1->getLength() * c1_up_dir );
+   const Vec3 c2_up( 0.5_r * c2->getLength() * c2_up_dir );
 
    // calculate the closest points of the two center lines
    Vec3 cp1, cp2;
@@ -1876,12 +1876,12 @@ bool collide( CapsuleID c1, CapsuleID c2, Container& container )
       const real_t c2x( c1_up_dir * ( c2->getPosition() - c1->getPosition() ) );
 
       // Creating two contact points if the capsules are parallel to each other
-      if ( floatIsEqual(std::fabs( c1_up_dir * c2_up_dir ), real_t(1) ) &&
+      if ( floatIsEqual(std::fabs( c1_up_dir * c2_up_dir ), 1_r ) &&
           c2x > -c1->getLength() && c2x < c1->getLength() )
       {
-         const real_t k( c1->getRadius() + real_t(0.5) * dist );
-         const real_t hl1( real_t(0.5) * c1->getLength() );
-         const real_t hl2( real_t(0.5) * c2->getLength() );
+         const real_t k( c1->getRadius() + 0.5_r * dist );
+         const real_t hl1( 0.5_r * c1->getLength() );
+         const real_t hl2( 0.5_r * c2->getLength() );
 
          WALBERLA_LOG_DETAIL(
                    "      First contact created between capsule " << c1->getID()
@@ -1923,7 +1923,7 @@ bool collide( CapsuleID c1, CapsuleID c2, Container& container )
       // Creating a single contact point
       else
       {
-         const real_t k( c2->getRadius() + real_t(0.5) * dist );
+         const real_t k( c2->getRadius() + 0.5_r * dist );
          const Vec3 gPos( cp2 + normal * k );
 
          WALBERLA_LOG_DETAIL(
@@ -1962,7 +1962,7 @@ bool collide( CapsuleID c, PlaneID p, Container& container )
    const Mat3& R( c->getRotation() );
 
    // Computing the location of the sphere caps of the capsule
-   const Vec3 c_up ( real_t(0.5) * c->getLength() * Vec3( R[0], R[3], R[6] ) );
+   const Vec3 c_up ( 0.5_r * c->getLength() * Vec3( R[0], R[3], R[6] ) );
    const Vec3 posUp( c->getPosition() + c_up );
    const Vec3 posDn( c->getPosition() - c_up );
 
@@ -2006,7 +2006,7 @@ template <typename Container>
 inline
 bool collide( SphereID s, CapsuleID c, Container& container )
 {
-   const real_t length( real_t(0.5)*c->getLength() );  // Half cylinder length
+   const real_t length( 0.5_r*c->getLength() );  // Half cylinder length
    const Vec3& spos( s->getPosition() );             // Global position of the sphere
    const Vec3& cpos( c->getPosition() );             // Global position of the capsule
    const Mat3& R( c->getRotation() );                // Rotation of the capsule
@@ -2031,7 +2031,7 @@ bool collide( SphereID s, CapsuleID c, Container& container )
 
    if( dist < contactThreshold ) {
       normal = normal.getNormalized();
-      const real_t k( c->getRadius() + real_t(0.5) * dist );
+      const real_t k( c->getRadius() + 0.5_r * dist );
       const Vec3 gPos( spos2 + normal * k );
 
       WALBERLA_LOG_DETAIL(
@@ -2062,9 +2062,9 @@ bool collide( BoxID b, CapsuleID c, Container& container )
    //----- Calculating the first contact point between the capsule and the box -----
 
    // Computing the displacement of the spherical caps of the capsule in world space coordinates
-   const Vec3 c_up( real_t(0.5)*c->getLength()*R[0],
-                    real_t(0.5)*c->getLength()*R[3],
-                    real_t(0.5)*c->getLength()*R[6] );
+   const Vec3 c_up( 0.5_r*c->getLength()*R[0],
+                    0.5_r*c->getLength()*R[3],
+                    0.5_r*c->getLength()*R[6] );
 
    // Computing the centers of the spherical caps in world space coordinates
    const Vec3 up  ( c->getPosition()+c_up );
@@ -2082,7 +2082,7 @@ bool collide( BoxID b, CapsuleID c, Container& container )
 
    // Calculating the contact normal and the position of the closest contact point
    normalize(normal1);
-   const Vec3 gpos1( bp1 - real_t(0.5)*dist1*normal1 );
+   const Vec3 gpos1( bp1 - 0.5_r*dist1*normal1 );
 
    WALBERLA_LOG_DETAIL(
              "      Contact created between box " << b->getID() << " and capsule " << c->getID()
@@ -2104,7 +2104,7 @@ bool collide( BoxID b, CapsuleID c, Container& container )
 
    // Calculating the contact normal and the position of the closest contact point
    normalize(normal2);
-   const Vec3 gpos2( bp2 - real_t(0.5)*dist2*normal2 );
+   const Vec3 gpos2( bp2 - 0.5_r*dist2*normal2 );
 
    WALBERLA_LOG_DETAIL(
              "      Contact created between box " << b->getID() << " and capsule " << c->getID()

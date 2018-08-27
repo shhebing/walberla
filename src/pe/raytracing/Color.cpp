@@ -33,43 +33,43 @@ Color Color::colorFromHSV(real_t hue, real_t saturation, real_t value) {
    // based on Max K. Agoston: Computer Graphics and Geometric Modeling - Implementation and Algorithms
    real_t r, g, b;
    
-   if (realIsEqual(hue, real_t(360))) {
-      hue = real_t(0);
+   if (realIsEqual(hue, 360_r)) {
+      hue = 0_r;
    } else {
-      hue /= real_t(60);
+      hue /= 60_r;
    }
    real_t fract = hue - std::floor(hue);
    
-   real_t P = value*(real_t(1) - saturation);
-   real_t Q = value*(real_t(1) - saturation*fract);
-   real_t T = value*(real_t(1) - saturation*(real_t(1) - fract));
+   real_t P = value*(1_r - saturation);
+   real_t Q = value*(1_r - saturation*fract);
+   real_t T = value*(1_r - saturation*(1_r - fract));
    
-   if (real_t(0) <= hue && hue < real_t(1)) {
+   if (0_r <= hue && hue < 1_r) {
       r = value;
       g = T;
       b = P;
-   } else if (real_t(1) <= hue && hue < real_t(2)) {
+   } else if (1_r <= hue && hue < 2_r) {
       r = Q;
       g = value,
       b = P;
-   } else if (real_t(2) <= hue && hue < real_t(3)) {
+   } else if (2_r <= hue && hue < 3_r) {
       r = P;
       g = value;
       b = T;
-   } else if (real_t(3) <= hue && hue < real_t(4)) {
+   } else if (3_r <= hue && hue < 4_r) {
       r = P;
       g = Q;
       b = value;
-   } else if (real_t(4) <= hue && hue < real_t(5)) {
+   } else if (4_r <= hue && hue < 5_r) {
       r = T;
       g = P;
       b = value;
-   } else if (real_t(5) <= hue && hue < real_t(6)) {
+   } else if (5_r <= hue && hue < 6_r) {
       r = value;
       g = P;
       b = Q;
    } else {
-      r = g = b = real_t(0);
+      r = g = b = 0_r;
    }
    
    return Color(r, g, b);

@@ -52,7 +52,7 @@ public:
                       const BlockDataID & bodyStorageID,
                       pe::cr::ICR & collisionResponse,
                       const std::function<void (void)> & synchronizeFunc,
-                      const real_t timeStepSize = real_t(1),
+                      const real_t timeStepSize = 1_r,
                       const uint_t numberOfSubIterations = uint_t(1),
                       const std::function<void (void)> & forceEvaluationFunc = [](){})
          : timeStepSize_( timeStepSize )

@@ -110,7 +110,7 @@ const FlagUID MO_SBB_Flag( "moving obstacle SBB" );
 
 static void refinementSelection( SetupBlockForest& forest, uint_t levels, AABB refinementBox )
 {
-   real_t dx = real_t(1); // dx on finest level
+   real_t dx = 1_r; // dx on finest level
    for( auto block = forest.begin(); block != forest.end(); ++block )
    {
       uint_t blockLevel = block->getLevel();
@@ -163,7 +163,7 @@ static shared_ptr< StructuredBlockForest > createBlockStructure( const AABB & do
 
    // refinement box is in the left lower corner of the domain
    AABB refinementBox( domainAABB.xMin(), domainAABB.yMin(), domainAABB.zMin(),
-                       domainAABB.xMin()+real_t(1), domainAABB.yMin()+real_t(1), domainAABB.zMin()+real_t(1) );
+                       domainAABB.xMin()+1_r, domainAABB.yMin()+1_r, domainAABB.zMin()+1_r );
 
    WALBERLA_LOG_INFO_ON_ROOT(" - refinement box: " << refinementBox);
 
@@ -175,7 +175,7 @@ static shared_ptr< StructuredBlockForest > createBlockStructure( const AABB & do
    // calculate process distribution
    const memory_t memoryLimit = math::Limits< memory_t >::inf();
 
-   sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), uint_c( MPIManager::instance()->numProcesses() ), real_t(0), memoryLimit, true );
+   sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), uint_c( MPIManager::instance()->numProcesses() ), 0_r, memoryLimit, true );
 
    WALBERLA_LOG_INFO_ON_ROOT( sforest );
 
@@ -309,8 +309,8 @@ int main( int argc, char **argv )
    Vector3<uint_t> domainSize( 32, 16, 16 );
 
    const uint_t numberOfLevels = uint_t(2);
-   const real_t relaxationTime = real_t(1);
-   const real_t wallVelocity = real_t(0.01);
+   const real_t relaxationTime = 1_r;
+   const real_t wallVelocity = 0.01_r;
 
    std::string baseFolder = "vtk_out";
 
@@ -328,7 +328,7 @@ int main( int argc, char **argv )
                                     domainSize[1] / ( coarseBlocksPerDirection[1] * levelScalingFactor ),
                                     domainSize[2] / ( coarseBlocksPerDirection[2] * levelScalingFactor ) );
 
-   AABB simulationDomain( real_t(0), real_t(0), real_t(0), real_c(domainSize[0]), real_c(domainSize[1]), real_c(domainSize[2]) );
+   AABB simulationDomain( 0_r, 0_r, 0_r, real_c(domainSize[0]), real_c(domainSize[1]), real_c(domainSize[2]) );
    auto blocks = createBlockStructure( simulationDomain, blockSizeInCells, numberOfLevels );
 
    //write domain decomposition to file
@@ -350,7 +350,7 @@ int main( int argc, char **argv )
    // create pe bodies
 
    // bounding planes (global)
-   const auto planeMaterial = pe::createMaterial( "myPlaneMat", real_t(8920), real_t(0), real_t(1), real_t(1), real_t(0), real_t(1), real_t(1), real_t(0), real_t(0) );
+   const auto planeMaterial = pe::createMaterial( "myPlaneMat", 8920_r, 0_r, 1_r, 1_r, 0_r, 1_r, 1_r, 0_r, 0_r );
 
    // planes in E and W direction
    pe::createPlane( *globalBodyStorage, 0, Vector3<real_t>(1,0,0), Vector3<real_t>(0,0,0), planeMaterial );
@@ -363,18 +363,18 @@ int main( int argc, char **argv )
    // planes in B and T direction
    pe::createPlane( *globalBodyStorage, 0, Vector3<real_t>(0,0,1), Vector3<real_t>(0,0,0), planeMaterial );
    auto topPlane = pe::createPlane( *globalBodyStorage, 0, Vector3<real_t>(0,0,-1), Vector3<real_t>(0,0,real_c(domainSize[2])), planeMaterial );
-   topPlane->setLinearVel(wallVelocity, real_t(0), real_t(0));
+   topPlane->setLinearVel(wallVelocity, 0_r, 0_r);
 
    ///////////////////////
    // ADD DATA TO BLOCKS //
    ////////////////////////
 
    // create the lattice model
-   LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::TRT::constructWithMagicNumber( real_t(1) / relaxationTime, lbm::collision_model::TRT::threeSixteenth, finestLevel ) );
+   LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::TRT::constructWithMagicNumber( 1_r / relaxationTime, lbm::collision_model::TRT::threeSixteenth, finestLevel ) );
 
    // add PDF field
    BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (zyxf)", latticeModel,
-                                                                         Vector3< real_t >( real_t(0) ), real_t(1),
+                                                                         Vector3< real_t >( 0_r ), 1_r,
                                                                          FieldGhostLayers, field::zyxf );
 
    // add flag field

@@ -77,7 +77,7 @@ protected:
 template< typename Stencil_T >
 real_t ResidualNormStencilField< Stencil_T >::weightedL2() const
 {
-   real_t result( real_t(0) );
+   real_t result( 0_r );
    
    for( auto block = blocks_.begin( requiredSelectors_, incompatibleSelectors_ ); block != blocks_.end(); ++block )
    {
@@ -85,7 +85,7 @@ real_t ResidualNormStencilField< Stencil_T >::weightedL2() const
       const Field_T * const ff = block->template getData< const Field_T >( fId_ );
       const StencilField_T * stencil = block->template getData< StencilField_T >( stencilId_ );
       
-      real_t blockResult( real_t(0) );
+      real_t blockResult( 0_r );
       
       WALBERLA_FOR_ALL_CELLS_XYZ_OMP( uf, omp parallel for schedule(static) reduction(+:blockResult),
 

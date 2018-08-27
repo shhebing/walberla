@@ -62,8 +62,8 @@ int main( int argc, char **argv )
    // uncomment to have logging
    //logging::Logging::instance()->setLogLevel(logging::Logging::LogLevel::DETAIL);
 
-   const real_t dx     = real_t(1);
-   const real_t radius = real_t(5);
+   const real_t dx     = 1_r;
+   const real_t radius = 5_r;
 
    ///////////////////////////
    // DATA STRUCTURES SETUP //
@@ -86,23 +86,23 @@ int main( int argc, char **argv )
    pe::SetBodyTypeIDs<BodyTypeTuple>::execute();
    shared_ptr<pe::BodyStorage> globalBodyStorage = make_shared<pe::BodyStorage>();
    auto bodyStorageID = blocks->addBlockData(pe::createStorageDataHandling<BodyTypeTuple>(), "Storage");
-   auto sphereMaterialID = pe::createMaterial( "sphereMat", real_t(1) , real_t(0.3), real_t(0.2), real_t(0.2), real_t(0.24), real_t(200), real_t(200), real_t(0), real_t(0) );
+   auto sphereMaterialID = pe::createMaterial( "sphereMat", 1_r , 0.3_r, 0.2_r, 0.2_r, 0.24_r, 200_r, 200_r, 0_r, 0_r );
 
    // pe coupling
    const real_t overlap = real_t( 1.5 ) * dx;
    std::function<void(void)> syncCall = std::bind( pe::syncNextNeighbors<BodyTypeTuple>, boost::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(nullptr), overlap, false );
 
    // sphere positions for test scenarios
-   Vector3<real_t> positionInsideBlock(real_t(10), real_t(10), real_t(10));
-   Vector3<real_t> positionAtBlockBorder(real_t(19.5), real_t(10), real_t(10));
-   Vector3<real_t> positionAtBlockBorderUpdated(real_t(20.5), real_t(10), real_t(10));
+   Vector3<real_t> positionInsideBlock(10_r, 10_r, 10_r);
+   Vector3<real_t> positionAtBlockBorder(19.5_r, 10_r, 10_r);
+   Vector3<real_t> positionAtBlockBorderUpdated(20.5_r, 10_r, 10_r);
 
-   Vector3<real_t> positionAtBlockBorder2(real_t(20) + radius + overlap - real_t(0.5), real_t(10), real_t(10));
-   Vector3<real_t> positionAtBlockBorderUpdated2(real_t(20) + radius + overlap + real_t(0.5), real_t(10), real_t(10));
+   Vector3<real_t> positionAtBlockBorder2(20_r + radius + overlap - 0.5_r, 10_r, 10_r);
+   Vector3<real_t> positionAtBlockBorderUpdated2(20_r + radius + overlap + 0.5_r, 10_r, 10_r);
 
 
-   Vector3<real_t> testForce(real_t(2), real_t(1), real_t(0));
-   Vector3<real_t> torqueOffset = Vector3<real_t>(real_t(1), real_t(0), real_t(0));
+   Vector3<real_t> testForce(2_r, 1_r, 0_r);
+   Vector3<real_t> torqueOffset = Vector3<real_t>(1_r, 0_r, 0_r);
 
    pe_coupling::ForceTorqueOnBodiesResetter resetter(blocks, bodyStorageID);
    shared_ptr<pe_coupling::BodiesForceTorqueContainer> container1 = make_shared<pe_coupling::BodiesForceTorqueContainer>(blocks, bodyStorageID);
@@ -147,8 +147,8 @@ int main( int argc, char **argv )
       WALBERLA_LOG_DEVEL_ON_ROOT(" - expecting force: " << expectedForce);
       WALBERLA_LOG_DEVEL_ON_ROOT(" - expecting torque: " << expectedTorque);
 
-      Vector3<real_t> actingForce(real_t(0));
-      Vector3<real_t> actingTorque(real_t(0));
+      Vector3<real_t> actingForce(0_r);
+      Vector3<real_t> actingTorque(0_r);
       for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
       {
          for( auto bodyIt = pe::BodyIterator::begin( *blockIt, bodyStorageID); bodyIt != pe::BodyIterator::end(); ++bodyIt )
@@ -233,8 +233,8 @@ int main( int argc, char **argv )
       WALBERLA_LOG_DEVEL_ON_ROOT(" - expecting force: " << expectedForce);
       WALBERLA_LOG_DEVEL_ON_ROOT(" - expecting torque: " << expectedTorque);
 
-      Vector3<real_t> actingForce(real_t(0));
-      Vector3<real_t> actingTorque(real_t(0));
+      Vector3<real_t> actingForce(0_r);
+      Vector3<real_t> actingTorque(0_r);
       for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
       {
          for( auto bodyIt = pe::BodyIterator::begin( *blockIt, bodyStorageID); bodyIt != pe::BodyIterator::end(); ++bodyIt )
@@ -325,8 +325,8 @@ int main( int argc, char **argv )
       WALBERLA_LOG_DEVEL_ON_ROOT(" - expecting force: " << expectedForce);
       WALBERLA_LOG_DEVEL_ON_ROOT(" - expecting torque: " << expectedTorque);
 
-      Vector3<real_t> actingForce(real_t(0));
-      Vector3<real_t> actingTorque(real_t(0));
+      Vector3<real_t> actingForce(0_r);
+      Vector3<real_t> actingTorque(0_r);
       for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
       {
          for( auto bodyIt = pe::BodyIterator::begin( *blockIt, bodyStorageID); bodyIt != pe::BodyIterator::end(); ++bodyIt )
@@ -429,8 +429,8 @@ int main( int argc, char **argv )
       WALBERLA_LOG_DEVEL_ON_ROOT(" - expecting force: " << expectedForce);
       WALBERLA_LOG_DEVEL_ON_ROOT(" - expecting torque: " << expectedTorque);
 
-      Vector3<real_t> actingForce(real_t(0));
-      Vector3<real_t> actingTorque(real_t(0));
+      Vector3<real_t> actingForce(0_r);
+      Vector3<real_t> actingTorque(0_r);
       for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
       {
          for( auto bodyIt = pe::BodyIterator::begin( *blockIt, bodyStorageID); bodyIt != pe::BodyIterator::end(); ++bodyIt )

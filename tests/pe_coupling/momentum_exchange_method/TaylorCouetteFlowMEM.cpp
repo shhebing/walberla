@@ -115,11 +115,11 @@ public:
    { }
    real_t getMaximumRelativeError()
    {
-      Vector3<real_t> midPoint( domainLength_ * real_t(0.5), domainWidth_ * real_t(0.5), domainWidth_ * real_t(0.5) );
+      Vector3<real_t> midPoint( domainLength_ * 0.5_r, domainWidth_ * 0.5_r, domainWidth_ * 0.5_r );
       Cell midCell = blocks_->getCell( midPoint );
       CellInterval evaluationCells( midCell.x(), midCell.y(), midCell.z(), midCell.x(), blocks_->getDomainCellBB().yMax(), midCell.z() );
 
-      real_t maxError = real_t(0);
+      real_t maxError = 0_r;
 
       for( auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt )
       {
@@ -262,10 +262,10 @@ int main( int argc, char **argv )
 
    const uint_t timesteps = shortrun ? uint_c(10) : uint_c(5000);
 
-   const real_t radius1 = real_c(width) * real_t(0.25); // radius of internal cylinder
-   const real_t radius2 = real_c(width) * real_t(0.45); // radius of external cylinder
-   const real_t angularVel1 = real_t(0.001); // angular velocity of internal cylinder
-   const real_t angularVel2 = real_t(-0.001); // angular velocity of external cylinder
+   const real_t radius1 = real_c(width) * 0.25_r; // radius of internal cylinder
+   const real_t radius2 = real_c(width) * 0.45_r; // radius of external cylinder
+   const real_t angularVel1 = 0.001_r; // angular velocity of internal cylinder
+   const real_t angularVel2 = -0.001_r; // angular velocity of external cylinder
 
    ///////////////////////////
    // BLOCK STRUCTURE SETUP //
@@ -283,7 +283,7 @@ int main( int argc, char **argv )
    const uint_t yCells  =  width / blockDist[1];
    const uint_t zCells  =  width / blockDist[2];
 
-   const real_t dx = real_t(1);
+   const real_t dx = 1_r;
 
    auto blocks = blockforest::createUniformBlockGrid( blockDist[0], blockDist[1], blockDist[2], xCells, yCells, zCells, dx,
                                                       ( processes != 1 ),
@@ -306,13 +306,13 @@ int main( int argc, char **argv )
    std::function<void(void)> syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(nullptr), overlap, false );
 
    // create pe bodies
-   const auto material = pe::createMaterial( "granular", real_t(1.2), real_t(0.25), real_t(0.4), real_t(0.4), real_t(0.35), real_t(1.39e11), real_t(5.18e7), real_t(1.07e2), real_t(1.07e2) );
+   const auto material = pe::createMaterial( "granular", 1.2_r, 0.25_r, 0.4_r, 0.4_r, 0.35_r, 1.39e11_r, 5.18e7_r, 1.07e2_r, 1.07e2_r );
 
    // instead of a cylinder, we use the capsule and make sure it extends the computational domain in x-direction to effectively get a cylinder
-   auto cap = pe::createCapsule( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, pe::Vec3(real_c(length),real_c(width),real_c(width)) * real_t(0.5), radius1, real_c(length)*real_t(2), material, true, false, true );
+   auto cap = pe::createCapsule( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, pe::Vec3(real_c(length),real_c(width),real_c(width)) * 0.5_r, radius1, real_c(length)*2_r, material, true, false, true );
    cap->setAngularVel( pe::Vec3(1,0,0) * angularVel1 );
 
-   auto cb = pe::createCylindricalBoundary( *globalBodyStorage, 0, pe::Vec3(real_c(length),real_c(width),real_c(width))*real_t(0.5), radius2 );
+   auto cb = pe::createCylindricalBoundary( *globalBodyStorage, 0, pe::Vec3(real_c(length),real_c(width),real_c(width))*0.5_r, radius2 );
    cb->setAngularVel( pe::Vec3(1,0,0) * angularVel2 );
 
    //synchronize the pe set up on all processes
@@ -325,7 +325,7 @@ int main( int argc, char **argv )
    // add pdf field
    LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::TRT::constructWithMagicNumber( omega ) );
 
-   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage( blocks, "pdf field (zyxf)", latticeModel, Vector3< real_t >( real_t(0) ), real_t(1), uint_t(1), field::zyxf );
+   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage( blocks, "pdf field (zyxf)", latticeModel, Vector3< real_t >( 0_r ), 1_r, uint_t(1), field::zyxf );
 
    // add flag field
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field" );
@@ -408,7 +408,7 @@ int main( int argc, char **argv )
       timeloopTiming.logResultOnRoot();
       WALBERLA_LOG_RESULT_ON_ROOT("Maximum relative error in velocity in angular direction: " << maxError );
       // error has to be below 10%
-      WALBERLA_CHECK_LESS( maxError, real_t(0.1) );
+      WALBERLA_CHECK_LESS( maxError, 0.1_r );
    }
 
    return 0;

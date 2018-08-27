@@ -75,9 +75,9 @@ namespace field {
       {
          WALBERLA_ASSERT( validRegion_.contains( x,y,z ) );
 
-         const cell_idx_t ciX = x < real_t(0) ? cell_idx_c( x - real_t(1) ) : cell_idx_c( x );
-         const cell_idx_t ciY = y < real_t(0) ? cell_idx_c( y - real_t(1) ) : cell_idx_c( y );
-         const cell_idx_t ciZ = z < real_t(0) ? cell_idx_c( z - real_t(1) ) : cell_idx_c( z );
+         const cell_idx_t ciX = x < 0_r ? cell_idx_c( x - 1_r ) : cell_idx_c( x );
+         const cell_idx_t ciY = y < 0_r ? cell_idx_c( y - 1_r ) : cell_idx_c( y );
+         const cell_idx_t ciZ = z < 0_r ? cell_idx_c( z - 1_r ) : cell_idx_c( z );
 
          return field_.get( ciX, ciY, ciZ, f );
       }

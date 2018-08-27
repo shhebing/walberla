@@ -75,7 +75,7 @@ void initU( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
       {
          const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, *cell );
          math::seedRandomGenerator( static_cast<unsigned int>( (p[0] * real_t(blocks->getNumberOfXCells()) + p[1]) * real_t(blocks->getNumberOfYCells()) + p[2]) );
-         u->get( *cell ) = math::realRandom( real_t(-10), real_t(10) );
+         u->get( *cell ) = math::realRandom( -10_r, 10_r );
       }
    }
     
@@ -144,8 +144,8 @@ void initURect( const shared_ptr< StructuredBlockStorage > & blocks, const Block
    WALBERLA_LOG_RESULT_ON_ROOT("Cuboid size: " << cuboidSize[0] << ", "  << cuboidSize[1] << ", "  << cuboidSize[2] );
 
 
-   AABB cuboidAABB( real_t(0.5)*(real_c(globalNumCells[0]) - cuboidSize[0]), real_t(0.5)*(real_c(globalNumCells[1]) - cuboidSize[1]), real_t(0.5)*(real_c(globalNumCells[2]) - cuboidSize[2]),
-                    real_t(0.5)*(real_c(globalNumCells[0]) + cuboidSize[0]), real_t(0.5)*(real_c(globalNumCells[1]) + cuboidSize[1]), real_t(0.5)*(real_c(globalNumCells[2]) + cuboidSize[2])
+   AABB cuboidAABB( 0.5_r*(real_c(globalNumCells[0]) - cuboidSize[0]), 0.5_r*(real_c(globalNumCells[1]) - cuboidSize[1]), 0.5_r*(real_c(globalNumCells[2]) - cuboidSize[2]),
+                    0.5_r*(real_c(globalNumCells[0]) + cuboidSize[0]), 0.5_r*(real_c(globalNumCells[1]) + cuboidSize[1]), 0.5_r*(real_c(globalNumCells[2]) + cuboidSize[2])
    );
 
    pde::Zeroize(blocks, uId);
@@ -257,7 +257,7 @@ real_t runConvergenceConstStencil(const real_t xDomainSize, const real_t yDomain
    const real_t dx = xDomainSize / real_c( xBlocks * xCells );
    const real_t dy = yDomainSize / real_c( yBlocks * yCells );
    const real_t dz = zDomainSize / real_c( zBlocks * zCells );
-   auto blocks = blockforest::createUniformBlockGrid( math::AABB( real_t(0), real_t(0), real_t(0),
+   auto blocks = blockforest::createUniformBlockGrid( math::AABB( 0_r, 0_r, 0_r,
                                                                   xDomainSize, yDomainSize, zDomainSize ),
                                                       xBlocks, yBlocks, zBlocks,    // number of blocks
                                                       xCells, yCells, zCells,       // number of cells per block
@@ -267,23 +267,23 @@ real_t runConvergenceConstStencil(const real_t xDomainSize, const real_t yDomain
 
    WALBERLA_LOG_RESULT_ON_ROOT("Discretization dx: " << dx << ", " << dy << ", " << dz);
 
-   BlockDataID uId = field::addToStorage< PdeField_T >( blocks, "u", real_t(0), field::zyxf, uint_t(1) );
+   BlockDataID uId = field::addToStorage< PdeField_T >( blocks, "u", 0_r, field::zyxf, uint_t(1) );
 
    initU(blocks, uId);
    // initURect( blocks, uId );
 
-   BlockDataID fId = field::addToStorage< PdeField_T >( blocks, "f", real_t(0), field::zyxf, uint_t(1) );
+   BlockDataID fId = field::addToStorage< PdeField_T >( blocks, "f", 0_r, field::zyxf, uint_t(1) );
 
    SweepTimeloop timeloop( blocks, uint_t(1) );
 
    std::vector< real_t > weights( Stencil_T::Size );
-   weights[ Stencil_T::idx[ stencil::C ] ] = real_t(2) / ( blocks->dx() * blocks->dx() ) + real_t(2) / ( blocks->dy() * blocks->dy() ) + real_t(2) / ( blocks->dz() * blocks->dz() );
-   weights[ Stencil_T::idx[ stencil::N ] ] = real_t(-1) / ( blocks->dy() * blocks->dy() );
-   weights[ Stencil_T::idx[ stencil::S ] ] = real_t(-1) / ( blocks->dy() * blocks->dy() );
-   weights[ Stencil_T::idx[ stencil::E ] ] = real_t(-1) / ( blocks->dx() * blocks->dx() );
-   weights[ Stencil_T::idx[ stencil::W ] ] = real_t(-1) / ( blocks->dx() * blocks->dx() );
-   weights[ Stencil_T::idx[ stencil::T ] ] = real_t(-1) / ( blocks->dx() * blocks->dz() );
-   weights[ Stencil_T::idx[ stencil::B ] ] = real_t(-1) / ( blocks->dx() * blocks->dz() );
+   weights[ Stencil_T::idx[ stencil::C ] ] = 2_r / ( blocks->dx() * blocks->dx() ) + 2_r / ( blocks->dy() * blocks->dy() ) + 2_r / ( blocks->dz() * blocks->dz() );
+   weights[ Stencil_T::idx[ stencil::N ] ] = -1_r / ( blocks->dy() * blocks->dy() );
+   weights[ Stencil_T::idx[ stencil::S ] ] = -1_r / ( blocks->dy() * blocks->dy() );
+   weights[ Stencil_T::idx[ stencil::E ] ] = -1_r / ( blocks->dx() * blocks->dx() );
+   weights[ Stencil_T::idx[ stencil::W ] ] = -1_r / ( blocks->dx() * blocks->dx() );
+   weights[ Stencil_T::idx[ stencil::T ] ] = -1_r / ( blocks->dx() * blocks->dz() );
+   weights[ Stencil_T::idx[ stencil::B ] ] = -1_r / ( blocks->dx() * blocks->dz() );
 
    for (uint_t i = 0; i < Stencil_T::Size; ++i)
       WALBERLA_LOG_RESULT_ON_ROOT("Weights on finest level (" << i << ") = " << weights[i] );
@@ -311,7 +311,7 @@ real_t runConvergenceConstStencil(const real_t xDomainSize, const real_t yDomain
    for (uint_t i = 1; i < convrate.size(); ++i)
    {
       WALBERLA_LOG_RESULT_ON_ROOT("Convergence rate in iteration " << i << ": " << convrate[i]);
-      WALBERLA_CHECK_LESS(convrate[i], real_t(0.1));
+      WALBERLA_CHECK_LESS(convrate[i], 0.1_r);
    }
 
    // computing average convergence rate of last few V-cycles

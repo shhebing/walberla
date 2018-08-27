@@ -60,7 +60,7 @@ BlockForestEvaluation::BlockForestEvaluation( const BlockForest & forest ) :
          blockStatistics_[i].avg = sample.mean();
          blockStatistics_[i].stdDev = sample.stdDeviation();
          const auto relStdDev = sample.relativeStdDeviation();
-         blockStatistics_[i].relStdDev = math::isnan( relStdDev ) ? real_t(0) : relStdDev;
+         blockStatistics_[i].relStdDev = math::isnan( relStdDev ) ? 0_r : relStdDev;
       }
    }
 }

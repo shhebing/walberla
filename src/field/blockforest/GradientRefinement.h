@@ -109,7 +109,7 @@ void GradientRefinement< VectorField_T, Filter_T, Pseudo2D >::operator()( std::v
 
             real_t gradient[gradients];
             for( int i = 0; i < gradients; ++i )
-               gradient[i] = real_t(0);
+               gradient[i] = 0_r;
 
             if( innerInterval.contains(x,y,z) )
             {
@@ -184,7 +184,7 @@ void GradientRefinement< VectorField_T, Filter_T, Pseudo2D >::operator()( std::v
                }
             }
 
-            real_t magnitute( real_t(0) );
+            real_t magnitute( 0_r );
             for( int i = 0; i < gradients; ++i )
                magnitute += gradient[i];
 

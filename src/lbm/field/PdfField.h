@@ -84,8 +84,8 @@ public:
 
    PdfField( const uint_t _xSize, const uint_t _ySize, const uint_t _zSize,
              const LatticeModel_T & _latticeModel,
-             const bool initialize = true, const Vector3< real_t > & initialVelocity = Vector3< real_t >( real_t(0.0) ),
-             const real_t initialDensity = real_t(1.0),
+             const bool initialize = true, const Vector3< real_t > & initialVelocity = Vector3< real_t >( 0.0_r ),
+             const real_t initialDensity = 1.0_r,
              const uint_t ghostLayers = uint_t(1), const field::Layout & _layout = field::zyxf,
              const shared_ptr< field::FieldAllocator<real_t> > & alloc = shared_ptr< field::FieldAllocator<real_t> >() );
 
@@ -127,23 +127,23 @@ public:
    // set density and velocity //
    //////////////////////////////
 
-   inline void setDensityAndVelocity( const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) );
+   inline void setDensityAndVelocity( const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r );
 
    inline void setDensityAndVelocity( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
-                                      const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) );
+                                      const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r );
    inline void setDensityAndVelocity( const Cell & cell,
-                                      const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) );
+                                      const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r );
 
    /////////////////////
    // set equilibrium //
    /////////////////////
 
-   inline void setToEquilibrium( const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) );
+   inline void setToEquilibrium( const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r );
 
    inline void setToEquilibrium( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
-                                 const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) );
+                                 const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r );
    inline void setToEquilibrium( const Cell & cell,
-                                 const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) );
+                                 const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r );
 
    /////////////////
    // get density //
@@ -288,7 +288,7 @@ PdfField< LatticeModel_T >::PdfField( const uint_t _xSize, const uint_t _ySize, 
 {
 #ifdef _OPENMP
    // take care of proper thread<->memory assignment (first-touch allocation policy !)
-   this->setWithGhostLayer( real_t(0) );
+   this->setWithGhostLayer( 0_r );
 #endif
 
    if( initialize )
@@ -475,7 +475,7 @@ inline void PdfField< LatticeModel_T >::getVelocity( Vector3< real_t > & velocit
    if( LatticeModel_T::compressible )
    {
       const real_t rho = DensityAndMomentumDensity< LatticeModel_T >::get( velocity, latticeModel_, *this, x, y, z );
-      const real_t invRho = real_t(1.0) / rho;
+      const real_t invRho = 1.0_r / rho;
       velocity *= invRho;
    }
    else
@@ -514,7 +514,7 @@ inline void PdfField< LatticeModel_T >::getEquilibriumVelocity( Vector3< real_t 
    if( LatticeModel_T::compressible )
    {
       const real_t rho = DensityAndMomentumDensity< LatticeModel_T >::getEquilibrium( velocity, latticeModel_, *this, x, y, z );
-      const real_t invRho = real_t(1.0) / rho;
+      const real_t invRho = 1.0_r / rho;
       velocity *= invRho;
    }
    else
@@ -633,7 +633,7 @@ inline real_t PdfField< LatticeModel_T >::getDensityAndVelocity( Vector3< real_t
    const real_t rho = DensityAndMomentumDensity< LatticeModel_T >::get( velocity, latticeModel_, *this, x, y, z );
    if( LatticeModel_T::compressible )
    {
-      const real_t invRho = real_t(1.0) / rho;
+      const real_t invRho = 1.0_r / rho;
       velocity *= invRho;
    }
    return rho;
@@ -654,7 +654,7 @@ inline real_t PdfField< LatticeModel_T >::getDensityAndEquilibriumVelocity( Vect
    const real_t rho = DensityAndMomentumDensity< LatticeModel_T >::getEquilibrium( velocity, latticeModel_, *this, x, y, z );
    if( LatticeModel_T::compressible )
    {
-      const real_t invRho = real_t(1.0) / rho;
+      const real_t invRho = 1.0_r / rho;
       velocity *= invRho;
    }
    return rho;

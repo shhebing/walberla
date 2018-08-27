@@ -616,7 +616,7 @@ int main( int argc, char **argv )
    }
 
    // average the forces acting on the bodies over the number of LBM steps
-   timeloop.addFuncAfterTimeStep( pe_coupling::ForceTorqueOnBodiesScaler( blocks, bodyStorageID, real_t(1)/real_c(numLbmSubCycles) ), "Force averaging for several LBM steps" );
+   timeloop.addFuncAfterTimeStep( pe_coupling::ForceTorqueOnBodiesScaler( blocks, bodyStorageID, 1_r/real_c(numLbmSubCycles) ), "Force averaging for several LBM steps" );
 
    // add pressure force contribution
    // The flow in the channel is here driven by a body force and is periodic
@@ -624,8 +624,8 @@ int main( int argc, char **argv )
    // The buoyancy force on the body due to this pressure gradient has to be added 'artificially'
    // F_{buoyancy} = - V_{body} * grad ( p ) = V_{body} * \rho_{fluid} *  a
    // ( V_{body} := volume of body,  a := acceleration driving the flow )
-   Vector3<real_t> buoyancyForce(math::M_PI / real_t(6) * setup.forcing * setup.particleDiam * setup.particleDiam * setup.particleDiam ,
-                                 real_t(0), real_t(0));
+   Vector3<real_t> buoyancyForce(math::M_PI / 6_r * setup.forcing * setup.particleDiam * setup.particleDiam * setup.particleDiam ,
+                                 0_r, 0_r);
    timeloop.addFuncAfterTimeStep( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, buoyancyForce ), "Buoyancy force" );
 
    // add pe timesteps

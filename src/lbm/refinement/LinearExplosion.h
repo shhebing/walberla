@@ -348,7 +348,7 @@ void fillTemporaryCoarseField( const cell_idx_t y, const cell_idx_t z, const Cel
               value += pdfField->get( fx + cell_idx_t(1), fy + cell_idx_t(1), fz                , f );
               value += pdfField->get( fx + cell_idx_t(1), fy + cell_idx_t(1), fz + cell_idx_t(1), f );
 
-         tmpField->get(x,y,z,f) = real_t(0.125) * value;
+         tmpField->get(x,y,z,f) = 0.125_r * value;
          */
       }
    }
@@ -406,7 +406,7 @@ void linearInterpolation( const cell_idx_t y, const cell_idx_t z, const CellInte
 
             const auto v = tmpField->get( cell, f );
 
-            Vector3< real_t > grad( real_t(0) );
+            Vector3< real_t > grad( 0_r );
 
             for( uint_t i = 0; i < PdfField_T::Stencil::D; ++i )
             {
@@ -419,7 +419,7 @@ void linearInterpolation( const cell_idx_t y, const cell_idx_t z, const CellInte
                   WALBERLA_ASSERT( !math::isnan( tmpField->get( max[i], f ) ) );
                   WALBERLA_ASSERT( !math::isnan( tmpField->get( min[i], f ) ) );
 
-                  grad[i] = real_t(0.5) * ( tmpField->get( max[i], f ) - tmpField->get( min[i], f ) );
+                  grad[i] = 0.5_r * ( tmpField->get( max[i], f ) - tmpField->get( min[i], f ) );
                }
 
 #else
@@ -429,7 +429,7 @@ void linearInterpolation( const cell_idx_t y, const cell_idx_t z, const CellInte
                   if( boolField->get( min[i] ) )
                   {
                      WALBERLA_ASSERT( !math::isnan( tmpField->get( min[i], f ) ) );
-                     grad[i] = real_t(0.5) * ( tmpField->get( max[i], f ) - tmpField->get( min[i], f ) );
+                     grad[i] = 0.5_r * ( tmpField->get( max[i], f ) - tmpField->get( min[i], f ) );
                   }
                   else
                   {

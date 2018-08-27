@@ -41,7 +41,7 @@ int main( int argc, char** argv )
    config->listParameters();
    WALBERLA_CHECK_EQUAL      ( int        ( config->getParameter<int>        ("testInt")  ),    4          );
    WALBERLA_CHECK_EQUAL      ( std::string( config->getParameter<std::string>("testString")), "someString" );
-   WALBERLA_CHECK_FLOAT_EQUAL( double     ( config->getParameter<real_t>     ("testDouble")), real_t(42.42));
+   WALBERLA_CHECK_FLOAT_EQUAL( double     ( config->getParameter<real_t>     ("testDouble")), 42.42_r);
 
 
    auto subBlock = config->getBlock("subBlock");

@@ -82,7 +82,7 @@ private:
    Vector3<real_t> getStressTensorGradient( const Cell & cell, const TensorField_T* velocityGradientField, const BoundaryHandling_T * boundaryHandling )
    {
 
-      std::vector< Matrix3< real_t > > stressTensorValues( Stencil_T::Size, Matrix3< real_t >(real_t(0)) );
+      std::vector< Matrix3< real_t > > stressTensorValues( Stencil_T::Size, Matrix3< real_t >(0_r) );
 
 
       Matrix3< real_t > velGradientInCenterCell = velocityGradientField->get( cell );
@@ -104,8 +104,8 @@ private:
       // obtain the gradient of the tensor using the gradient formula
       // See: Ramadugu et al - "Lattice differential operators for computational physics" (2013)
       // with T = c_s**2
-      const real_t inv_c_s_sqr = real_t(3);
-      Vector3<real_t> gradStressTensor( real_t(0) );
+      const real_t inv_c_s_sqr = 3_r;
+      Vector3<real_t> gradStressTensor( 0_r );
       for( auto dir = Stencil_T::beginNoCenter(); dir != Stencil_T::end(); ++dir)
       {
          Vector3<real_t> latticeVel( real_c(dir.cx()), real_c(dir.cy()), real_c(dir.cz()) );

@@ -29,13 +29,13 @@ Permeability<PdfField_T, BoundaryHandling_T>::Permeability( real_t viscosity, co
    : nu_( viscosity ), pdfFieldId_( pdfFieldId ), boundaryHandlingId_( boundaryHandlingId ), fluid_( fluid ), blocks_( blocks ), time_( 0 ), lastU_( 0 )
 {
    delta_               = std::numeric_limits<real_t>::max();
-   k_                   = real_t(0);
+   k_                   = 0_r;
 
    numSampleFluidNodes_ = uint_t(0);
    numC0FluidNodes_     = uint_t(0);
    numC1FluidNodes_     = uint_t(0); 
    flowAxis_            = uint_t(0);
-   convCrit_            = real_t(0);
+   convCrit_            = 0_r;
    interval_            = uint_t(0);
 
    initialized_  = false;
@@ -48,7 +48,7 @@ void Permeability<PdfField_T, BoundaryHandling_T>::init( const Config::BlockHand
    sampleVolume_ = blocks_->getCellBBFromAABB( config.getParameter<AABB>( "sampleVolume", blocks_->getDomain() ) );
    flowAxis_     = config.getParameter<uint_t>( "flowAxis" );
    interval_     = config.getParameter<uint_t>( "calcFrequency" );
-   convCrit_     = config.getParameter<real_t>( "convCriterion", real_t(1.0E-20) );
+   convCrit_     = config.getParameter<real_t>( "convCriterion", 1.0E-20_r );
 
    initSampleVolume();
 }
@@ -169,14 +169,14 @@ void Permeability<PdfField_T, BoundaryHandling_T>::operator()()
      p1  /= real_c( numC1FluidNodes_ );         // average density in cross section c1
 
      // convert density to pressure (P = rho / 3) and calculate average gradient
-     const real_t pressureGradient = ( p0 - p1 ) / ( real_t(3) * real_c( sampleVolume_.size( flowAxis_ ) - 1 ) );
+     const real_t pressureGradient = ( p0 - p1 ) / ( 3_r * real_c( sampleVolume_.size( flowAxis_ ) - 1 ) );
 
      if( math::isnan( u ) || math::isinf( u ) )
      {
         WALBERLA_LOG_WARNING( "Cannot determine permeability. Invalid mean fluid velocity " << u );
 
         delta_ = std::numeric_limits<real_t>::max();
-        k_     = real_t(0);
+        k_     = 0_r;
      }
 
      else

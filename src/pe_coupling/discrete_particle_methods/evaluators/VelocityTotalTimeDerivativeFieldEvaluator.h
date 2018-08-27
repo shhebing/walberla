@@ -53,9 +53,9 @@ public:
                                               const ConstBlockDataID & currentVelocityFieldID,
                                               const ConstBlockDataID & formerVelocityFieldID,
                                               const ConstBlockDataID & velocityGradientFieldID,
-                                              const real_t & deltaT = real_t(1) )
+                                              const real_t & deltaT = 1_r )
       : totalTimeDerivativeVelocityFieldID_( totalTimeDerivativeVelocityFieldID ), currentVelocityFieldID_( currentVelocityFieldID ),
-        formerVelocityFieldID_( formerVelocityFieldID ), velocityGradientFieldID_( velocityGradientFieldID ), deltaTinv_( real_t(1) / deltaT )
+        formerVelocityFieldID_( formerVelocityFieldID ), velocityGradientFieldID_( velocityGradientFieldID ), deltaTinv_( 1_r / deltaT )
    { }
 
    void operator()(IBlock * const block)
@@ -86,7 +86,7 @@ public:
 
    void resetDeltaT( const real_t & deltaT )
    {
-      deltaTinv_ = real_t(1) / deltaT;
+      deltaTinv_ = 1_r / deltaT;
    }
 
 private:

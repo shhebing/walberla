@@ -101,13 +101,13 @@ real_t permeability( Setup setup )
 {
    // BCC implementation
    const real_t L = real_c(setup.length);
-   const real_t r = real_c(std::sqrt(real_t(3.0))) / real_t(4) * L * setup.kappa;
+   const real_t r = real_c(std::sqrt(3.0_r)) / 4_r * L * setup.kappa;
 
    real_t drag( 0.0 );
    for( uint_t i = 0; i < 31; i++ )
       drag += real_c(qs[i]) * real_c(std::pow( setup.kappa, real_c(i) ));
 
-   return ( L * L * L ) / ( real_t(6) * math::PI * r * real_t(2) * drag );
+   return ( L * L * L ) / ( 6_r * math::PI * r * 2_r * drag );
 }
 
 
@@ -120,7 +120,7 @@ BlockDataID initPdfField< lbm::collision_model::SRT >( const shared_ptr<Structur
    using LatticeModel_T = lbm::D3Q19<lbm::collision_model::SRT>;
 
    LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::SRT( omega ) );
-   return lbm::addPdfFieldToStorage( blocks, "PDF Field (SRT)", latticeModel, Vector3<real_t>(), real_t(1) );
+   return lbm::addPdfFieldToStorage( blocks, "PDF Field (SRT)", latticeModel, Vector3<real_t>(), 1_r );
 }
 
 template< >
@@ -129,7 +129,7 @@ BlockDataID initPdfField< lbm::collision_model::TRT >( const shared_ptr<Structur
    using LatticeModel_T = lbm::D3Q19<lbm::collision_model::TRT>;
 
    LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::TRT::constructWithMagicNumber( omega ) );
-   return lbm::addPdfFieldToStorage( blocks, "PDF Field (TRT)", latticeModel, Vector3<real_t>(), real_t(1) );
+   return lbm::addPdfFieldToStorage( blocks, "PDF Field (TRT)", latticeModel, Vector3<real_t>(), 1_r );
 }
 
 template< >
@@ -138,7 +138,7 @@ BlockDataID initPdfField< lbm::collision_model::D3Q19MRT >( const shared_ptr<Str
    using LatticeModel_T = lbm::D3Q19<lbm::collision_model::D3Q19MRT>;
 
    LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::D3Q19MRT::constructPanWithMagicNumber( omega ) );
-   return lbm::addPdfFieldToStorage( blocks, "PDF Field (MRT)", latticeModel, Vector3<real_t>(), real_t(1) );
+   return lbm::addPdfFieldToStorage( blocks, "PDF Field (MRT)", latticeModel, Vector3<real_t>(), 1_r );
 }
 
 template< >
@@ -147,7 +147,7 @@ BlockDataID initPdfField< lbm::collision_model::D3Q27Cumulant >( const shared_pt
    typedef lbm::D3Q27< lbm::collision_model::D3Q27Cumulant, true > LatticeModel_T;
 
    LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::D3Q27Cumulant( omega ) );
-   return lbm::addPdfFieldToStorage( blocks, "PDF Field (Cumulant)", latticeModel, Vector3<real_t>(), real_t(1) );
+   return lbm::addPdfFieldToStorage( blocks, "PDF Field (Cumulant)", latticeModel, Vector3<real_t>(), 1_r );
 }
 
 

@@ -88,7 +88,7 @@ std::unique_ptr<SetupBlockForest> createSetupBlockForest(const math::AABB& simul
 
    WALBERLA_LOG_INFO_ON_ROOT( "Balancing " << sforest->getNumberOfBlocks() << " blocks for " << numberOfProcesses << " processes...");
 
-   sforest->balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), numberOfProcesses, real_t(0), memory_t(0), false, true );
+   sforest->balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), numberOfProcesses, 0_r, memory_t(0), false, true );
    return sforest;
 }
 

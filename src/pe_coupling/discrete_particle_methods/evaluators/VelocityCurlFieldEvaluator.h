@@ -70,7 +70,7 @@ private:
    Vector3<real_t> getVelocityCurl( const Cell & cell, const VectorField_T * velocityField, const BoundaryHandling_T * boundaryHandling )
    {
 
-      std::vector< Vector3<real_t> > velocityValues( Stencil_T::Size, Vector3<real_t>(real_t(0)) );
+      std::vector< Vector3<real_t> > velocityValues( Stencil_T::Size, Vector3<real_t>(0_r) );
 
       Vector3<real_t> velocityInCenterCell = velocityField->get( cell );
 
@@ -89,8 +89,8 @@ private:
       // apply curl formula
       // See: Ramadugu et al - Lattice differential operators for computational physics (2013)
       // with T = c_s**2
-      const real_t inv_c_s_sqr = real_t(3);
-      Vector3<real_t> curl( real_t(0) );
+      const real_t inv_c_s_sqr = 3_r;
+      Vector3<real_t> curl( 0_r );
       for( auto dir = Stencil_T::beginNoCenter(); dir != Stencil_T::end(); ++dir)
       {
          Vector3<real_t> latticeVel( real_c(dir.cx()), real_c(dir.cy()), real_c(dir.cz()) );

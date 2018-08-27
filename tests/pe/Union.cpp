@@ -69,15 +69,15 @@ void SnowManFallingOnPlane()
    cr::HCSITS cr(globalBodyStorage, forest->getBlockStoragePointer(), storageID, ccdID, fcdID);
    cr.setMaxIterations( uint_c(10) );
    cr.setRelaxationModel( cr::HCSITS::InelasticGeneralizedMaximumDissipationContact );
-   cr.setRelaxationParameter( real_t(0.7) );
-   cr.setErrorReductionParameter( real_t(0.8) );
+   cr.setRelaxationParameter( 0.7_r );
+   cr.setErrorReductionParameter( 0.8_r );
    cr.setGlobalLinearAcceleration( Vec3(0,0,-1) );
 
    createPlane( *globalBodyStorage, 0, Vec3(0,0,1), Vec3(0,0,0) );
 
    UnionType* un  = createUnion< boost::tuple<Sphere> >( *globalBodyStorage, forest->getBlockStorage(), storageID, 0, Vec3(5,5,5) );
-   auto sp1       = createSphere(un, 10, Vec3(5,5,1), real_t(1));
-   auto sp2       = createSphere(un, 11, Vec3(real_t(6.7),5,real_t(1.2)), real_t(1.1));
+   auto sp1       = createSphere(un, 10, Vec3(5,5,1), 1_r);
+   auto sp2       = createSphere(un, 11, Vec3(6.7_r,5,1.2_r), 1.1_r);
 
    auto distance = (sp1->getPosition() - sp2->getPosition()).length();
 
@@ -87,13 +87,13 @@ void SnowManFallingOnPlane()
    for (unsigned int i = 0; i < 1000; ++i)
    {
       //vtkWriter->write( true );
-      cr.timestep( real_t(0.1) );
+      cr.timestep( 0.1_r );
    }
 
-   //WALBERLA_CHECK_FLOAT_EQUAL( sp1->getLinearVel().length(), real_t(0) );
-   //WALBERLA_CHECK_FLOAT_EQUAL( sp2->getLinearVel().length(), real_t(0) );
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON( sp1->getPosition()[2], real_t(1)  , real_t(0.001) );
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON( sp2->getPosition()[2], real_t(1.1), real_t(0.001) );
+   //WALBERLA_CHECK_FLOAT_EQUAL( sp1->getLinearVel().length(), 0_r );
+   //WALBERLA_CHECK_FLOAT_EQUAL( sp2->getLinearVel().length(), 0_r );
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON( sp1->getPosition()[2], 1_r  , 0.001_r );
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON( sp2->getPosition()[2], 1.1_r, 0.001_r );
    WALBERLA_CHECK_FLOAT_EQUAL( (sp1->getPosition() - sp2->getPosition()).length(), distance );
 
    //WALBERLA_LOG_DEVEL(un);
@@ -104,8 +104,8 @@ void ImpulsCarryover()
    MaterialID iron = Material::find("iron");
 
    auto un  = std::make_unique<UnionType>(12, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), false, true, false);
-   auto sp1 = std::make_unique<Sphere>( 10, 0, Vec3( 1,0,0), Vec3(0,0,0), Quat(), real_t(1), iron, false, true, false );
-   auto sp2 = std::make_unique<Sphere>( 11, 0, Vec3(-1,0,0), Vec3(0,0,0), Quat(), real_t(1), iron, false, true, false );
+   auto sp1 = std::make_unique<Sphere>( 10, 0, Vec3( 1,0,0), Vec3(0,0,0), Quat(), 1_r, iron, false, true, false );
+   auto sp2 = std::make_unique<Sphere>( 11, 0, Vec3(-1,0,0), Vec3(0,0,0), Quat(), 1_r, iron, false, true, false );
 
    sp1->setLinearVel(Vec3(0,real_c(+1),0));
    sp2->setLinearVel(Vec3(0,real_c(-1),0));
@@ -115,9 +115,9 @@ void ImpulsCarryover()
 
    WALBERLA_CHECK_FLOAT_EQUAL( un->getPosition(),  Vec3(0,0,0) );
    WALBERLA_CHECK_FLOAT_EQUAL( un->getLinearVel(), Vec3(0,0,0) );
-   WALBERLA_CHECK_FLOAT_EQUAL( un->getAngularVel() * Vec3(1,0,0), real_t(0) );
-   WALBERLA_CHECK_FLOAT_EQUAL( un->getAngularVel() * Vec3(0,1,0), real_t(0) );
-   WALBERLA_CHECK_GREATER( un->getAngularVel() * Vec3(0,0,1), real_t(0) );
+   WALBERLA_CHECK_FLOAT_EQUAL( un->getAngularVel() * Vec3(1,0,0), 0_r );
+   WALBERLA_CHECK_FLOAT_EQUAL( un->getAngularVel() * Vec3(0,1,0), 0_r );
+   WALBERLA_CHECK_GREATER( un->getAngularVel() * Vec3(0,0,1), 0_r );
 }
 
 int main( int argc, char ** argv )

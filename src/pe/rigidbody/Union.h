@@ -328,12 +328,12 @@ void Union<BodyTypeTuple>::calcBoundingBox()
    // Setting the bounding box of an empty union
    if( bodies_.isEmpty() ) {
       aabb_ = math::AABB(
-                 gpos_[0] - real_t(0.01),
-            gpos_[1] - real_t(0.01),
-            gpos_[2] - real_t(0.01),
-            gpos_[0] + real_t(0.01),
-            gpos_[1] + real_t(0.01),
-            gpos_[2] + real_t(0.01)
+                 gpos_[0] - 0.01_r,
+            gpos_[1] - 0.01_r,
+            gpos_[2] - 0.01_r,
+            gpos_[0] + 0.01_r,
+            gpos_[1] + 0.01_r,
+            gpos_[2] + 0.01_r
             );
    }
 
@@ -363,8 +363,8 @@ void Union<BodyTypeTuple>::calcCenterOfMass()
    WALBERLA_ASSERT( checkInvariants(), "Invalid union state detected" );
 
    // Initializing the total mass and the inverse mass
-   mass_    = real_t(0);
-   invMass_ = real_t(0);
+   mass_    = 0_r;
+   invMass_ = 0_r;
 
    // Don't calculate the center of mass of an empty union
    if( bodies_.isEmpty() ) return;
@@ -375,8 +375,8 @@ void Union<BodyTypeTuple>::calcCenterOfMass()
       const BodyID body( bodies_.begin().getBodyID() );
       gpos_ = body->getPosition();
       mass_ = body->getMass();
-      if( !isFixed() && mass_ > real_t(0) )
-         invMass_ = real_t(1) / mass_;
+      if( !isFixed() && mass_ > 0_r )
+         invMass_ = 1_r / mass_;
    }
 
    // Calculating the center of mass of a union containing several bodies
@@ -396,8 +396,8 @@ void Union<BodyTypeTuple>::calcCenterOfMass()
          }
 
          // Calculating the center of mass for unions with non-zero mass
-         if( mass_ > real_t(0) ) {
-            if( !isFixed() ) invMass_ = real_t(1) / mass_;
+         if( mass_ > 0_r ) {
+            if( !isFixed() ) invMass_ = 1_r / mass_;
             gpos_ /= mass_;
          }
 
@@ -447,11 +447,11 @@ void Union<BodyTypeTuple>::calcInertia()
    WALBERLA_ASSERT( checkInvariants(), "Invalid union state detected" );
 
    // Initializing the body moment of inertia and the inverse moment of inertia
-   I_    = real_t(0);
-   Iinv_ = real_t(0);
+   I_    = 0_r;
+   Iinv_ = 0_r;
 
    // Don't calculate the moment of inertia of an infinite or empty union
-   if( !isFinite() || bodies_.isEmpty() || floatIsEqual(mass_, real_t(0)) ) return;
+   if( !isFinite() || bodies_.isEmpty() || floatIsEqual(mass_, 0_r) ) return;
 
    // Calculating the global moment of inertia
    real_t mass;

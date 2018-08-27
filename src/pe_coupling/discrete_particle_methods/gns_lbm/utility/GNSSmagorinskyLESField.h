@@ -129,7 +129,7 @@ void GNSSmagorinskyLESField< LatticeModel_T, Filter_T >::operator()( IBlock * co
 
    WALBERLA_ASSERT_EQUAL( pdfField->xyzSizeWithGhostLayer(), omegaField->xyzSizeWithGhostLayer() );
 
-   const real_t factor = real_t(18) * std::sqrt( real_t(2) ) * smagorinskyConstant_ * smagorinskyConstant_;
+   const real_t factor = 18_r * std::sqrt( 2_r ) * smagorinskyConstant_ * smagorinskyConstant_;
 
    filter_( *block );
 
@@ -137,15 +137,15 @@ void GNSSmagorinskyLESField< LatticeModel_T, Filter_T >::operator()( IBlock * co
 
       if( filter_(x,y,z) )
       {
-         const real_t tau0 = real_t(1) / omegaField->get(x,y,z);
+         const real_t tau0 = 1_r / omegaField->get(x,y,z);
 
          Vector3< real_t > momentumDensity;
          const real_t rho = pdfField->getDensityAndEquilibriumMomentumDensity( momentumDensity, x, y, z );
 
          Vector3< real_t > velocity = momentumDensity / rho;
 
-         const real_t porosity = real_t(1) - svfField->get(x,y,z);
-         const real_t invPorosity = real_t(1) / porosity;
+         const real_t porosity = 1_r - svfField->get(x,y,z);
+         const real_t invPorosity = 1_r / porosity;
 
          // use special GNS equilibrium
          std::vector< real_t > equilibrium( Stencil_T::Size );
@@ -153,8 +153,8 @@ void GNSSmagorinskyLESField< LatticeModel_T, Filter_T >::operator()( IBlock * co
          {
             const real_t wq = LatticeModel_T::w[ d.toIdx() ];
             const real_t vel = real_c(d.cx()) * velocity[0] + real_c(d.cy()) * velocity[1] + real_c(d.cz()) * velocity[2];
-            real_t feq = wq * rho * ( real_t(1) - real_t(1.5) * invPorosity * velocity.sqrLength() +
-                                      real_t(4.5) * invPorosity * vel * vel + real_t(3.0) * vel ); // modified feq
+            real_t feq = wq * rho * ( 1_r - 1.5_r * invPorosity * velocity.sqrLength() +
+                                      4.5_r * invPorosity * vel * vel + 3.0_r * vel ); // modified feq
             feq -= wq; // walberla: center around 0 in incompressible case, attention if always needed!
             equilibrium[d.toIdx()] = feq;
          }
@@ -163,21 +163,21 @@ void GNSSmagorinskyLESField< LatticeModel_T, Filter_T >::operator()( IBlock * co
          for( uint_t i = 0; i != Stencil_T::Size; ++i )
             nonEquilibrium[i] = pdfField->get(x,y,z,i) - equilibrium[i];
 
-         real_t filteredMeanMomentum = real_t(0);
+         real_t filteredMeanMomentum = 0_r;
          for( uint_t alpha = 0; alpha < 3; ++alpha ) {
             for( uint_t beta = 0; beta < 3; ++beta )
             {
-               real_t qij = real_t(0);
+               real_t qij = 0_r;
                for( auto d = Stencil_T::begin(); d != Stencil_T::end(); ++d )
                   qij += nonEquilibrium[ d.toIdx() ] * real_c(stencil::c[alpha][*d]) * real_c(stencil::c[beta][*d]);
                filteredMeanMomentum += qij * qij;
             }
          }
 
-         const real_t tauTurbulent = LatticeModel_T::compressible ? ( real_t(0.5) * ( std::sqrt( tau0 * tau0 + (factor / rho) * std::sqrt( real_t(2) * filteredMeanMomentum ) ) - tau0 ) ) :
-                                                                    ( real_t(0.5) * ( std::sqrt( tau0 * tau0 + factor * std::sqrt( real_t(2) * filteredMeanMomentum ) ) - tau0 ) );
+         const real_t tauTurbulent = LatticeModel_T::compressible ? ( 0.5_r * ( std::sqrt( tau0 * tau0 + (factor / rho) * std::sqrt( 2_r * filteredMeanMomentum ) ) - tau0 ) ) :
+                                                                    ( 0.5_r * ( std::sqrt( tau0 * tau0 + factor * std::sqrt( 2_r * filteredMeanMomentum ) ) - tau0 ) );
 
-         omegaField->get(x,y,z) = real_t(1) / ( tau0 + tauTurbulent );
+         omegaField->get(x,y,z) = 1_r / ( tau0 + tauTurbulent );
       }
    )
 }

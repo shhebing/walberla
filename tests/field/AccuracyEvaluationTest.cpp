@@ -64,7 +64,7 @@ int main( int argc, char* argv[] )
 
    auto blocks = blockforest::createUniformBlockGrid( uint_t( 2), uint_t( 1), uint_t( 2), // blocks
                                                       uint_t(10), uint_t(10), uint_t(10), // cells
-                                                      real_t(1), // dx
+                                                      1_r, // dx
                                                       uint_t( 2), uint_t( 1), uint_t( 2) ); // number of processes
 
    //math::seedRandomGenerator( numeric_cast<std::mt19937::result_type>( std::time(0) ) );

@@ -84,12 +84,12 @@ public:
          {
             if(!dpmBodySelectorFct_(bodyIt.getBodyID())) continue;
 
-            Vector3<real_t> forceOnFluid( real_t(0) );
+            Vector3<real_t> forceOnFluid( 0_r );
 
             Vector3<real_t> bodyPosition = bodyIt->getPosition();
 
             // interpolate fluid velocity to body position
-            Vector3<real_t> fluidVelocity( real_t(0) );
+            Vector3<real_t> fluidVelocity( 0_r );
             velocityInterpolator->get( bodyPosition, &fluidVelocity );
 
             WALBERLA_ASSERT( !math::isnan(fluidVelocity[0]) && !math::isnan(fluidVelocity[1]) && !math::isnan(fluidVelocity[2]),

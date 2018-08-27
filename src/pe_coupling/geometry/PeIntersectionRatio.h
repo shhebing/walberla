@@ -64,7 +64,7 @@ inline real_t intersectionRatio( const pe::RigidBody & peRigidBody,
    {
       const pe::Plane & plane = static_cast< const pe::Plane & >( peRigidBody );
       const real_t ratio = intersectionRatioPlanePe( plane, fluidPoint, direction );
-      WALBERLA_ASSERT_FLOAT_EQUAL( ( fluidPoint + ratio * direction - plane.getPosition() ) * plane.getNormal(), real_t(0) );
+      WALBERLA_ASSERT_FLOAT_EQUAL( ( fluidPoint + ratio * direction - plane.getPosition() ) * plane.getNormal(), 0_r );
       return ratio;
    }
    else if ( peRigidBody.getTypeID() == pe::Ellipsoid::getStaticTypeID() )

@@ -109,19 +109,19 @@ static void refinementSelection( SetupBlockForest& forest, const uint_t levels )
 {
    const AABB & domain = forest.getDomain();
 
-   const real_t xSpan = domain.xSize() / real_t(32);
-   const real_t ySpan = domain.ySize() / real_t(32);
-   const real_t zSpan = domain.zSize() / real_t(64);
+   const real_t xSpan = domain.xSize() / 32_r;
+   const real_t ySpan = domain.ySize() / 32_r;
+   const real_t zSpan = domain.zSize() / 64_r;
 
-   const real_t xMiddle = ( domain.xMin() + domain.xMax() ) / real_t(2);
-   const real_t yMiddle = ( domain.yMin() + domain.yMax() ) / real_t(2);
-   const real_t zMiddle = ( domain.zMin() + domain.zMax() ) / real_t(2);
+   const real_t xMiddle = ( domain.xMin() + domain.xMax() ) / 2_r;
+   const real_t yMiddle = ( domain.yMin() + domain.yMax() ) / 2_r;
+   const real_t zMiddle = ( domain.zMin() + domain.zMax() ) / 2_r;
 
    AABB middleBox( xMiddle - xSpan, yMiddle - ySpan, zMiddle +             zSpan,
-                   xMiddle + xSpan, yMiddle + ySpan, zMiddle + real_t(3) * zSpan );
+                   xMiddle + xSpan, yMiddle + ySpan, zMiddle + 3_r * zSpan );
 
    AABB shiftedBox( xMiddle +             xSpan, yMiddle +             ySpan, zMiddle +             zSpan,
-                    xMiddle + real_t(3) * xSpan, yMiddle + real_t(3) * ySpan, zMiddle + real_t(3) * zSpan );
+                    xMiddle + 3_r * xSpan, yMiddle + 3_r * ySpan, zMiddle + 3_r * zSpan );
 
    for( auto block = forest.begin(); block != forest.end(); ++block )
    {
@@ -160,7 +160,7 @@ static shared_ptr< StructuredBlockForest > createBlockStructure( const uint_t le
    // calculate process distribution
    const memory_t memoryLimit = math::Limits< memory_t >::inf();
 
-   sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), uint_c( MPIManager::instance()->numProcesses() ), real_t(0), memoryLimit, true );
+   sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), uint_c( MPIManager::instance()->numProcesses() ), 0_r, memoryLimit, true );
 
    WALBERLA_LOG_INFO_ON_ROOT( sforest );
 
@@ -227,7 +227,7 @@ shared_ptr< vtk::VTKOutput> createFluidFieldVTKWriter( shared_ptr< StructuredBlo
 #endif
 
    const auto & aabb = blocks->getDomain();
-   vtk::AABBCellFilter aabbFilter( AABB( aabb.xMin(), real_t(19), aabb.zMin(), aabb.xMax(), real_t(20), aabb.zMax() ) );
+   vtk::AABBCellFilter aabbFilter( AABB( aabb.xMin(), 19_r, aabb.zMin(), aabb.xMax(), 20_r, aabb.zMax() ) );
    pdfFieldVTKWriter->addCellInclusionFilter( aabbFilter );
 
    auto velocityWriter = make_shared< lbm::VelocityVTKWriter< LatticeModel_T, float > >( pdfFieldId, "VelocityFromPDF" );
@@ -337,7 +337,7 @@ int main( int argc, char ** argv )
    //LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::D3Q19MRT::constructTRT( omega, lbm::collision_model::TRT::lambda_d( omega ) ) );
    //LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::D3Q19MRT( 1.19, 1.4, 1.2, omega, 1.4, 1.98 ) );
 
-   BlockDataID pdfFieldId = lbm::addPdfFieldToStorage( blocks, "pdf field", latticeModel, velocity, real_t(1), FieldGhostLayers );
+   BlockDataID pdfFieldId = lbm::addPdfFieldToStorage( blocks, "pdf field", latticeModel, velocity, 1_r, FieldGhostLayers );
    BlockDataID tmpFieldId = lbm::addPdfFieldToStorage( blocks, "tmp field", latticeModel, FieldGhostLayers );
 
    for( auto block = blocks->begin(); block != blocks->end(); ++block )
@@ -395,7 +395,7 @@ int main( int argc, char ** argv )
    // check constant velocity
 
    //typedef GhostLayerField<real_t,1> ErrorField;
-   //BlockDataID errorFieldId = field::addToStorage< ErrorField >( blocks, "error field", real_t(0), field::zyxf, FieldGhostLayers );
+   //BlockDataID errorFieldId = field::addToStorage< ErrorField >( blocks, "error field", 0_r, field::zyxf, FieldGhostLayers );
 
    for( auto block = blocks->begin(); block != blocks->end(); ++block )
    {
@@ -407,7 +407,7 @@ int main( int argc, char ** argv )
          Vector3< real_t > cellVelocity = pdfField->getVelocity( cell.x(), cell.y(), cell.z() );
          Vector3< real_t > diff = cellVelocity - velocity;
 
-         WALBERLA_CHECK_FLOAT_EQUAL( diff.length() / velocity.length(), real_t(0) );
+         WALBERLA_CHECK_FLOAT_EQUAL( diff.length() / velocity.length(), 0_r );
 
          //errorField->get( cell.x(), cell.y(), cell.z() ) = diff.length() / velocity.length();
       }

@@ -211,7 +211,7 @@ int main( int argc, char * argv[] )
    meshWorkloadMemory.setOutsideCellWorkload(1);
    bfc.setWorkloadMemorySUIDAssignmentFunction( meshWorkloadMemory );
    bfc.setPeriodicity( Vector3<bool>(true) );
-   bfc.setRefinementSelectionFunction( makeRefinementSelection( distanceOctree, numLevels - uint_t(1), dx, dx * real_t(1) ) );
+   bfc.setRefinementSelectionFunction( makeRefinementSelection( distanceOctree, numLevels - uint_t(1), dx, dx * 1_r ) );
 
    auto structuredBlockforest = bfc.createStructuredBlockForest( blockSize );
 
@@ -225,7 +225,7 @@ int main( int argc, char * argv[] )
 
    static const uint_t NUM_GHOSTLAYERS = 4;
 
-   BlockDataID pdfFieldId = lbm::addPdfFieldToStorage( structuredBlockforest, "pdf field", latticeModel, Vector3<real_t>(0), real_t(1), NUM_GHOSTLAYERS, field::fzyx );
+   BlockDataID pdfFieldId = lbm::addPdfFieldToStorage( structuredBlockforest, "pdf field", latticeModel, Vector3<real_t>(0), 1_r, NUM_GHOSTLAYERS, field::fzyx );
    BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >( structuredBlockforest, "flag field", NUM_GHOSTLAYERS );
 
    const FlagUID fluidFlagUID( "Fluid" );

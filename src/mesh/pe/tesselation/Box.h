@@ -36,7 +36,7 @@ void tesselateBox( const walberla::pe::Box & box, MeshType & mesh, std::vector<t
    typedef typename MeshType::VertexHandle VertexHandle;
    typedef typename MeshType::FaceHandle FaceHandle;
 
-   const Vector3<real_t> d = real_t(0.5) * box.getLengths();
+   const Vector3<real_t> d = 0.5_r * box.getLengths();
 
    const VertexHandle nnn = mesh.add_vertex( toOpenMeshNumericCast<Scalar>( box.pointFromBFtoWF( Vector3<real_t>( -d[0], -d[1], -d[2] ) ) ) );
    const VertexHandle nnp = mesh.add_vertex( toOpenMeshNumericCast<Scalar>( box.pointFromBFtoWF( Vector3<real_t>( -d[0], -d[1], +d[2] ) ) ) );

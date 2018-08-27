@@ -70,9 +70,9 @@ public:
    /*!\brief Clamps this colors component values between 0 and 1.
     */
    inline void clamp() {
-      (*this)[0] = std::min(std::max((*this)[0], real_t(0)), real_t(1));
-      (*this)[1] = std::min(std::max((*this)[1], real_t(0)), real_t(1));
-      (*this)[2] = std::min(std::max((*this)[2], real_t(0)), real_t(1));
+      (*this)[0] = std::min(std::max((*this)[0], 0_r), 1_r);
+      (*this)[1] = std::min(std::max((*this)[1], 0_r), 1_r);
+      (*this)[2] = std::min(std::max((*this)[2], 0_r), 1_r);
    }
    
    static Color colorFromHSV(real_t hue, real_t saturation, real_t value);

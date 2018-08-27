@@ -68,7 +68,7 @@ CylindricalBoundary::CylindricalBoundary( id_t sid, id_t uid, const Vec3& gpos, 
    // Since the constructor is never directly called but only used in a small number
    // of functions that already check the cylinder arguments, only asserts are used here to
    // double check the arguments.
-   WALBERLA_ASSERT_GREATER( radius, real_t(0), "Invalid cylinder radius"  );
+   WALBERLA_ASSERT_GREATER( radius, 0_r, "Invalid cylinder radius"  );
 
    // Initializing the instantiated cylinder
    gpos_   = gpos;

@@ -53,21 +53,21 @@ inline real_t levelDependentRelaxationParameter( const uint_t targetLevel, const
    else if( level == targetLevel )
       return parameter_level;
    else
-      powFactor = real_t(1) / real_c( uint_t(1) << ( level - targetLevel ) );
+      powFactor = 1_r / real_c( uint_t(1) << ( level - targetLevel ) );
 
    const real_t parameter_level_half = real_c(0.5) * parameter_level;
-   return parameter_level / ( parameter_level_half + powFactor * ( real_t(1) - parameter_level_half ) );
+   return parameter_level / ( parameter_level_half + powFactor * ( 1_r - parameter_level_half ) );
 }
 
 inline real_t viscosityFromOmega( const real_t omega )
 {
-   static const real_t one_third = real_t(1) / real_t(3);
-   return ( real_t(1) / omega - real_t(0.5) ) * one_third;
+   static const real_t one_third = 1_r / 3_r;
+   return ( 1_r / omega - 0.5_r ) * one_third;
 }
 
 inline real_t omegaFromViscosity( const real_t viscosity )
 {
-   return real_t(1) / ( real_t(0.5) + real_t(3) * viscosity );
+   return 1_r / ( 0.5_r + 3_r * viscosity );
 }
 
 
@@ -112,7 +112,7 @@ public:
    real_t viscosity() const { return viscosity_; }
 
    real_t omega( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/,
-                 const Vector3<real_t> & /*velocity*/ = Vector3<real_t>(), const real_t /*rho*/ = real_t(1) ) const { return omega_; }
+                 const Vector3<real_t> & /*velocity*/ = Vector3<real_t>(), const real_t /*rho*/ = 1_r ) const { return omega_; }
    real_t viscosity( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/ ) const { return viscosity_; }
 
    real_t viscosity( const uint_t _level ) const
@@ -173,7 +173,7 @@ public:
    }
 
    real_t omega( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
-                 const Vector3<real_t> & /*velocity*/ = Vector3<real_t>(), const real_t /*rho*/ = real_t(1) ) const
+                 const Vector3<real_t> & /*velocity*/ = Vector3<real_t>(), const real_t /*rho*/ = 1_r ) const
    {
       return omegaField_->get(x,y,z);
    }
@@ -271,18 +271,18 @@ public:
 
    real_t omega() const { return lambda_e_; }
    real_t omega( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/,
-                 const Vector3<real_t> & /*velocity*/ = Vector3<real_t>(), const real_t /*rho*/ = real_t(1) ) const { return omega(); }
+                 const Vector3<real_t> & /*velocity*/ = Vector3<real_t>(), const real_t /*rho*/ = 1_r ) const { return omega(); }
 
    inline real_t omega_bulk() const { return omega(); }
 
    static real_t lambda_e( const real_t _omega ) { return _omega; }
    static real_t lambda_d( const real_t _omega, const real_t _magicNumber = threeSixteenth )
    {
-      return ( real_t(4) - real_t(2) * _omega ) / ( real_t(4) * _magicNumber * _omega + real_t(2) - _omega );
+      return ( 4_r - 2_r * _omega ) / ( 4_r * _magicNumber * _omega + 2_r - _omega );
    }
    static real_t magicNumber( const real_t _lambda_e, const real_t _lambda_d )
    {
-      return ( ( real_t(2) - _lambda_e ) * ( real_t(2) - _lambda_d ) ) / ( real_t(4) * _lambda_e * _lambda_d );
+      return ( ( 2_r - _lambda_e ) * ( 2_r - _lambda_d ) ) / ( 4_r * _lambda_e * _lambda_d );
    }
 
    real_t viscosity( const uint_t _level ) const
@@ -295,7 +295,7 @@ public:
 
 private:
 
-   TRT() : lambda_e_( real_t(0) ), lambda_d_( real_t(0) ), magicNumber_( real_t(0) ), viscosity_( real_t(0) ), level_( uint_t(0) ) {}
+   TRT() : lambda_e_( 0_r ), lambda_d_( 0_r ), magicNumber_( 0_r ), viscosity_( 0_r ), level_( uint_t(0) ) {}
    
    void initWithMagicNumber( const real_t _omega, const real_t _magicNumber, const uint_t _level )
    {
@@ -342,14 +342,14 @@ public:
              const uint_t _level = uint_t(0) ) :
       viscosity_( viscosityFromOmega( _s9 ) ), level_( _level )
    {
-      s_[0]  = real_t(0);
+      s_[0]  = 0_r;
       s_[1]  = _s1;
       s_[2]  = _s2;
-      s_[3]  = real_t(0);
+      s_[3]  = 0_r;
       s_[4]  = _s4;
-      s_[5]  = real_t(0);
+      s_[5]  = 0_r;
       s_[6]  = _s4;
-      s_[7]  = real_t(0);
+      s_[7]  = 0_r;
       s_[8]  = _s4;
       s_[9]  = _s9;
       s_[10] = _s10;
@@ -446,14 +446,14 @@ public:
       */
    }
 
-   real_t s0()  const { return real_t(0); }
+   real_t s0()  const { return 0_r; }
    real_t s1()  const { return s_[1];     }
    real_t s2()  const { return s_[2];     }
-   real_t s3()  const { return real_t(0); }
+   real_t s3()  const { return 0_r; }
    real_t s4()  const { return s_[4];     }
-   real_t s5()  const { return real_t(0); }
+   real_t s5()  const { return 0_r; }
    real_t s6()  const { return s_[6];     }
-   real_t s7()  const { return real_t(0); }
+   real_t s7()  const { return 0_r; }
    real_t s8()  const { return s_[8];     }
    real_t s9()  const { return s_[9];     }
    real_t s10() const { return s_[10];    }
@@ -481,7 +481,7 @@ public:
 
    real_t omega() const { return s_[9]; }
    real_t omega( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/,
-                 const Vector3<real_t> & /*velocity*/ = Vector3<real_t>(), const real_t /*rho*/ = real_t(1) ) const { return omega(); }
+                 const Vector3<real_t> & /*velocity*/ = Vector3<real_t>(), const real_t /*rho*/ = 1_r ) const { return omega(); }
 
    real_t omega_bulk() const { return s_[1]; }
 
@@ -498,24 +498,24 @@ public:
 
 private:
 
-   D3Q19MRT() : viscosity_( real_t(0) ), level_( uint_t(0) )
+   D3Q19MRT() : viscosity_( 0_r ), level_( uint_t(0) )
    {
-      s_[0]  = real_t(0); s_[1]  = real_t(0); s_[2]  = real_t(0); s_[3]  = real_t(0); s_[4]  = real_t(0);
-      s_[5]  = real_t(0); s_[6]  = real_t(0); s_[7]  = real_t(0); s_[8]  = real_t(0); s_[9]  = real_t(0);
-      s_[10] = real_t(0); s_[11] = real_t(0); s_[12] = real_t(0); s_[13] = real_t(0); s_[14] = real_t(0);
-      s_[15] = real_t(0); s_[16] = real_t(0); s_[17] = real_t(0); s_[18] = real_t(0);
+      s_[0]  = 0_r; s_[1]  = 0_r; s_[2]  = 0_r; s_[3]  = 0_r; s_[4]  = 0_r;
+      s_[5]  = 0_r; s_[6]  = 0_r; s_[7]  = 0_r; s_[8]  = 0_r; s_[9]  = 0_r;
+      s_[10] = 0_r; s_[11] = 0_r; s_[12] = 0_r; s_[13] = 0_r; s_[14] = 0_r;
+      s_[15] = 0_r; s_[16] = 0_r; s_[17] = 0_r; s_[18] = 0_r;
    }
 
    void initTRT( const real_t lambda_e, const real_t lambda_d, const uint_t _level = uint_t(0) )
    {
-      s_[0]  = real_t(0);
+      s_[0]  = 0_r;
       s_[1]  = lambda_e;
       s_[2]  = lambda_e;
-      s_[3]  = real_t(0);
+      s_[3]  = 0_r;
       s_[4]  = lambda_d;
-      s_[5]  = real_t(0);
+      s_[5]  = 0_r;
       s_[6]  = lambda_d;
-      s_[7]  = real_t(0);
+      s_[7]  = 0_r;
       s_[8]  = lambda_d;
       s_[9]  = lambda_e;
       s_[10] = lambda_e;
@@ -534,14 +534,14 @@ private:
    
    void initPan( const real_t lambda_e, const real_t lambda_d, const uint_t _level = uint_t(0) )
    {
-      s_[0]  = real_t(0);
+      s_[0]  = 0_r;
       s_[1]  = lambda_d;
       s_[2]  = lambda_d;
-      s_[3]  = real_t(0);
+      s_[3]  = 0_r;
       s_[4]  = lambda_d;
-      s_[5]  = real_t(0);
+      s_[5]  = 0_r;
       s_[6]  = lambda_d;
-      s_[7]  = real_t(0);
+      s_[7]  = 0_r;
       s_[8]  = lambda_d;
       s_[9]  = lambda_e;
       s_[10] = lambda_d;
@@ -589,7 +589,7 @@ public:
    {
       omega_[0] = _omega1;
       for( uint_t i = uint_t(1); i < uint_t(10); ++i )
-         omega_[i] = real_t(1);
+         omega_[i] = 1_r;
    }
 
    /// Initializes all omegas separately
@@ -644,7 +644,7 @@ public:
 
    real_t omega() const { return omega_[0]; }
    real_t omega( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/,
-                 const Vector3<real_t> & /*velocity*/ = Vector3<real_t>(), const real_t /*rho*/ = real_t(1) ) const { return omega(); }
+                 const Vector3<real_t> & /*velocity*/ = Vector3<real_t>(), const real_t /*rho*/ = 1_r ) const { return omega(); }
 
    real_t omega( uint_t idx ) const { return omega_[idx]; }
 

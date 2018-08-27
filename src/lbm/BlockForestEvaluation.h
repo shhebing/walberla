@@ -135,7 +135,7 @@ private:
 
    real_t totalWorkload( const shared_ptr< StructuredBlockForest > & blocks ) const
    {
-      real_t work( real_t(0) );
+      real_t work( 0_r );
       for( uint_t i = uint_t(0); i < blocks->getNumberOfLevels(); ++i )
          work += real_c( cells_.numberOfCells(i) * uint64_c( math::uintPow2(i) ) );
       return work;
@@ -148,7 +148,7 @@ private:
 
    real_t allFineWorkload( const shared_ptr< StructuredBlockForest > & blocks ) const
    {
-      real_t work( real_t(0) );
+      real_t work( 0_r );
       for( uint_t i = uint_t(0); i < blocks->getNumberOfLevels(); ++i )
          work += real_c( cells_.numberOfCells(i) * uint64_c( Pseudo2D ? math::uintPow4( blocks->getNumberOfLevels() - uint_t(1) - i ) :
                                                                         math::uintPow8( blocks->getNumberOfLevels() - uint_t(1) - i ) ) ) *

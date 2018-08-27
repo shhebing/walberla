@@ -44,7 +44,7 @@ namespace lbm {
 
 template< typename LatticeModel_T, typename FieldPtrOrIterator >
 inline void setDensityAndVelocity( FieldPtrOrIterator & it, const LatticeModel_T & latticeModel,
-                                   const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) );
+                                   const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r );
 
 /////////////////
 // EQUILIBRIUM //
@@ -52,7 +52,7 @@ inline void setDensityAndVelocity( FieldPtrOrIterator & it, const LatticeModel_T
 
 template< typename LatticeModel_T, typename FieldPtrOrIterator >
 inline void setToEquilibrium( FieldPtrOrIterator & it,
-                              const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) );
+                              const Vector3< real_t > & velocity = Vector3< real_t >( 0.0_r ), const real_t rho = 1.0_r );
 
 /////////////
 // DENSITY //
@@ -261,7 +261,7 @@ inline void getVelocity( Vector3< real_t > & velocity, const LatticeModel_T & la
    if( LatticeModel_T::compressible )
    {
       const real_t rho = getDensityAndMomentumDensity< LatticeModel_T >( velocity, latticeModel, it );
-      const real_t invRho = real_t(1.0) / rho;
+      const real_t invRho = 1.0_r / rho;
       velocity *= invRho;
    }
    else
@@ -288,7 +288,7 @@ inline void getEquilibriumVelocity( Vector3< real_t > & velocity, const LatticeM
    if( LatticeModel_T::compressible )
    {
       const real_t rho = getDensityAndEquilibriumMomentumDensity< LatticeModel_T >( velocity, latticeModel, it );
-      const real_t invRho = real_t(1.0) / rho;
+      const real_t invRho = 1.0_r / rho;
       velocity *= invRho;
    }
    else
@@ -361,7 +361,7 @@ inline real_t getDensityAndVelocity( Vector3< real_t > & velocity, const Lattice
    const real_t rho = getDensityAndMomentumDensity< LatticeModel_T >( velocity, latticeModel, it );
    if( LatticeModel_T::compressible )
    {
-      const real_t invRho = real_t(1.0) / rho;
+      const real_t invRho = 1.0_r / rho;
       velocity *= invRho;
    }
    return rho;
@@ -375,7 +375,7 @@ inline real_t getDensityAndEquilibriumVelocity( Vector3< real_t > & velocity, co
    const real_t rho = getDensityAndEquilibriumMomentumDensity< LatticeModel_T >( velocity, latticeModel, it );
    if( LatticeModel_T::compressible )
    {
-      const real_t invRho = real_t(1.0) / rho;
+      const real_t invRho = 1.0_r / rho;
       velocity *= invRho;
    }
    return rho;

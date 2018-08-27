@@ -72,7 +72,7 @@ int main( int argc, char * argv[] )
 
    auto blocks = blockforest::createUniformBlockGrid( uint_t(1), uint_t(1), uint_t(1),
                                                       fieldSize[0], fieldSize[1], uint_t(1),
-                                                      real_t(1),
+                                                      1_r,
                                                       uint_t(1), uint_t(1), uint_t(1),
                                                       true, true, false );
 

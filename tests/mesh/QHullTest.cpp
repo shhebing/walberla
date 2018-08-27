@@ -116,13 +116,13 @@ void test( const std::string & testName, const std::vector<Vector3<real_t>> & po
 std::vector<Vector3<real_t>> generatePointCloudCube()
 {
    std::vector<Vector3<real_t>> points;
-   points.emplace_back( real_t(-1), real_t(-1), real_t(-1) );
-   points.emplace_back( real_t(-1), real_t(-1), real_t( 1) );
-   points.emplace_back( real_t(-1), real_t( 1), real_t(-1) );
-   points.emplace_back( real_t(-1), real_t( 1), real_t( 1) );
-   points.emplace_back( real_t( 1), real_t(-1), real_t(-1) );
-   points.emplace_back( real_t( 1), real_t(-1), real_t( 1) );
-   points.emplace_back( real_t( 1), real_t( 1), real_t(-1) );
+   points.emplace_back( -1_r, -1_r, -1_r );
+   points.emplace_back( -1_r, -1_r, real_t( 1) );
+   points.emplace_back( -1_r, real_t( 1), -1_r );
+   points.emplace_back( -1_r, real_t( 1), real_t( 1) );
+   points.emplace_back( real_t( 1), -1_r, -1_r );
+   points.emplace_back( real_t( 1), -1_r, real_t( 1) );
+   points.emplace_back( real_t( 1), real_t( 1), -1_r );
    points.emplace_back( real_t( 1), real_t( 1), real_t( 1) );
 
    return points;
@@ -132,10 +132,10 @@ std::vector<Vector3<real_t>> generatePointCloudCube()
 std::vector<Vector3<real_t>> generatePointCloudTetrahedron()
 {
    std::vector<Vector3<real_t>> points;
-   points.emplace_back( real_t( 1), real_t( 1), real_t(-1) );
-   points.emplace_back( real_t(-1), real_t(-1), real_t(-1) );
-   points.emplace_back( real_t(-1), real_t( 1), real_t( 1) );
-   points.emplace_back( real_t( 1), real_t(-1), real_t( 1) );
+   points.emplace_back( real_t( 1), real_t( 1), -1_r );
+   points.emplace_back( -1_r, -1_r, -1_r );
+   points.emplace_back( -1_r, real_t( 1), real_t( 1) );
+   points.emplace_back( real_t( 1), -1_r, real_t( 1) );
 
    return points;
 }
@@ -144,7 +144,7 @@ std::vector<Vector3<real_t>> generatePointCloudOctahedron()
 {
    std::vector<Vector3<real_t>> points;
 
-   for( auto one : {real_t(-1), real_t(1)} )
+   for( auto one : {-1_r, 1_r} )
    {
       points.emplace_back( one,   0,   0 );
       points.emplace_back(   0, one,   0 );
@@ -158,9 +158,9 @@ std::vector<Vector3<real_t>> generatePointCloudIcosahedron()
 {
    std::vector<Vector3<real_t>> points;
    
-   static const real_t PHI = ( real_t(1) + std::sqrt( real_t(5) ) ) / real_t(2);
+   static const real_t PHI = ( 1_r + std::sqrt( 5_r ) ) / 2_r;
 
-   for( auto one : {real_t(-1), real_t(1)} )
+   for( auto one : {-1_r, 1_r} )
       for( auto phi : {-PHI, PHI} )
       {
          points.emplace_back( real_t(  0), real_t(one), real_t(phi) );
@@ -175,8 +175,8 @@ std::vector<Vector3<real_t>> generatePointCloudDodecahedron()
 {
    std::vector<Vector3<real_t>> points = generatePointCloudCube();
 
-   static const real_t PHI = ( real_t(1) + std::sqrt( real_t(5) ) ) / real_t(2);
-   static const real_t PHI_INV = real_t(1) / PHI;
+   static const real_t PHI = ( 1_r + std::sqrt( 5_r ) ) / 2_r;
+   static const real_t PHI_INV = 1_r / PHI;
 
    for( auto phi : {-PHI, PHI} )
       for( auto piv : {-PHI_INV, PHI_INV} )
@@ -210,7 +210,7 @@ std::vector<Vector3<real_t>> generatPointCloudOnSphere( const real_t radius, con
    for( auto & p : pointCloud )
    {
       real_t theta = 2 * math::PI * distribution(rng);
-      real_t phi = std::acos( real_t(1.0) - real_t(2.0) * distribution(rng) );
+      real_t phi = std::acos( 1.0_r - 2.0_r * distribution(rng) );
       p[0] = std::sin(phi) * std::cos(theta) * radius;
       p[1] = std::sin(phi) * std::sin(theta) * radius;
       p[2] = std::cos(phi) * radius;
@@ -229,10 +229,10 @@ void runTests( const uint_t numPoints, const bool doVTKOutput )
    test<MeshType>( "icosahedron", generatePointCloudIcosahedron(), doVTKOutput );
    test<MeshType>( "dodecahedron", generatePointCloudDodecahedron(), doVTKOutput );
 
-   math::AABB aabb( real_t(-1), real_t(-1), real_t(-1), real_t(1), real_t(1), real_t(1) );
+   math::AABB aabb( -1_r, -1_r, -1_r, 1_r, 1_r, 1_r );
    test<MeshType>( "aabb", generatePointCloudInAABB(aabb, numPoints), doVTKOutput );
 
-   test<MeshType>( "sphere", generatPointCloudOnSphere(real_t(1), numPoints), doVTKOutput );
+   test<MeshType>( "sphere", generatPointCloudOnSphere(1_r, numPoints), doVTKOutput );
 }
 
 

@@ -11,7 +11,7 @@
 using namespace walberla;
 typedef GhostLayerField< real_t, 1 > Field_T;
 
-const real_t factor = real_t(2.745652);
+const real_t factor = 2.745652_r;
 
 real_t greens(uint_t /* x */, uint_t /* y */, uint_t /* z */)
 {

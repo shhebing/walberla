@@ -39,7 +39,7 @@ namespace math {
  **********************************************************************************************************************/
 void DistributedSample::mpiAllGather()
 {
-   sum_ = real_t(0);
+   sum_ = 0_r;
    min_ =  std::numeric_limits< real_t >::max();
    max_ = -std::numeric_limits< real_t >::max();
    size_ = uint_c( data_.size() );
@@ -60,7 +60,7 @@ void DistributedSample::mpiAllGather()
    }
 
    mean_ = sum_ / real_c(size_);
-   variance_ = real_t(0);
+   variance_ = 0_r;
 
    for( auto it = data_.begin(); it != data_.end(); ++it )
    {
@@ -77,10 +77,10 @@ void DistributedSample::mpiAllGather()
    
    if( size_ == uint_t(0) )
    {
-      min_ = real_t(0);
-      max_ = real_t(0);
-      mean_ = real_t(0);
-      variance_ = real_t(0);
+      min_ = 0_r;
+      max_ = 0_r;
+      mean_ = 0_r;
+      variance_ = 0_r;
    }
 }
 
@@ -98,7 +98,7 @@ void DistributedSample::mpiGather( int rank )
       WALBERLA_ASSERT( rank == 0 );
    }
 
-   sum_ = real_t(0);
+   sum_ = 0_r;
    min_ =  std::numeric_limits< real_t >::max();
    max_ = -std::numeric_limits< real_t >::max();
    size_ = uint_c( data_.size() );
@@ -119,7 +119,7 @@ void DistributedSample::mpiGather( int rank )
    }
 
    mean_ = sum_ / real_c(size_);
-   variance_ = real_t(0);
+   variance_ = 0_r;
 
    for( auto it = data_.begin(); it != data_.end(); ++it )
    {
@@ -136,10 +136,10 @@ void DistributedSample::mpiGather( int rank )
    
    if( size_ == uint_t(0) )
    {
-      min_ = real_t(0);
-      max_ = real_t(0);
-      mean_ = real_t(0);
-      variance_ = real_t(0);
+      min_ = 0_r;
+      max_ = 0_r;
+      mean_ = 0_r;
+      variance_ = 0_r;
    }   
 }
 

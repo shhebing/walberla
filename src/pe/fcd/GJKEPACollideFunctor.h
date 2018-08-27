@@ -110,7 +110,7 @@ namespace gjkepa{
       Vec3 contactPoint;
       real_t penetrationDepth;
 
-      real_t margin = real_t(1e-4);
+      real_t margin = 1e-4_r;
       GJK gjk;
       if(gjk.doGJKmargin(*a, *b, margin)){
          //2. If collision is possible perform EPA.
@@ -143,7 +143,7 @@ namespace gjkepa{
       if(pdepth < contactThreshold){ //We have a collision
          normal = support_dir;
          penetrationDepth = pdepth;
-         contactPoint = contactp + real_t(0.5) * penetrationDepth * normal;
+         contactPoint = contactp + 0.5_r * penetrationDepth * normal;
          contacts_.push_back( Contact(a, b, contactPoint, normal, penetrationDepth) );
          return true;
       }else{ //No collision

@@ -56,13 +56,13 @@ int main( int argc, char **argv )
 
    pe::SetBodyTypeIDs<BodyTypeTuple>::execute(); //important to be able to compare static body types in intersection function!
 
-   const real_t epsilon( real_t(1e-5) );
+   const real_t epsilon( 1e-5_r );
 
    walberla::id_t sid = 0;
    walberla::id_t uid = 0;
 
-   Vector3<real_t> rPos( real_t(0));
-   Vector3<real_t> rotationAngles( real_t(0));
+   Vector3<real_t> rPos( 0_r);
+   Vector3<real_t> rotationAngles( 0_r);
    Quaternion<real_t> quat( rotationAngles );
    pe::MaterialID material = pe::Material::find("iron");
 
@@ -71,30 +71,30 @@ int main( int argc, char **argv )
    // SPHERE //
    ////////////
    {
-      Vector3<real_t> bodyPos(real_t(1), real_t(0), real_t(0));
-      real_t radius = real_t(1);
+      Vector3<real_t> bodyPos(1_r, 0_r, 0_r);
+      real_t radius = 1_r;
 
       pe::Sphere sphere(++sid, ++uid, bodyPos, rPos, quat, radius, material, false, false, false);
 
       pe::RigidBody & rb = sphere; // otherwise not the pe_coupling/geometry version is matched
 
-      Vector3<real_t> pos1(real_t(-0.5), real_t(0), real_t(0));
-      Vector3<real_t> dir1(real_t(1), real_t(0), real_t(0));
+      Vector3<real_t> pos1(-0.5_r, 0_r, 0_r);
+      Vector3<real_t> dir1(1_r, 0_r, 0_r);
       real_t delta1 = walberla::lbm::intersectionRatio(rb, pos1, dir1, epsilon );
-      WALBERLA_CHECK_FLOAT_EQUAL(delta1, real_t(0.5), "Intersection ratio with sphere wrong!");
+      WALBERLA_CHECK_FLOAT_EQUAL(delta1, 0.5_r, "Intersection ratio with sphere wrong!");
 
-      Vector3<real_t> pos2(real_t(1), real_t(1), real_t(1));
-      Vector3<real_t> dir2(real_t(0), -real_t(1), -real_t(1));
+      Vector3<real_t> pos2(1_r, 1_r, 1_r);
+      Vector3<real_t> dir2(0_r, -1_r, -1_r);
       real_t delta2 = walberla::lbm::intersectionRatio(rb, pos2, dir2, epsilon );
-      WALBERLA_CHECK_FLOAT_EQUAL(delta2, (std::sqrt(2) - real_t(1)) / std::sqrt(2), "Intersection ratio with sphere wrong!");
+      WALBERLA_CHECK_FLOAT_EQUAL(delta2, (std::sqrt(2) - 1_r) / std::sqrt(2), "Intersection ratio with sphere wrong!");
    }
 
    ///////////
    // PLANE //
    ///////////
    {
-      Vector3<real_t> bodyPos(real_t(1), real_t(0), real_t(0));
-      Vector3<real_t> bodyNormal(real_t(0), real_t(1), real_t(1));
+      Vector3<real_t> bodyPos(1_r, 0_r, 0_r);
+      Vector3<real_t> bodyNormal(0_r, 1_r, 1_r);
 
       bodyNormal = bodyNormal.getNormalized();
 
@@ -102,50 +102,50 @@ int main( int argc, char **argv )
 
       pe::RigidBody & rb = plane; // otherwise not the pe_coupling/geometry version is matched
 
-      Vector3<real_t> pos1(real_t(1), real_t(0.5), real_t(0.5));
-      Vector3<real_t> dir1(real_t(0), -real_t(1), -real_t(1));
+      Vector3<real_t> pos1(1_r, 0.5_r, 0.5_r);
+      Vector3<real_t> dir1(0_r, -1_r, -1_r);
       real_t delta1 = walberla::lbm::intersectionRatio(rb, pos1, dir1, epsilon );
-      WALBERLA_CHECK_FLOAT_EQUAL(delta1, real_t(0.5), "Intersection ratio with plane wrong!");
+      WALBERLA_CHECK_FLOAT_EQUAL(delta1, 0.5_r, "Intersection ratio with plane wrong!");
 
-      Vector3<real_t> dir2(real_t(0), real_t(0), -real_t(2));
+      Vector3<real_t> dir2(0_r, 0_r, -2_r);
       real_t delta2 = walberla::lbm::intersectionRatio(rb, pos1, dir2, epsilon );
-      WALBERLA_CHECK_FLOAT_EQUAL(delta2, real_t(0.5), "Intersection ratio with plane wrong!");
+      WALBERLA_CHECK_FLOAT_EQUAL(delta2, 0.5_r, "Intersection ratio with plane wrong!");
 
-      Vector3<real_t> dir3(real_t(0), -real_t(3), real_t(0));
+      Vector3<real_t> dir3(0_r, -3_r, 0_r);
       real_t delta3 = walberla::lbm::intersectionRatio(rb, pos1, dir3, epsilon );
-      WALBERLA_CHECK_FLOAT_EQUAL(delta3, real_t(1)/real_t(3), "Intersection ratio with plane wrong!");
+      WALBERLA_CHECK_FLOAT_EQUAL(delta3, 1_r/3_r, "Intersection ratio with plane wrong!");
    }
 
    ///////////////
    // ELLIPSOID //
    ///////////////
    {
-      Vector3<real_t> bodyPos(real_t(1), real_t(0), real_t(0));
-      Vector3<real_t> semiAxes1(real_t(1), real_t(1), real_t(1));
+      Vector3<real_t> bodyPos(1_r, 0_r, 0_r);
+      Vector3<real_t> semiAxes1(1_r, 1_r, 1_r);
 
       pe::Ellipsoid ellip1(++sid, ++uid, bodyPos, rPos, quat, semiAxes1, material, false, false, false);
 
       pe::RigidBody & rb1 = ellip1; // otherwise not the pe_coupling/geometry version is matched
 
-      Vector3<real_t> pos1(real_t(-0.5), real_t(0), real_t(0));
-      Vector3<real_t> dir1(real_t(1), real_t(0), real_t(0));
+      Vector3<real_t> pos1(-0.5_r, 0_r, 0_r);
+      Vector3<real_t> dir1(1_r, 0_r, 0_r);
       real_t delta1 = walberla::lbm::intersectionRatio(rb1, pos1, dir1, epsilon );
-      WALBERLA_CHECK_FLOAT_EQUAL(delta1, real_t(0.5), "Intersection ratio with ellipsoid wrong!");
+      WALBERLA_CHECK_FLOAT_EQUAL(delta1, 0.5_r, "Intersection ratio with ellipsoid wrong!");
 
-      Vector3<real_t> pos2(real_t(1), real_t(1), real_t(1));
-      Vector3<real_t> dir2(real_t(0), -real_t(1), -real_t(1));
+      Vector3<real_t> pos2(1_r, 1_r, 1_r);
+      Vector3<real_t> dir2(0_r, -1_r, -1_r);
       real_t delta2 = walberla::lbm::intersectionRatio(rb1, pos2, dir2, epsilon );
-      WALBERLA_CHECK_FLOAT_EQUAL(delta2, (std::sqrt(2) - real_t(1)) / std::sqrt(2), "Intersection ratio with ellipsoid wrong!");
+      WALBERLA_CHECK_FLOAT_EQUAL(delta2, (std::sqrt(2) - 1_r) / std::sqrt(2), "Intersection ratio with ellipsoid wrong!");
 
-      Vector3<real_t> semiAxes2(real_t(2), real_t(0.5), real_t(2));
+      Vector3<real_t> semiAxes2(2_r, 0.5_r, 2_r);
       pe::Ellipsoid ellip2(++sid, ++uid, bodyPos, rPos, quat, semiAxes2, material, false, false, false);
 
       pe::RigidBody & rb2 = ellip2; // otherwise not the pe_coupling/geometry version is matched
 
-      Vector3<real_t> pos3(real_t(1), real_t(1), real_t(0));
-      Vector3<real_t> dir3(real_t(0), real_t(-1), real_t(0));
+      Vector3<real_t> pos3(1_r, 1_r, 0_r);
+      Vector3<real_t> dir3(0_r, -1_r, 0_r);
       real_t delta3 = walberla::lbm::intersectionRatio(rb2, pos3, dir3, epsilon );
-      WALBERLA_CHECK_FLOAT_EQUAL(delta3, real_t(0.5), "Intersection ratio with ellipsoid wrong!");
+      WALBERLA_CHECK_FLOAT_EQUAL(delta3, 0.5_r, "Intersection ratio with ellipsoid wrong!");
 
    }
 

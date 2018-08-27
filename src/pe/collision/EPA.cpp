@@ -81,11 +81,11 @@ inline EPA::EPA_Triangle::EPA_Triangle( size_t a, size_t b, size_t c,
    real_t vc = nT * (A % B);
    real_t va = nT * (B % C);
    real_t vb = nT * (C % A);
-   real_t denom = real_t(1.0) / (va + vb + vc);
+   real_t denom = 1.0_r / (va + vb + vc);
 
    bar_[0] = va * denom;
    bar_[1] = vb * denom;
-   bar_[2] = real_t(1.0) - bar_[0] - bar_[1];
+   bar_[2] = 1.0_r - bar_[0] - bar_[1];
 
    closest_ = bar_[0] * A + bar_[1] * B + bar_[2] * C;
 

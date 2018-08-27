@@ -307,7 +307,7 @@ static shared_ptr< SetupBlockForest > createSetupBlockForest( const blockforest:
    if( blocksPerProcess != 0 )
       numberOfProcesses = uint_c( std::ceil( real_c( forest->getNumberOfBlocks() ) / real_c( blocksPerProcess ) ) );
 
-   forest->balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), numberOfProcesses, real_t(0), processMemoryLimit, true );
+   forest->balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), numberOfProcesses, 0_r, processMemoryLimit, true );
 
    if( outputSetupForest ) 
    {
@@ -408,7 +408,7 @@ MyBoundaryHandling<LatticeModel_T>::operator()( IBlock * const block ) const
 
    return new BoundaryHandling_T( "boundary handling", flagField, fluid,
          boost::tuples::make_tuple( NoSlip_T( "no slip", NoSlip_Flag, pdfField ),
-                                       UBB_T( "velocity bounce back", UBB_Flag, pdfField, topVelocity_, real_t(0), real_t(0) ) ) );
+                                       UBB_T( "velocity bounce back", UBB_Flag, pdfField, topVelocity_, 0_r, 0_r ) ) );
 }
 
 
@@ -570,7 +570,7 @@ real_t exactFlowRate( const real_t flowRate )
 
 Vector3< real_t > exactVelocity( const Vector3< real_t > & p, const math::AABB & domain, const real_t maxLatticeVelocity )
 {
-   return Vector3< real_t >( maxLatticeVelocity * ( p[1] - domain.yMin() ) / domain.ySize(), real_t(0), real_t(0) );
+   return Vector3< real_t >( maxLatticeVelocity * ( p[1] - domain.yMin() ) / domain.ySize(), 0_r, 0_r );
 }
 
 
@@ -667,8 +667,8 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    setup.viscosity_L    = latticeModel.collisionModel().viscosity( uint_t(0) );
    setup.meanVelocity_L = ( setup.Re * setup.viscosity_L ) / real_c( setup.yBlocks * setup.yCells );
-   setup.maxVelocity_L  = real_t(2) * setup.meanVelocity_L;
-   setup.flowRate_L     = ( setup.maxVelocity_L * real_c( setup.yBlocks * setup.yCells ) * real_c( setup.zBlocks * setup.zCells ) ) / real_t(2);
+   setup.maxVelocity_L  = 2_r * setup.meanVelocity_L;
+   setup.flowRate_L     = ( setup.maxVelocity_L * real_c( setup.yBlocks * setup.yCells ) * real_c( setup.zBlocks * setup.zCells ) ) / 2_r;
 
    // creating the block structure
 
@@ -676,13 +676,13 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    // add pdf field to blocks
 
-   const real_t initVelocity = ( configBlock.getParameter< bool >( "initWithMeanVelocity", false ) ) ? setup.meanVelocity_L : real_t(0);
+   const real_t initVelocity = ( configBlock.getParameter< bool >( "initWithMeanVelocity", false ) ) ? setup.meanVelocity_L : 0_r;
 
    BlockDataID pdfFieldId = fzyx ? lbm::addPdfFieldToStorage( blocks, "pdf field (fzyx)", latticeModel,
-                                                              Vector3< real_t >( initVelocity, real_c(0), real_c(0) ), real_t(1),
+                                                              Vector3< real_t >( initVelocity, real_c(0), real_c(0) ), 1_r,
                                                               FieldGhostLayers, field::fzyx ) :
                                    lbm::addPdfFieldToStorage( blocks, "pdf field (zyxf)", latticeModel,
-                                                              Vector3< real_t >( initVelocity, real_c(0), real_c(0) ), real_t(1),
+                                                              Vector3< real_t >( initVelocity, real_c(0), real_c(0) ), 1_r,
                                                               FieldGhostLayers, field::zyxf );
 
    using VelocityAdaptor_T = typename lbm::Adaptor< LatticeModel_T >::VelocityVector;
@@ -743,18 +743,18 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
                                                                                                         flagFieldId, Fluid_Flag,
                                                                                                         std::bind( exactFlowRate, setup.flowRate_L ),
                                                                                                         exactSolutionFunction );
-   volumetricFlowRate->setNormalizationFactor( real_t(1) / setup.maxVelocity_L );
-   volumetricFlowRate->setDomainNormalization( Vector3<real_t>( real_t(1) ) );
+   volumetricFlowRate->setNormalizationFactor( 1_r / setup.maxVelocity_L );
+   volumetricFlowRate->setDomainNormalization( Vector3<real_t>( 1_r ) );
 
    timeloop.addFuncBeforeTimeStep( makeSharedFunctor( volumetricFlowRate ), "volumetric flow rate evaluation" );
 
    auto accuracyEvaluation = field::makeAccuracyEvaluation< VelocityAdaptor_T >( configBlock, blocks, velocityAdaptorId, exactSolutionFunction );
-   accuracyEvaluation->setNormalizationFactor( real_t(1) / setup.maxVelocity_L );
+   accuracyEvaluation->setNormalizationFactor( 1_r / setup.maxVelocity_L );
 
    timeloop.addFuncBeforeTimeStep( makeSharedFunctor( accuracyEvaluation ), "accuracy evaluation" );
 
    auto linePlot = field::makeAccuracyEvaluationLinePlot< VelocityAdaptor_T >( configBlock, blocks, velocityAdaptorId, exactSolutionFunction );
-   linePlot->setNormalizationFactor( real_t(1) / setup.maxVelocity_L );
+   linePlot->setNormalizationFactor( 1_r / setup.maxVelocity_L );
 
    timeloop.addFuncBeforeTimeStep( makeSharedFunctor( field::makeAccuracyEvaluationLinePlotter( configBlock, linePlot ) ), "accuracy evaluation (line plot)" );
 
@@ -1024,7 +1024,7 @@ int main( int argc, char **argv )
    setup.yCells = configBlock.getParameter< uint_t >( "yCells", uint_t(50) );
    setup.zCells = configBlock.getParameter< uint_t >( "zCells", uint_t(10) );
 
-   setup.Re = configBlock.getParameter< real_t >( "Re", real_t(10) );
+   setup.Re = configBlock.getParameter< real_t >( "Re", 10_r );
    
    // ... in bytes
    const memory_t memoryPerCell = configBlock.getParameter< memory_t >( "memoryPerCell", memory_t( 19 * 8 + 1 ) );
@@ -1047,7 +1047,7 @@ int main( int argc, char **argv )
       if( !configBlock.isDefined("borderRefinementLevel")  )
          WALBERLA_ABORT( "You have to specify \'borderRefinementLevel\' in the \"CouetteFlow\" block of the configuration file (" << argv[1] << ")" );
 
-      const real_t borderRefinementBuffer = configBlock.getParameter< real_t >( "borderRefinementBuffer", real_t(0) );
+      const real_t borderRefinementBuffer = configBlock.getParameter< real_t >( "borderRefinementBuffer", 0_r );
 
       BorderRefinementSelection borderRefinementSelection( setup, configBlock.getParameter< uint_t >( "borderRefinementLevel" ),
                borderRefinementBuffer );
@@ -1144,19 +1144,19 @@ int main( int argc, char **argv )
 
    // executing benchmark
 
-   const real_t omega = configBlock.getParameter< real_t >( "omega", real_t(1.4) );
+   const real_t omega = configBlock.getParameter< real_t >( "omega", 1.4_r );
 
-   const real_t magicNumber = configBlock.getParameter< real_t >( "magicNumber", real_t(3) / real_t(16) );
+   const real_t magicNumber = configBlock.getParameter< real_t >( "magicNumber", 3_r / 16_r );
 
-   const real_t lambda_e = configBlock.getParameter< real_t >( "lambda_e", real_t(1.4) );
-   const real_t lambda_d = configBlock.getParameter< real_t >( "lambda_d", real_t(1.4) );
+   const real_t lambda_e = configBlock.getParameter< real_t >( "lambda_e", 1.4_r );
+   const real_t lambda_d = configBlock.getParameter< real_t >( "lambda_d", 1.4_r );
 
-   const real_t s1  = configBlock.getParameter< real_t >( "s1",  real_t(1.4) );
-   const real_t s2  = configBlock.getParameter< real_t >( "s2",  real_t(1.4) );
-   const real_t s4  = configBlock.getParameter< real_t >( "s4",  real_t(1.4) );
-   const real_t s9  = configBlock.getParameter< real_t >( "s9",  real_t(1.4) );
-   const real_t s10 = configBlock.getParameter< real_t >( "s10", real_t(1.4) );
-   const real_t s16 = configBlock.getParameter< real_t >( "s16", real_t(1.4) );
+   const real_t s1  = configBlock.getParameter< real_t >( "s1",  1.4_r );
+   const real_t s2  = configBlock.getParameter< real_t >( "s2",  1.4_r );
+   const real_t s4  = configBlock.getParameter< real_t >( "s4",  1.4_r );
+   const real_t s9  = configBlock.getParameter< real_t >( "s9",  1.4_r );
+   const real_t s10 = configBlock.getParameter< real_t >( "s10", 1.4_r );
+   const real_t s16 = configBlock.getParameter< real_t >( "s16", 1.4_r );
 
    const uint_t relaxationParametersLevel = configBlock.getParameter< uint_t >( "relaxationParametersLevel", uint_t(0) );
 

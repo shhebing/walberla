@@ -49,9 +49,9 @@ class BodyVelocityTimeDerivativeEvaluator
 public:
 
    BodyVelocityTimeDerivativeEvaluator( const shared_ptr<StructuredBlockStorage> & blockStorage,
-                                        const BlockDataID & bodyStorageID, const real_t & deltaT = real_t(1),
+                                        const BlockDataID & bodyStorageID, const real_t & deltaT = 1_r,
                                         const std::function<bool(pe::BodyID)> & dpmBodySelectorFct = selectRegularBodies )
-   : blockStorage_( blockStorage ), bodyStorageID_( bodyStorageID ), deltaTinv_( real_t(1) / deltaT ),
+   : blockStorage_( blockStorage ), bodyStorageID_( bodyStorageID ), deltaTinv_( 1_r / deltaT ),
      dpmBodySelectorFct_( dpmBodySelectorFct)
      { }
 
@@ -72,7 +72,7 @@ public:
 
    void resetDeltaT( const real_t & deltaT )
    {
-      deltaTinv_ = real_t(1) / deltaT;
+      deltaTinv_ = 1_r / deltaT;
    }
 
    void get( Vector3<real_t> & particleVelocityTimeDerivative, const Vector3<real_t> currentParticleVelocity, const walberla::id_t & bodySystemID )

@@ -117,7 +117,7 @@ int main( int argc, char** argv )
    for (auto blkIt = forest->begin(); blkIt != forest->end(); ++blkIt)
    {
       IBlock & currentBlock = *blkIt;
-      for (auto it = grid_generator::SCIterator(currentBlock.getAABB(), Vector3<real_t>(spacing) * real_t(0.5), spacing); it != grid_generator::SCIterator(); ++it)
+      for (auto it = grid_generator::SCIterator(currentBlock.getAABB(), Vector3<real_t>(spacing) * 0.5_r, spacing); it != grid_generator::SCIterator(); ++it)
       {
          createSphere( *globalBodyStorage, forest->getBlockStorage(), storageID, 0, *it, 1 );
       }

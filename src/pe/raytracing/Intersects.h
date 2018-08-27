@@ -46,7 +46,7 @@ inline bool intersects(const EllipsoidID ellipsoid, const Ray& ray, real_t& t, V
 
 inline bool intersects(const BodyID body, const Ray& ray, real_t& t, Vec3& n);
    
-inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t, real_t padding = real_t(0.0), Vec3* n = NULL);
+inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t, real_t padding = 0.0_r, Vec3* n = NULL);
 inline bool intersectsSphere(const Vec3& gpos, real_t radius, const Ray& ray, real_t& t0, real_t& t1);
 
 struct IntersectsFunctor
@@ -63,7 +63,7 @@ struct IntersectsFunctor
    }
 };
 
-const real_t discriminantEps = real_t(1e-4);
+const real_t discriminantEps = 1e-4_r;
    
 inline bool intersects(const SphereID sphere, const Ray& ray, real_t& t, Vec3& n) {
    const real_t realMax = std::numeric_limits<real_t>::max();
@@ -110,7 +110,7 @@ inline bool intersects(const BoxID box, const Ray& ray, real_t& t, Vec3& n) {
    Ray transformedRay = ray.transformedToBF(box);
    
    const Vec3& lengths = box->getLengths();
-   const Vec3 lengthsHalved = lengths/real_t(2);
+   const Vec3 lengthsHalved = lengths/2_r;
    
    const Vec3 bounds[2] = {
       -lengthsHalved,
@@ -156,12 +156,12 @@ inline bool intersects(const BoxID box, const Ray& ray, real_t& t, Vec3& n) {
       tmax = tzmax;
    }
    
-   n[0] = n[1] = n[2] = real_t(0);
+   n[0] = n[1] = n[2] = 0_r;
    real_t t_;
    if (tmin > 0) {
       // ray hit box from outside
       t_ = tmin;
-      n[tminAxis] = real_t(1);
+      n[tminAxis] = 1_r;
    } else if (tmax < 0) {
       // tmin and tmax are smaller than 0 -> box is in rays negative direction
       t = realMax;
@@ -169,7 +169,7 @@ inline bool intersects(const BoxID box, const Ray& ray, real_t& t, Vec3& n) {
    } else {
       // ray origin within box
       t_ = tmax;
-      n[tmaxAxis] = real_t(1);
+      n[tmaxAxis] = 1_r;
    }
    
    if (transformedRay.getDirection() * n > 0) {
@@ -185,7 +185,7 @@ inline bool intersects(const CapsuleID capsule, const Ray& ray, real_t& t, Vec3&
    const Ray transformedRay = ray.transformedToBF(capsule);
    const Vec3& direction = transformedRay.getDirection();
    const Vec3& origin = transformedRay.getOrigin();
-   real_t halfLength = capsule->getLength()/real_t(2);
+   real_t halfLength = capsule->getLength()/2_r;
 
    const real_t realMax = std::numeric_limits<real_t>::max();
    t = realMax;
@@ -194,16 +194,16 @@ inline bool intersects(const CapsuleID capsule, const Ray& ray, real_t& t, Vec3&
    size_t intersectedPrimitive = 0; // 1 for capsule, 2 for left half sphere, 3 for right half sphere
 
    real_t a = direction[2]*direction[2] + direction[1]*direction[1];
-   real_t b = real_t(2)*origin[2]*direction[2] + real_t(2)*origin[1]*direction[1];
+   real_t b = 2_r*origin[2]*direction[2] + 2_r*origin[1]*direction[1];
    real_t c = origin[2]*origin[2] + origin[1]*origin[1] - capsule->getRadius()*capsule->getRadius();
-   real_t discriminant = b*b - real_t(4.)*a*c;
+   real_t discriminant = b*b - 4._r*a*c;
    if (std::abs(discriminant) >= discriminantEps) {
       // With discriminant smaller than 0, cylinder is not hit by ray (no solution for quadratic equation).
       // Thus only enter this section if the equation is actually solvable.
       
       real_t root = real_t(std::sqrt(discriminant));
-      real_t t0 = (-b - root) / (real_t(2) * a); // Distance to point where the ray enters the cylinder
-      real_t t1 = (-b + root) / (real_t(2) * a); // Distance to point where the ray leaves the cylinder
+      real_t t0 = (-b - root) / (2_r * a); // Distance to point where the ray enters the cylinder
+      real_t t1 = (-b + root) / (2_r * a); // Distance to point where the ray leaves the cylinder
 
       real_t tx0 = origin[0] + direction[0]*t0;
       real_t tx1 = origin[0] + direction[0]*t1;
@@ -281,7 +281,7 @@ inline bool intersects(const CapsuleID capsule, const Ray& ray, real_t& t, Vec3&
    
    if (intersectedPrimitive == 1) {
       Vec3 intersectionPoint = origin + direction*t;
-      Vec3 intersectionPointOnXAxis(intersectionPoint[0], real_t(0), real_t(0));
+      Vec3 intersectionPointOnXAxis(intersectionPoint[0], 0_r, 0_r);
       n = (intersectionPoint - intersectionPointOnXAxis).getNormalized();
    }
    
@@ -296,16 +296,16 @@ inline bool intersects(const EllipsoidID ellipsoid, const Ray& ray, real_t& t, V
    const Ray transformedRay = ray.transformedToBF(ellipsoid);
    const Vec3& semiAxes = ellipsoid->getSemiAxes();
    
-   const Mat3 M = Mat3::makeDiagonalMatrix(real_t(1)/semiAxes[0], real_t(1)/semiAxes[1], real_t(1)/semiAxes[2]);
+   const Mat3 M = Mat3::makeDiagonalMatrix(1_r/semiAxes[0], 1_r/semiAxes[1], 1_r/semiAxes[2]);
    
    const Vec3 d_M = M*transformedRay.getDirection();
    const Vec3 P_M = M*transformedRay.getOrigin();
    
    const real_t a = d_M*d_M;
-   const real_t b = real_t(2)*P_M*d_M;
+   const real_t b = 2_r*P_M*d_M;
    const real_t c = P_M*P_M - 1;
    
-   const real_t discriminant = b*b - real_t(4.)*a*c;
+   const real_t discriminant = b*b - 4._r*a*c;
    if (discriminant < 0) {
       // with discriminant smaller than 0, sphere is not hit by ray
       // (no solution for quadratic equation)
@@ -314,8 +314,8 @@ inline bool intersects(const EllipsoidID ellipsoid, const Ray& ray, real_t& t, V
    }
    
    const real_t root = real_t(std::sqrt(discriminant));
-   const real_t t0 = (-b - root) / (real_t(2.) * a); // distance to point where the ray enters the sphere
-   const real_t t1 = (-b + root) / (real_t(2.) * a); // distance to point where the ray leaves the sphere
+   const real_t t0 = (-b - root) / (2._r * a); // distance to point where the ray enters the sphere
+   const real_t t1 = (-b + root) / (2._r * a); // distance to point where the ray leaves the sphere
    
    if (t0 < 0 && t1 < 0) {
       return false;
@@ -354,9 +354,9 @@ inline bool intersectsSphere(const Vec3& gpos, real_t radius, const Ray& ray, re
    Vec3 displacement = ray.getOrigin() - gpos;
    
    real_t a = direction * direction;
-   real_t b = real_t(2.) * (displacement * direction);
+   real_t b = 2._r * (displacement * direction);
    real_t c = (displacement * displacement) - (radius * radius);
-   real_t discriminant = b*b - real_t(4.)*a*c;
+   real_t discriminant = b*b - 4._r*a*c;
    if (discriminant < 0) {
       // with discriminant smaller than 0, sphere is not hit by ray
       // (no solution for quadratic equation)
@@ -366,8 +366,8 @@ inline bool intersectsSphere(const Vec3& gpos, real_t radius, const Ray& ray, re
    }
    
    real_t root = real_t(std::sqrt(discriminant));
-   t0 = (-b - root) / (real_t(2.) * a); // distance to point where the ray enters the sphere
-   t1 = (-b + root) / (real_t(2.) * a); // distance to point where the ray leaves the sphere
+   t0 = (-b - root) / (2._r * a); // distance to point where the ray enters the sphere
+   t1 = (-b + root) / (2._r * a); // distance to point where the ray leaves the sphere
    
    if (t0 < 0 && t1 < 0) {
       return false;
@@ -432,14 +432,14 @@ inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t, real_t paddi
    }
    
    if (n != NULL) {
-      (*n)[0] = (*n)[1] = (*n)[2] = real_t(0);
+      (*n)[0] = (*n)[1] = (*n)[2] = 0_r;
    }
    real_t t_;
    if (tmin > 0) {
       // ray hit box from outside
       t_ = tmin;
       if (n != NULL) {
-         (*n)[tminAxis] = real_t(1);
+         (*n)[tminAxis] = 1_r;
       }
    } else if (tmax < 0) {
       // tmin and tmax are smaller than 0 -> box is in rays negative direction
@@ -449,7 +449,7 @@ inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t, real_t paddi
       // ray origin within box
       t_ = tmax;
       if (n != NULL) {
-         (*n)[tmaxAxis] = real_t(1);
+         (*n)[tmaxAxis] = 1_r;
       }
    }
    

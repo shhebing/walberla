@@ -41,7 +41,7 @@ static inline uint_t uintAbsDiff( const uint_t x, const uint_t y )
 }
 
 ComplexGeometryBlockforestCreator::ComplexGeometryBlockforestCreator( const AABB & aabb, const blockforest::SetupBlockForest::RootBlockExclusionFunction & rootBlockExclusionFunction )
-   : aabb_(aabb), maxIterations_(25), acceptableRelativeError_( real_t(0.1) ), maxBlockSkewness_(2.0),
+   : aabb_(aabb), maxIterations_(25), acceptableRelativeError_( 0.1_r ), maxBlockSkewness_(2.0),
      processMemoryLimit_( real_t( 0.0 ) ), periodicity_( false, false, false ), rootBlockExclusionFunction_ ( rootBlockExclusionFunction ),
      workloadMemorySUIDAssignmentFunction_( blockforest::uniformWorkloadAndMemoryAssignment ),
 #ifdef WALBERLA_BUILD_WITH_PARMETIS
@@ -106,18 +106,18 @@ shared_ptr<SetupBlockForest> ComplexGeometryBlockforestCreator::createSetupBlock
 
       const real_t factor = real_c( numRootBlocks ) / real_c( targetNumRootBlocks );
 
-      if( std::fabs( factor - real_t(1) ) < acceptableRelativeError_ )
+      if( std::fabs( factor - 1_r ) < acceptableRelativeError_ )
       {
          break;
       }
       if( numRootBlocks < targetNumRootBlocks )
       {
-         sizeBlockGrid = uint_c( real_c( sizeBlockGrid ) / factor + real_t(0.5) );
+         sizeBlockGrid = uint_c( real_c( sizeBlockGrid ) / factor + 0.5_r );
          dir = UP;
       }
       else if( numRootBlocks > targetNumRootBlocks )
       {
-         sizeBlockGrid = uint_c( real_c( sizeBlockGrid ) / factor + real_t(0.5) );
+         sizeBlockGrid = uint_c( real_c( sizeBlockGrid ) / factor + 0.5_r );
          dir = DOWN;
       }
       else
@@ -150,7 +150,7 @@ shared_ptr<SetupBlockForest> ComplexGeometryBlockforestCreator::createSetupBlock
    for( uint_t i = uint_t(0); i < uint_t(3); ++i )
       numBlocks[i] = uint_c( std::ceil( aabb_.size( i ) / blockSize[i] ) );
 
-   AABB newAABB( real_t(0), real_t(0), real_t(0),
+   AABB newAABB( 0_r, 0_r, 0_r,
                  real_c( numBlocks[0] ) * blockSize[0], real_c( numBlocks[1] ) * blockSize[1], real_c( numBlocks[2] ) * blockSize[2] );
 
    newAABB.translate( aabb_.center() - newAABB.center() );
@@ -218,7 +218,7 @@ uint_t ComplexGeometryBlockforestCreator::findNumBlocks( const Vector3<uint_t> &
 
 
 ComplexGeometryStructuredBlockforestCreator::ComplexGeometryStructuredBlockforestCreator( const AABB & aabb, const Vector3<real_t> & cellSize, const blockforest::SetupBlockForest::RootBlockExclusionFunction & rootBlockExclusionFunction )
-   : aabb_(aabb), cellSize_( cellSize ), maxIterations_(25), acceptableRelativeError_( real_t(0.1) ),
+   : aabb_(aabb), cellSize_( cellSize ), maxIterations_(25), acceptableRelativeError_( 0.1_r ),
      processMemoryLimit_( real_t( 0.0 ) ), periodicity_( false, false, false ),
      rootBlockExclusionFunction_ ( rootBlockExclusionFunction ),
      workloadMemorySUIDAssignmentFunction_( blockforest::uniformWorkloadAndMemoryAssignment ),
@@ -239,7 +239,7 @@ shared_ptr<SetupBlockForest> ComplexGeometryStructuredBlockforestCreator::create
 
    std::set< uint_t > blockSizeTested;
 
-   uint_t blockSize = uint_c( std::pow( domainVolume / ( real_t(2) * real_t( targetNumRootBlocks ) ), real_t(1) / real_t(3) ) + 0.5 );
+   uint_t blockSize = uint_c( std::pow( domainVolume / ( 2_r * real_t( targetNumRootBlocks ) ), 1_r / 3_r ) + 0.5 );
 
    uint_t          bestBlockSize = blockSize;
    uint_t          bestNumRootBlocks = std::numeric_limits<uint_t>::max();
@@ -278,18 +278,18 @@ shared_ptr<SetupBlockForest> ComplexGeometryStructuredBlockforestCreator::create
 
       const real_t factor = real_c( numRootBlocks ) / real_c( targetNumRootBlocks );
 
-      if( std::fabs( factor - real_t(1) ) < acceptableRelativeError_ )
+      if( std::fabs( factor - 1_r ) < acceptableRelativeError_ )
       {
          break;
       }
       if( numRootBlocks < targetNumRootBlocks )
       {
-         blockSize = uint_c( real_c( blockSize ) * std::pow( factor, real_t(1) / real_t(3) ) + real_t(0.5) );
+         blockSize = uint_c( real_c( blockSize ) * std::pow( factor, 1_r / 3_r ) + 0.5_r );
          dir = UP;
       }
       else if( numRootBlocks > targetNumRootBlocks )
       {
-         blockSize = uint_c( real_c( blockSize ) * std::pow( factor, real_t(1) / real_t(3) ) + real_t(0.5) );
+         blockSize = uint_c( real_c( blockSize ) * std::pow( factor, 1_r / 3_r ) + 0.5_r );
          dir = DOWN;
       }
       else
@@ -306,7 +306,7 @@ shared_ptr<SetupBlockForest> ComplexGeometryStructuredBlockforestCreator::create
                               uint_c( std::ceil( real_c( numCells[1] ) / real_c( bestBlockSize ) ) ),
                               uint_c( std::ceil( real_c( numCells[2] ) / real_c( bestBlockSize ) ) ) );
 
-   AABB newAABB( real_t(0), real_t(0), real_t(0),
+   AABB newAABB( 0_r, 0_r, 0_r,
                  real_c( numBlocks[0] * bestBlockSize ) * cellSize_[0],
                  real_c( numBlocks[1] * bestBlockSize ) * cellSize_[1],
                  real_c( numBlocks[2] * bestBlockSize ) * cellSize_[2] );
@@ -344,7 +344,7 @@ shared_ptr<SetupBlockForest> ComplexGeometryStructuredBlockforestCreator::create
                               uint_c( std::ceil( real_c( numCells[1] ) / real_c( blockSize[1] ) ) ),
                               uint_c( std::ceil( real_c( numCells[2] ) / real_c( blockSize[2] ) ) ) );
 
-   AABB newAABB( real_t(0), real_t(0), real_t(0),
+   AABB newAABB( 0_r, 0_r, 0_r,
                  real_c( numBlocks[0] * blockSize[0] ) * cellSize_[0],
                  real_c( numBlocks[1] * blockSize[1] ) * cellSize_[1],
                  real_c( numBlocks[2] * blockSize[2] ) * cellSize_[2] );
@@ -377,7 +377,7 @@ shared_ptr<StructuredBlockForest> ComplexGeometryStructuredBlockforestCreator::c
                                 setupBlockForest->getRootBlockYSize(),
                                 setupBlockForest->getRootBlockZSize() );
 
-   Vector3<uint_t> blockSizeCells( uint_c( blockSize[0] / cellSize_[0] + real_t(0.5) ), uint_c( blockSize[1] / cellSize_[1] + real_t(0.5) ), uint_c( blockSize[2] / cellSize_[2] + real_t(0.5) ) );
+   Vector3<uint_t> blockSizeCells( uint_c( blockSize[0] / cellSize_[0] + 0.5_r ), uint_c( blockSize[1] / cellSize_[1] + 0.5_r ), uint_c( blockSize[2] / cellSize_[2] + 0.5_r ) );
 
    WALBERLA_ASSERT_FLOAT_EQUAL( blockSize[0] / cellSize_[0], real_c( blockSizeCells[0] ) );
    WALBERLA_ASSERT_FLOAT_EQUAL( blockSize[1] / cellSize_[1], real_c( blockSizeCells[1] ) );
@@ -417,7 +417,7 @@ uint_t ComplexGeometryStructuredBlockforestCreator::findNumBlocks( const Vector3
                               uint_c( std::ceil( real_c( numCells[1] ) / real_c( blockSize[1] ) ) ),
                               uint_c( std::ceil( real_c( numCells[2] ) / real_c( blockSize[2] ) ) ) );
 
-   AABB newAABB( real_t(0), real_t(0), real_t(0),
+   AABB newAABB( 0_r, 0_r, 0_r,
                  real_c( numBlocks[0] * blockSize[0] ) * cellSize_[0],
                  real_c( numBlocks[1] * blockSize[1] ) * cellSize_[1],
                  real_c( numBlocks[2] * blockSize[2] ) * cellSize_[2] );

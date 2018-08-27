@@ -109,7 +109,7 @@ static void refinementSelection( SetupBlockForest& forest, const uint_t levels )
 {
    const AABB & domain = forest.getDomain();
 
-   const real_t domainxMax = domain.xMax() / real_c( pow( real_t(2), int_c( levels - uint_t(1u) ) ) );
+   const real_t domainxMax = domain.xMax() / real_c( pow( 2_r, int_c( levels - uint_t(1u) ) ) );
 
    AABB left( domain.xMin(), domain.yMin(), domain.zMin(),
               domainxMax,    domain.yMax(), domain.zMax() );
@@ -142,7 +142,7 @@ shared_ptr< StructuredBlockForest > makeStructuredBlockStorage( uint_t length, u
     sforest.addWorkloadMemorySUIDAssignmentFunction( workloadAndMemoryAssignment );
 
     sforest.init(
-       AABB( real_t(0),        real_t(0),        real_t(0),             // blocks/processes in x/y/z direction
+       AABB( 0_r,        0_r,        0_r,             // blocks/processes in x/y/z direction
              real_c(cells[0]), real_c(cells[1]), real_c(cells[2]) ),    // cells per block in x/y/z direction
              blocks[0]  , blocks[1]  , blocks[2],                       // one block per process
              false      , true       , true);                           // periodicity
@@ -150,7 +150,7 @@ shared_ptr< StructuredBlockForest > makeStructuredBlockStorage( uint_t length, u
     // calculate process distribution
     const memory_t memoryLimit = math::Limits< memory_t >::inf();
 
-    sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), uint_c( MPIManager::instance()->numProcesses() ), real_t(0), memoryLimit, true );
+    sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), uint_c( MPIManager::instance()->numProcesses() ), 0_r, memoryLimit, true );
 
     MPIManager::instance()->useWorldComm();
 

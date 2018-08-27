@@ -165,7 +165,7 @@ public:
    template< typename LatticeModel_T >
    real_t forceTerm( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/, const Vector3<real_t> & /*velocity*/, const real_t /*rho*/,
                      const DirectionIndependentTerms_T & /*commonTerms*/, const real_t /*w*/,
-                     const real_t /*cx*/, const real_t /*cy*/, const real_t /*cz*/, const real_t /*omega*/, const real_t /*omega_bulk*/ ) const { return real_t(0); }
+                     const real_t /*cx*/, const real_t /*cy*/, const real_t /*cz*/, const real_t /*omega*/, const real_t /*omega_bulk*/ ) const { return 0_r; }
 
    bool setConstantBodyForceIfPossible( const Vector3<real_t> &, const uint_t = uint_t(0) ) { return false; }
 };
@@ -220,7 +220,7 @@ public:
                      const DirectionIndependentTerms_T & /*commonTerms*/, const real_t w,
                      const real_t cx, const real_t cy, const real_t cz, const real_t /*omega*/, const real_t /*omega_bulk*/ ) const
    {
-      return real_t(3.0) * w * ( cx * bodyForce_[0] + cy * bodyForce_[1] + cz * bodyForce_[2] );
+      return 3.0_r * w * ( cx * bodyForce_[0] + cy * bodyForce_[1] + cz * bodyForce_[2] );
    }
    
    /// "force_level" is the level that corresponds to "acceleration"
@@ -248,12 +248,12 @@ private:
    template< typename LatticeModel_T, class Enable = void >
    struct DirectionIndependentTerm
    {
-      static real_t get( const real_t ) { return real_t(0); }
+      static real_t get( const real_t ) { return 0_r; }
    };
    template< typename LatticeModel_T >
    struct DirectionIndependentTerm< LatticeModel_T, typename boost::enable_if_c< LatticeModel_T::compressible >::type >
    {
-      static real_t get( const real_t rho ) { return real_t(1) / rho; }
+      static real_t get( const real_t rho ) { return 1_r / rho; }
    };
 
    template< typename LatticeModel_T, class Enable = void >
@@ -378,7 +378,7 @@ public:
                      const real_t cx, const real_t cy, const real_t cz, const real_t /*omega*/, const real_t /*omega_bulk*/ ) const
    {
       const Vector3<real_t> c( cx, cy, cz );
-      return real_t(3) * w * ( ( c - velocity + ( real_t(3) * ( c * velocity ) * c ) ) * bodyForce_ );
+      return 3_r * w * ( ( c - velocity + ( 3_r * ( c * velocity ) * c ) ) * bodyForce_ );
    }
    
    /// "force_level" is the level that corresponds to "bodyForce"
@@ -438,7 +438,7 @@ public:
                      const real_t cx, const real_t cy, const real_t cz, const real_t /*omega*/, const real_t /*omega_bulk*/ ) const
    {
       const Vector3<real_t> c( cx, cy, cz );
-      return real_t(3) * w * ( ( c - velocity + ( real_t(3) * ( c * velocity ) * c ) ) * force(x,y,z) );
+      return 3_r * w * ( ( c - velocity + ( 3_r * ( c * velocity ) * c ) ) * force(x,y,z) );
    }
 
    bool setConstantBodyForceIfPossible( const Vector3< real_t > &, const uint_t = uint_t(0) ) { return false; }
@@ -496,13 +496,13 @@ public:
    {
       if (!boost::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value)
       {
-         const real_t one_third  = real_t(1) / real_t(3);
+         const real_t one_third  = 1_r / 3_r;
       
          const auto common = Matrix3<real_t>::makeDiagonalMatrix( velocity * bodyForce_ );
          return (tensorProduct( velocity, bodyForce_ ) +
                  tensorProduct( bodyForce_, velocity ) -
-                 common * (real_t(2)*one_third) ) * real_t(0.5) * ( real_t(2) + omega )
-                + common * ( one_third * ( real_t(2) + omega_bulk ) );
+                 common * (2_r*one_third) ) * 0.5_r * ( 2_r + omega )
+                + common * ( one_third * ( 2_r + omega_bulk ) );
       }
       else
       {
@@ -518,15 +518,15 @@ public:
       const Vector3<real_t> c( cx, cy, cz );
       if (!boost::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value)
       {
-         const real_t one_third  = real_t(1) / real_t(3);
+         const real_t one_third  = 1_r / 3_r;
       
          const real_t common = (commonTerms * ( tensorProduct(c,c) - Matrix3<real_t>::makeDiagonalMatrix(one_third) )).trace();
-         return real_t(3.0) * w * ( bodyForce_ * c + real_t(1.5) * common);
+         return 3.0_r * w * ( bodyForce_ * c + 1.5_r * common);
       }
       else
       {
-         return real_t(3.0) * w * ( real_t(1) - real_t(0.5) * omega ) *
-                                  ( ( c - velocity + ( real_t(3) * ( c * velocity ) * c ) ) * bodyForce_ );
+         return 3.0_r * w * ( 1_r - 0.5_r * omega ) *
+                                  ( ( c - velocity + ( 3_r * ( c * velocity ) * c ) ) * bodyForce_ );
       }
    }
    
@@ -582,13 +582,13 @@ public:
    {
       if (!boost::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value)
       {
-         const real_t one_third  = real_t(1) / real_t(3);
+         const real_t one_third  = 1_r / 3_r;
       
          const auto common = Matrix3<real_t>::makeDiagonalMatrix( velocity * force(x,y,z) );
          return (tensorProduct( velocity, force(x,y,z) ) +
                  tensorProduct( force(x,y,z), velocity ) -
-                 common * (real_t(2)*one_third) ) * real_t(0.5) * ( real_t(2) + omega )
-                + common * ( one_third * ( real_t(2) + omega_bulk ) );
+                 common * (2_r*one_third) ) * 0.5_r * ( 2_r + omega )
+                + common * ( one_third * ( 2_r + omega_bulk ) );
       }
       else
       {
@@ -605,15 +605,15 @@ public:
       const Vector3<real_t> c( cx, cy, cz );
       if (!boost::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value)
       {
-         const real_t one_third  = real_t(1) / real_t(3);
+         const real_t one_third  = 1_r / 3_r;
       
          const real_t common = (commonTerms * ( tensorProduct(c,c) - Matrix3<real_t>::makeDiagonalMatrix(one_third) )).trace();
-         return real_t(3.0) * w * ( force(x,y,z) * c + real_t(1.5) * common);
+         return 3.0_r * w * ( force(x,y,z) * c + 1.5_r * common);
       }
       else
       {
-         return real_t(3.0) * w * ( real_t(1) - real_t(0.5) * omega ) *
-                                  ( ( c - velocity + ( real_t(3) * ( c * velocity ) * c ) ) * force(x,y,z) );
+         return 3.0_r * w * ( 1_r - 0.5_r * omega ) *
+                                  ( ( c - velocity + ( 3_r * ( c * velocity ) * c ) ) * force(x,y,z) );
       }
    }
 
@@ -642,7 +642,7 @@ public:
    static const bool constant = true;
 
    Correction( const BlockDataID & previousRhoVelocityId ) :
-      force_( real_t(0) ), previousRhoVelocityId_( previousRhoVelocityId ), previousRhoVelocity_(NULL) {}
+      force_( 0_r ), previousRhoVelocityId_( previousRhoVelocityId ), previousRhoVelocity_(NULL) {}
 
    void pack( mpi::SendBuffer & buffer ) const { buffer << force_ << previousRhoVelocityId_; }
    void unpack( mpi::RecvBuffer & buffer ) { buffer >> force_ >> previousRhoVelocityId_; }

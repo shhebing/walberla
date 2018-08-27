@@ -73,13 +73,13 @@ int main( int argc, char **argv )
 
     uint_t sphereCount = 0;
 
-    if (pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), storageID, 0, Vec3( real_t(25), real_t(25), real_t(50) ), 1) != nullptr)
+    if (pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), storageID, 0, Vec3( 25_r, 25_r, 50_r ), 1) != nullptr)
         ++sphereCount;
-    if (pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), storageID, 0, Vec3( real_t(99), real_t(25), real_t(50) ), 2) != nullptr)
+    if (pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), storageID, 0, Vec3( 99_r, 25_r, 50_r ), 2) != nullptr)
         ++sphereCount;
-    if (pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), storageID, 0, Vec3( real_t(101), real_t(25), real_t(50) ), 2) != nullptr)
+    if (pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), storageID, 0, Vec3( 101_r, 25_r, 50_r ), 2) != nullptr)
         ++sphereCount;
-    if (pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), storageID, 0, Vec3( real_t(125), real_t(25), real_t(50) ), 1) != nullptr)
+    if (pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), storageID, 0, Vec3( 125_r, 25_r, 50_r ), 1) != nullptr)
         ++sphereCount;
 
     syncShadowOwners<BodyTuple>( blocks->getBlockForest(), storageID);

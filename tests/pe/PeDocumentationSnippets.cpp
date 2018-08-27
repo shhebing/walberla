@@ -85,8 +85,8 @@ int main( int argc, char ** argv )
    cr::HCSITS hcsits(globalBodyStorage, forest->getBlockStoragePointer(), storageID, ccdID, fcdID);
    hcsits.setMaxIterations           ( uint_c(10) );
    hcsits.setRelaxationModel         ( cr::HCSITS::InelasticGeneralizedMaximumDissipationContact );
-   hcsits.setRelaxationParameter     ( real_t(0.7) );
-   hcsits.setErrorReductionParameter ( real_t(0.8) );
+   hcsits.setRelaxationParameter     ( 0.7_r );
+   hcsits.setErrorReductionParameter ( 0.8_r );
    hcsits.setGlobalLinearAcceleration( Vec3(0,0,-1) );
    //! [Setup HCSITS]
 
@@ -103,7 +103,7 @@ int main( int argc, char ** argv )
 
    //! [Create a Capsule]
    // Create a capsule and rotate it after successfull creation.
-   CapsuleID capsule = createCapsule( *globalBodyStorage, forest->getBlockStorage(), storageID, 1, Vec3(2,3,4), real_t(1), real_t(1) );
+   CapsuleID capsule = createCapsule( *globalBodyStorage, forest->getBlockStorage(), storageID, 1, Vec3(2,3,4), 1_r, 1_r );
    if (capsule != nullptr)
       capsule->rotate( 0.0, real_c(math::PI/3.0), 0.0 );
    //! [Create a Capsule]
@@ -116,7 +116,7 @@ int main( int argc, char ** argv )
 
    //! [Create a Sphere]
    // Create a sphere and rotate it after successfull creation.
-   SphereID sphere = createSphere( *globalBodyStorage, forest->getBlockStorage(), storageID, 1, Vec3(2,3,4), real_t(1) );
+   SphereID sphere = createSphere( *globalBodyStorage, forest->getBlockStorage(), storageID, 1, Vec3(2,3,4), 1_r );
    if (sphere != nullptr)
       sphere->rotate( 0.0, real_c(math::PI/3.0), 0.0 );
    //! [Create a Sphere]
@@ -127,8 +127,8 @@ int main( int argc, char ** argv )
    if (un != nullptr)
    {
       createBox    ( un, 1, Vec3(2,3,4), Vec3(2.5,2.5,2.5) );
-      createCapsule( un, 1, Vec3(3,3,4), real_t(1), real_t(1) );
-      createSphere ( un, 1, Vec3(4,3,4), real_t(1) );
+      createCapsule( un, 1, Vec3(3,3,4), 1_r, 1_r );
+      createSphere ( un, 1, Vec3(4,3,4), 1_r );
    }
    //! [Create a Union]
 

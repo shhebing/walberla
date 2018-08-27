@@ -107,10 +107,10 @@ public:
    using cplx_t = std::complex<real_t>;
 
    PlugFlow( real_t L, real_t H, real_t u, real_t k ) :
-      period_( real_t(2)*math::PI/L ),
-      lambda_( period_*sqrt( cplx_t(real_t(1), u/k/period_) ) ),
-      emH_   ( real_t(1) - exp(-lambda_*H) ),
-      epH_   ( real_t(1) - exp(+lambda_*H) ),
+      period_( 2_r*math::PI/L ),
+      lambda_( period_*sqrt( cplx_t(1_r, u/k/period_) ) ),
+      emH_   ( 1_r - exp(-lambda_*H) ),
+      epH_   ( 1_r - exp(+lambda_*H) ),
       eeH_   ( emH_ - epH_ ){}
 
    inline real_t operator()( real_t x, real_t y )
@@ -120,10 +120,10 @@ public:
       const cplx_t epy = exp(+ly);
 #if 1
       // exact solution
-      return std::real( exp( cplx_t(real_t(0),period_*x) ) * ( emH_*epy - epH_*emy ) / eeH_ );
+      return std::real( exp( cplx_t(0_r,period_*x) ) * ( emH_*epy - epH_*emy ) / eeH_ );
 #else
       // integral solution
-      return std::imag( exp( cplx_t(real_t(0),period_*x) ) * ( emH_*epy + epH_*emy ) / ( eeH_ * period_ * lambda_ ) );
+      return std::imag( exp( cplx_t(0_r,period_*x) ) * ( emH_*epy + epH_*emy ) / ( eeH_ * period_ * lambda_ ) );
 #endif
    }
 
@@ -139,7 +139,7 @@ private:
 class TestSweep{
 public:
    TestSweep( ConstBlockDataID pdfFieldID, real_t omega, real_t velocity, real_t error ) :
-      pdfFieldID_(pdfFieldID), k_((real_t(1)/omega-real_c(0.5))/real_t(3)), velocity_(velocity), error_(error){}
+      pdfFieldID_(pdfFieldID), k_((1_r/omega-real_c(0.5))/3_r), velocity_(velocity), error_(error){}
 
    void operator()( IBlock* block );
 private:
@@ -158,7 +158,7 @@ void TestSweep::operator()( IBlock* block )
    const uint_t sy = srcPDF_->ySize();
    const uint_t sz = srcPDF_->zSize();
 
-   real_t snumerical( real_t(0) ), sanalytical( real_t(0) );
+   real_t snumerical( 0_r ), sanalytical( 0_r );
 
    PlugFlow pf( real_c(sx), real_c(sy), velocity_, k_ );
 
@@ -234,12 +234,12 @@ int main( int argc, char **argv )
             WALBERLA_LOG_WARNING( "Ignore unknown option " << argv[i++] );
       }
    }
-   vec3_t velocity( velx, real_t(0), real_t(0) );
+   vec3_t velocity( velx, 0_r, 0_r );
       
    auto blockStorage = blockforest::createUniformBlockGrid(
       1,      1,      1,      // blocks/processes in x/y/z direction
       length, length, width,  // cells per block in x/y/z direction
-      real_t(1),              // cell size
+      1_r,              // cell size
       true,                   // one block per process
       true,   false,  true,   // periodicity
       false );
@@ -248,11 +248,11 @@ int main( int argc, char **argv )
    BlockDataID flagFieldID  = field::addFlagFieldToStorage<MyFlagField>( blockStorage, "Flag field" );
 
    LM lm = LM( lbm::collision_model::SRT( omega ) );
-   BlockDataID srcFieldID   = lbm::addPdfFieldToStorage( blockStorage, "PDF AdDif field", lm, vec3_t(), real_t(0) );
+   BlockDataID srcFieldID   = lbm::addPdfFieldToStorage( blockStorage, "PDF AdDif field", lm, vec3_t(), 0_r );
 
    BlockDataID boundaryHandling = MyBoundaryHandling::addDefaultDiffusionBoundaryHandlingToStorage( blockStorage, "BoundaryHandling", flagFieldID, getFluidFlag(), srcFieldID );
 
-   auto cbc = make_shared<CosBoundaryConfiguration>( real_t(2)*math::PI/real_c(length) );
+   auto cbc = make_shared<CosBoundaryConfiguration>( 2_r*math::PI/real_c(length) );
    geometry::initializer::BoundaryFromDomainBorder<MyBoundaryHandling::BoundaryHandling_T> bfdb( *blockStorage, boundaryHandling );
    bfdb.init( MyBoundaryHandling::getDiffusionDirichletBoundaryUID(), stencil::N, cbc, -1, 1 );
    bfdb.init( MyBoundaryHandling::getDiffusionDirichletBoundaryUID(), stencil::S, cbc, -1, 1 );

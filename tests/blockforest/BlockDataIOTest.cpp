@@ -44,7 +44,7 @@ const Set<SUID> None( Set<SUID>::emptySet() );
 static void refinementSelectionFunction( SetupBlockForest& forest )
 {
    for( auto block = forest.begin(); block != forest.end(); ++block )
-      if( block->getAABB().contains( Vector3<real_t>( real_t(75) ) ) )
+      if( block->getAABB().contains( Vector3<real_t>( 75_r ) ) )
             if( !block->hasFather() )
                block->setMarker( true );
 }
@@ -55,7 +55,7 @@ static void workloadMemorySUIDAssignmentFunction( SetupBlockForest& forest )
    {
       block->setMemory( memory_t(1) );
       block->setWorkload( workload_t(1) );
-      if( block->getAABB().contains( Vector3<real_t>( real_t(25) ) ) )
+      if( block->getAABB().contains( Vector3<real_t>( 25_r ) ) )
          block->addState( Empty );
    }
 }

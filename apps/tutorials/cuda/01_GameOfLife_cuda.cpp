@@ -102,7 +102,7 @@ int main( int argc, char ** argv )
    shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid (
             uint_t(1) ,              uint_t(2),                           uint_t(1), // number of blocks in x,y,z direction
             image.size( uint_t(0) ), image.size( uint_t(1) ) / uint_t(2), uint_t(1), // how many cells per block (x,y,z)
-            real_t(1),                                                               // dx: length of one cell in physical coordinates
+            1_r,                                                               // dx: length of one cell in physical coordinates
             false,                                                                   // one block per process - "false" means all blocks to one process
             false, false, false );                                                   // no periodicity
 

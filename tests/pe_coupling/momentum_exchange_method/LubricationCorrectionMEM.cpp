@@ -266,7 +266,7 @@ private:
             // in this geometry setup the relative error is 0.1246489711 %
             real_t analytical = real_c(3.0)/real_c(2.0) * walberla::math::PI * real_c(1.0) * nu_L_ * real_c(2.0) * real_c(vel_[0]) * radius_ * radius_ * real_c(1.0)/gap;
             real_t relErr     = std::fabs( analytical - forceSphr2[0] ) / analytical * real_c(100.0);
-            WALBERLA_CHECK_LESS( relErr, real_t(1) );
+            WALBERLA_CHECK_LESS( relErr, 1_r );
          }
       }
    }
@@ -362,7 +362,7 @@ private:
             // in this geometry setup the relative error is 0.183515322065561 %
             real_t analytical = real_c(6.0) * walberla::math::PI * real_c(1.0) * nu_L_ * real_c(-vel_[0]) * radius_ * radius_ * real_c(1.0)/gap;
             real_t relErr     = std::fabs( analytical - forceSphr1[0] ) / analytical * real_c(100.0);
-            WALBERLA_CHECK_LESS( relErr, real_t(1) );
+            WALBERLA_CHECK_LESS( relErr, 1_r );
          }
       }
 
@@ -706,12 +706,12 @@ int main( int argc, char **argv )
    if ( sphSphTest )
    {
       timesteps = uint_c(1000);
-      nu_L      = real_t(2);
+      nu_L      = 2_r;
       dt_SI     = real_c(0.3);
       periodicX = true;
 
-      radius    = real_t(6);
-      velocity  = pe::Vec3( real_c(0.008), real_t(0), real_t(0) );
+      radius    = 6_r;
+      velocity  = pe::Vec3( real_c(0.008), 0_r, 0_r );
       id1       = uint_c(1);
       id2       = uint_c(2);
    }
@@ -720,11 +720,11 @@ int main( int argc, char **argv )
    if ( sphWallTest )
    {
       timesteps = uint_c(26399);       // uint_c(13199);       // uint_c(17599);       // uint_c(19800);
-      nu_L      = real_t(1)/real_t(4); // real_t(1)/real_t(8); // real_t(1)/real_t(6); // real_t(3)/real_t(16);
+      nu_L      = 1_r/4_r; // 1_r/8_r; // 1_r/6_r; // 3_r/16_r;
       dt_SI     = real_c(0.125);
       periodicX = false;
-      radius    = real_t(12);
-      velocity  = pe::Vec3 (real_c(-0.001),real_t(0),real_t(0) );
+      radius    = 12_r;
+      velocity  = pe::Vec3 (real_c(-0.001),0_r,0_r );
       id1       = uint_c(1);
       id2       = uint_c(56);
    }
@@ -736,7 +736,7 @@ int main( int argc, char **argv )
    // parameters equal for all test cases
    real_t rho_SI = real_c(1000);  // rho [kg/m^3]
    real_t dx_SI  = real_c(1e-3);  // dx [m]
-   real_t dx     = real_t(1);     // lattice dx
+   real_t dx     = 1_r;     // lattice dx
 
    uint_t length = uint_c(192);   // length of the domain in x-direction in cells
    uint_t width  = uint_c(128);   // width (and height) of the domain in y- and z-direction in cells
@@ -748,12 +748,12 @@ int main( int argc, char **argv )
       timesteps = uint_c(1);
       length    = uint_c(24);
       width     = uint_c(12);
-      nu_L      = real_t(2);
+      nu_L      = 2_r;
       dt_SI     = real_c(0.3);
       periodicX = true;
 
-      radius    = real_t(2);
-      velocity  = pe::Vec3 ( real_c(0.0001),real_t(0),real_t(0) );
+      radius    = 2_r;
+      velocity  = pe::Vec3 ( real_c(0.0001),0_r,0_r );
       id1       = uint_c(1);
       id2       = uint_c(2);
    }
@@ -764,8 +764,8 @@ int main( int argc, char **argv )
 
    // Perform missing variable calculations
    real_t nu_SI  = dx_SI * dx_SI / dt_SI * nu_L;                    // kinematic viscosity [m^2/s]
-   real_t tau    = real_c(0.5) * ( real_t(6) * nu_L + real_t(1) );
-   real_t omega  = real_t(1) / tau;
+   real_t tau    = real_c(0.5) * ( 6_r * nu_L + 1_r );
+   real_t omega  = 1_r / tau;
 
 
    ///////////////////////////
@@ -794,7 +794,7 @@ int main( int argc, char **argv )
    std::function<void(void)> syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(nullptr), overlap, false );
 
    // create the material
-   const auto myMat = pe::createMaterial( "myMat", real_c(1.4), real_t(0), real_t(1), real_t(1), real_t(0), real_t(1), real_t(1), real_t(0), real_t(0) );
+   const auto myMat = pe::createMaterial( "myMat", real_c(1.4), 0_r, 1_r, 1_r, 0_r, 1_r, 1_r, 0_r, 0_r );
 
    // sphere-sphere test
    if ( sphSphTest )
@@ -897,10 +897,10 @@ int main( int argc, char **argv )
    LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::TRT::constructWithMagicNumber( omega ) );
 
    BlockDataID pdfFieldID = useFZYX ? lbm::addPdfFieldToStorage( blocks, "pdf field (fzyx)", latticeModel,
-                                                                 Vector3< real_t >( real_t(0), real_t(0), real_t(0) ), real_t(1),
+                                                                 Vector3< real_t >( 0_r, 0_r, 0_r ), 1_r,
                                                                  uint_t(1), field::fzyx ) :
                                       lbm::addPdfFieldToStorage( blocks, "pdf field (zyxf)", latticeModel,
-                                                                 Vector3< real_t >( real_t(0), real_t(0), real_t(0) ), real_t(1),
+                                                                 Vector3< real_t >( 0_r, 0_r, 0_r ), 1_r,
                                                                  uint_t(1), field::zyxf );
 
    // add flag field

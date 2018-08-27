@@ -71,8 +71,8 @@ int main( int argc, char ** argv )
    //! [Config HCSITS]
    WALBERLA_CHECK_EQUAL( hcsits.getRelaxationModel(), cr::HCSITS::RelaxationModel::ApproximateInelasticCoulombContactByDecoupling );
    WALBERLA_CHECK_EQUAL( hcsits.getMaxIterations(), 123 );
-   WALBERLA_CHECK_FLOAT_EQUAL( hcsits.getRelaxationParameter(), real_t(0.123) );
-   WALBERLA_CHECK_FLOAT_EQUAL( hcsits.getErrorReductionParameter(), real_t(0.123) );
+   WALBERLA_CHECK_FLOAT_EQUAL( hcsits.getRelaxationParameter(), 0.123_r );
+   WALBERLA_CHECK_FLOAT_EQUAL( hcsits.getErrorReductionParameter(), 0.123_r );
    WALBERLA_CHECK_FLOAT_EQUAL( hcsits.getGlobalLinearAcceleration(), Vec3(1,-2,3) );
 
    return EXIT_SUCCESS;

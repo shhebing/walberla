@@ -315,7 +315,7 @@ static shared_ptr< SetupBlockForest > createSetupBlockForest( const blockforest:
    if( blocksPerProcess != 0 )
       numberOfProcesses = uint_c( std::ceil( real_c( forest->getNumberOfBlocks() ) / real_c( blocksPerProcess ) ) );
 
-   forest->balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), numberOfProcesses, real_t(0), processMemoryLimit, true );
+   forest->balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), numberOfProcesses, 0_r, processMemoryLimit, true );
 
    if( outputSetupForest ) 
    {
@@ -412,27 +412,27 @@ public:
 
       // http://devmag.org.za/2009/04/17/basic-collision-detection-in-2d-part-2/
 
-      const Vector3< real_t > circle( real_t(0), py, pz );
+      const Vector3< real_t > circle( 0_r, py, pz );
 
       const Vector3< real_t > f = fluid - circle;
       const Vector3< real_t > d = ( boundary - circle ) - f;
 
       const real_t a = d[1] * d[1] + d[2] * d[2];
-      const real_t b = real_t(2) * ( d[1] * f[1] + d[2] * f[2] );
+      const real_t b = 2_r * ( d[1] * f[1] + d[2] * f[2] );
       const real_t c = f[1] * f[1] + f[2] * f[2] - r * r;
 
-      const real_t bb4ac = b * b - ( real_t(4) * a * c );
-      WALBERLA_CHECK_GREATER_EQUAL( bb4ac, real_t(0) );
+      const real_t bb4ac = b * b - ( 4_r * a * c );
+      WALBERLA_CHECK_GREATER_EQUAL( bb4ac, 0_r );
 
       const real_t sqrtbb4ac = std::sqrt( bb4ac );
 
-      real_t alpha = ( -b + sqrtbb4ac ) / ( real_t(2) * a );
-      const real_t beta = ( -b - sqrtbb4ac ) / ( real_t(2) * a );
-      if( alpha < real_t(0) || ( beta >= real_t(0) && beta < alpha )  )
+      real_t alpha = ( -b + sqrtbb4ac ) / ( 2_r * a );
+      const real_t beta = ( -b - sqrtbb4ac ) / ( 2_r * a );
+      if( alpha < 0_r || ( beta >= 0_r && beta < alpha )  )
          alpha = beta;
 
-      WALBERLA_CHECK_GREATER_EQUAL( alpha, real_t(0) );
-      WALBERLA_CHECK_LESS_EQUAL( alpha, real_t(1) );
+      WALBERLA_CHECK_GREATER_EQUAL( alpha, 0_r );
+      WALBERLA_CHECK_LESS_EQUAL( alpha, 1_r );
 
       return alpha;
    }
@@ -614,18 +614,18 @@ protected:
       const real_t viscosity_L    = pdf_->latticeModel().collisionModel().viscosity(); // in lattice units on the current level
       const real_t radius_L       = channelRadius / dy; // in lattice units on the current level
       
-      real_t refVelocity_x( real_t(0) ); // in lattice units on the current level
+      real_t refVelocity_x( 0_r ); // in lattice units on the current level
       if( setup_.circularProfile )
       {
          const real_t middleDistanceY_L = ( center[1] - channelMiddle[1] ) / dy;
          const real_t middleDistanceZ_L = ( center[2] - channelMiddle[2] ) / dy;
          const real_t middleDistance_L_2 = middleDistanceY_L * middleDistanceY_L + middleDistanceZ_L * middleDistanceZ_L;
-         refVelocity_x = ( acceleration_L / ( real_t(4) * viscosity_L ) ) * ( radius_L * radius_L - middleDistance_L_2 );
+         refVelocity_x = ( acceleration_L / ( 4_r * viscosity_L ) ) * ( radius_L * radius_L - middleDistance_L_2 );
       }
       else
       {
          const real_t middleDistance_L = ( center[1] - channelMiddle[1] ) / dy;
-         refVelocity_x = ( acceleration_L / ( real_t(2) * viscosity_L ) ) * ( radius_L * radius_L - middleDistance_L * middleDistance_L );
+         refVelocity_x = ( acceleration_L / ( 2_r * viscosity_L ) ) * ( radius_L * radius_L - middleDistance_L * middleDistance_L );
       }
       
       const auto velocity = pdf_->getVelocity(x,y,z);
@@ -724,8 +724,8 @@ Vector3< real_t > exactPlatesVelocity( const Vector3< real_t > & p, const shared
 {
    const real_t middleDistance_L = ( p[1] - blocks->getDomain().center()[1] ) / blocks->dy();
 
-   return Vector3< real_t >( ( setup.acceleration_L / ( real_t(2) * setup.viscosity_L ) ) * ( setup.radius_L * setup.radius_L - middleDistance_L * middleDistance_L ),
-                             real_t(0), real_t(0) );
+   return Vector3< real_t >( ( setup.acceleration_L / ( 2_r * setup.viscosity_L ) ) * ( setup.radius_L * setup.radius_L - middleDistance_L * middleDistance_L ),
+                             0_r, 0_r );
 }
 
 Vector3< real_t > exactPipeVelocity( const Vector3< real_t > & p, const shared_ptr< StructuredBlockStorage > & blocks, const Setup & setup )
@@ -737,8 +737,8 @@ Vector3< real_t > exactPipeVelocity( const Vector3< real_t > & p, const shared_p
    const real_t middleDistanceZ_L = ( p[2] - channelMiddle[2] ) / blocks->dz();
    const real_t middleDistance_L_2 = middleDistanceY_L * middleDistanceY_L + middleDistanceZ_L * middleDistanceZ_L;
 
-   return Vector3< real_t >( ( setup.acceleration_L / ( real_t(4) * setup.viscosity_L ) ) * ( setup.radius_L * setup.radius_L - middleDistance_L_2 ),
-                             real_t(0), real_t(0) );
+   return Vector3< real_t >( ( setup.acceleration_L / ( 4_r * setup.viscosity_L ) ) * ( setup.radius_L * setup.radius_L - middleDistance_L_2 ),
+                             0_r, 0_r );
 }
 
 
@@ -760,14 +760,14 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    if( setup.circularProfile )
    {
-      setup.maxVelocity_L = ( setup.acceleration_L * setup.radius_L * setup.radius_L ) / ( real_t(4) * setup.viscosity_L );
-      setup.meanVelocity_L = ( setup.acceleration_L * setup.radius_L * setup.radius_L ) / ( real_t(8) * setup.viscosity_L );
+      setup.maxVelocity_L = ( setup.acceleration_L * setup.radius_L * setup.radius_L ) / ( 4_r * setup.viscosity_L );
+      setup.meanVelocity_L = ( setup.acceleration_L * setup.radius_L * setup.radius_L ) / ( 8_r * setup.viscosity_L );
       setup.flowRate_L = setup.meanVelocity_L * math::PI * setup.radius_L * setup.radius_L;
    }
    else
    {
-      setup.maxVelocity_L = ( setup.acceleration_L * setup.radius_L * setup.radius_L ) / ( real_t(2) * setup.viscosity_L );
-      setup.meanVelocity_L = ( setup.acceleration_L * setup.radius_L * setup.radius_L ) / ( real_t(3) * setup.viscosity_L );
+      setup.maxVelocity_L = ( setup.acceleration_L * setup.radius_L * setup.radius_L ) / ( 2_r * setup.viscosity_L );
+      setup.meanVelocity_L = ( setup.acceleration_L * setup.radius_L * setup.radius_L ) / ( 3_r * setup.viscosity_L );
       setup.flowRate_L = setup.meanVelocity_L * real_c( setup.yBlocks * setup.yCells * setup.zBlocks * setup.zCells );
    }
 
@@ -777,13 +777,13 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    // add pdf field to blocks
 
-   const real_t initVelocity = ( configBlock.getParameter< bool >( "initWithMeanVelocity", false ) ) ? setup.meanVelocity_L : real_t(0);
+   const real_t initVelocity = ( configBlock.getParameter< bool >( "initWithMeanVelocity", false ) ) ? setup.meanVelocity_L : 0_r;
 
    BlockDataID pdfFieldId = fzyx ? lbm::addPdfFieldToStorage( blocks, "pdf field (fzyx)", latticeModel,
-                                                              Vector3< real_t >( initVelocity, real_c(0), real_c(0) ), real_t(1),
+                                                              Vector3< real_t >( initVelocity, real_c(0), real_c(0) ), 1_r,
                                                               FieldGhostLayers, field::fzyx ) :
                                    lbm::addPdfFieldToStorage( blocks, "pdf field (zyxf)", latticeModel,
-                                                              Vector3< real_t >( initVelocity, real_c(0), real_c(0) ), real_t(1),
+                                                              Vector3< real_t >( initVelocity, real_c(0), real_c(0) ), 1_r,
                                                               FieldGhostLayers, field::zyxf );
 
    using VelocityAdaptor_T = typename lbm::Adaptor< LatticeModel_T >::VelocityVector;
@@ -854,20 +854,20 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
                                                                                                         flagFieldId, Fluid_Flag,
                                                                                                         std::bind( exactFlowRate, setup.flowRate_L ),
                                                                                                         exactSolutionFunction );
-   volumetricFlowRate->setNormalizationFactor( real_t(1) / setup.maxVelocity_L );
-   volumetricFlowRate->setDomainNormalization( Vector3<real_t>( real_t(1) ) );
+   volumetricFlowRate->setNormalizationFactor( 1_r / setup.maxVelocity_L );
+   volumetricFlowRate->setDomainNormalization( Vector3<real_t>( 1_r ) );
 
    timeloop.addFuncBeforeTimeStep( makeSharedFunctor( volumetricFlowRate ), "volumetric flow rate evaluation" );
 
    auto accuracyEvaluation = field::makeAccuracyEvaluation< VelocityAdaptor_T, FlagField_T >( configBlock, blocks, velocityAdaptorId,
                                                                                               flagFieldId, Fluid_Flag, exactSolutionFunction );
-   accuracyEvaluation->setNormalizationFactor( real_t(1) / setup.maxVelocity_L );
+   accuracyEvaluation->setNormalizationFactor( 1_r / setup.maxVelocity_L );
 
    timeloop.addFuncBeforeTimeStep( makeSharedFunctor( accuracyEvaluation ), "accuracy evaluation" );
    
    auto linePlot = field::makeAccuracyEvaluationLinePlot< VelocityAdaptor_T, FlagField_T >( configBlock, blocks, velocityAdaptorId,
                                                                                             flagFieldId, Fluid_Flag, exactSolutionFunction );
-   linePlot->setNormalizationFactor( real_t(1) / setup.maxVelocity_L );
+   linePlot->setNormalizationFactor( 1_r / setup.maxVelocity_L );
 
    timeloop.addFuncBeforeTimeStep( makeSharedFunctor( field::makeAccuracyEvaluationLinePlotter( configBlock, linePlot ) ), "accuracy evaluation (line plot)" );
    
@@ -1136,7 +1136,7 @@ int main( int argc, char **argv )
    setup.yCells = configBlock.getParameter< uint_t >( "yCells", uint_t(50) );
    setup.zCells = configBlock.getParameter< uint_t >( "zCells", uint_t(10) );
 
-   setup.Re = configBlock.getParameter< real_t >( "Re", real_t(10) );
+   setup.Re = configBlock.getParameter< real_t >( "Re", 10_r );
    
    // http://www.ae.metu.edu.tr/~ae244/docs/FluidMechanics-by-JamesFay/2003/Textbook/Nodes/chap06/node9.html
    // http://farside.ph.utexas.edu/teaching/336L/Fluidhtml/node106.html
@@ -1175,7 +1175,7 @@ int main( int argc, char **argv )
       if( !configBlock.isDefined("borderRefinementLevel")  )
          WALBERLA_ABORT( "You have to specify \'borderRefinementLevel\' in the \"PoiseuilleChannel\" block of the configuration file (" << argv[1] << ")" );
 
-      const real_t borderRefinementBuffer = configBlock.getParameter< real_t >( "borderRefinementBuffer", real_t(0) );
+      const real_t borderRefinementBuffer = configBlock.getParameter< real_t >( "borderRefinementBuffer", 0_r );
 
       BorderRefinementSelection borderRefinementSelection( setup, configBlock.getParameter< uint_t >( "borderRefinementLevel" ),
                borderRefinementBuffer );
@@ -1242,12 +1242,12 @@ int main( int argc, char **argv )
 
    // executing benchmark
 
-   const real_t omega = configBlock.getParameter< real_t >( "omega", real_t(1.4) );
+   const real_t omega = configBlock.getParameter< real_t >( "omega", 1.4_r );
 
-   const real_t magicNumber = configBlock.getParameter< real_t >( "magicNumber", real_t(3) / real_t(16) );
+   const real_t magicNumber = configBlock.getParameter< real_t >( "magicNumber", 3_r / 16_r );
 
-   const real_t lambda_e = configBlock.getParameter< real_t >( "lambda_e", real_t(1.4) );
-   const real_t lambda_d = configBlock.getParameter< real_t >( "lambda_d", real_t(1.4) );
+   const real_t lambda_e = configBlock.getParameter< real_t >( "lambda_e", 1.4_r );
+   const real_t lambda_d = configBlock.getParameter< real_t >( "lambda_d", 1.4_r );
 
    const uint_t relaxationParametersLevel = configBlock.getParameter< uint_t >( "relaxationParametersLevel", uint_t(0) );
 
@@ -1257,20 +1257,20 @@ int main( int argc, char **argv )
 
       setup.viscosity_L = cm.viscosity( uint_t(0) );
       if( setup.circularProfile )
-         setup.acceleration_L = ( real_t(4) * setup.viscosity_L * setup.viscosity_L * setup.Re ) / ( setup.radius_L * setup.radius_L * setup.radius_L );
+         setup.acceleration_L = ( 4_r * setup.viscosity_L * setup.viscosity_L * setup.Re ) / ( setup.radius_L * setup.radius_L * setup.radius_L );
       else
-         setup.acceleration_L = ( real_t(3) * setup.viscosity_L * setup.viscosity_L * setup.Re ) / ( real_t(2) * setup.radius_L * setup.radius_L * setup.radius_L );
+         setup.acceleration_L = ( 3_r * setup.viscosity_L * setup.viscosity_L * setup.Re ) / ( 2_r * setup.radius_L * setup.radius_L * setup.radius_L );
 
       if( lm == LMD3Q19 )
       {
          if( compressible )
          {
-            D3Q19_SRT_COMP latticeModel = D3Q19_SRT_COMP( cm, lbm::force_model::SimpleConstant( setup.acceleration_L, real_t(0), real_t(0) ) );
+            D3Q19_SRT_COMP latticeModel = D3Q19_SRT_COMP( cm, lbm::force_model::SimpleConstant( setup.acceleration_L, 0_r, 0_r ) );
             run( config, latticeModel, fzyx, syncComm, fullComm, linearExplosion, refinementSelectionFunctions, setup, memoryPerCell, processMemoryLimit );
          }
          else
          {
-            D3Q19_SRT_INCOMP latticeModel = D3Q19_SRT_INCOMP( cm, lbm::force_model::SimpleConstant( setup.acceleration_L, real_t(0), real_t(0) ) );
+            D3Q19_SRT_INCOMP latticeModel = D3Q19_SRT_INCOMP( cm, lbm::force_model::SimpleConstant( setup.acceleration_L, 0_r, 0_r ) );
             run( config, latticeModel, fzyx, syncComm, fullComm, linearExplosion, refinementSelectionFunctions, setup, memoryPerCell, processMemoryLimit );
          }
       }
@@ -1278,12 +1278,12 @@ int main( int argc, char **argv )
       {
          if( compressible )
          {
-            D3Q27_SRT_COMP latticeModel = D3Q27_SRT_COMP( cm, lbm::force_model::SimpleConstant( setup.acceleration_L, real_t(0), real_t(0) ) );
+            D3Q27_SRT_COMP latticeModel = D3Q27_SRT_COMP( cm, lbm::force_model::SimpleConstant( setup.acceleration_L, 0_r, 0_r ) );
             run( config, latticeModel, fzyx, syncComm, fullComm, linearExplosion, refinementSelectionFunctions, setup, memoryPerCell, processMemoryLimit );
          }
          else
          {
-            D3Q27_SRT_INCOMP latticeModel = D3Q27_SRT_INCOMP( cm, lbm::force_model::SimpleConstant( setup.acceleration_L, real_t(0), real_t(0) ) );
+            D3Q27_SRT_INCOMP latticeModel = D3Q27_SRT_INCOMP( cm, lbm::force_model::SimpleConstant( setup.acceleration_L, 0_r, 0_r ) );
             run( config, latticeModel, fzyx, syncComm, fullComm, linearExplosion, refinementSelectionFunctions, setup, memoryPerCell, processMemoryLimit );
          }
       }
@@ -1299,27 +1299,27 @@ int main( int argc, char **argv )
 
       setup.viscosity_L = cm.viscosity( uint_t(0) );
       if( setup.circularProfile )
-         setup.acceleration_L = ( real_t(4) * setup.viscosity_L * setup.viscosity_L * setup.Re ) / ( setup.radius_L * setup.radius_L * setup.radius_L );
+         setup.acceleration_L = ( 4_r * setup.viscosity_L * setup.viscosity_L * setup.Re ) / ( setup.radius_L * setup.radius_L * setup.radius_L );
       else
-         setup.acceleration_L = ( real_t(3) * setup.viscosity_L * setup.viscosity_L * setup.Re ) / ( real_t(2) * setup.radius_L * setup.radius_L * setup.radius_L );
+         setup.acceleration_L = ( 3_r * setup.viscosity_L * setup.viscosity_L * setup.Re ) / ( 2_r * setup.radius_L * setup.radius_L * setup.radius_L );
 
       if( lm == LMD3Q19 )
       {
          WALBERLA_CHECK( !compressible );
 
-         D3Q19_TRT_INCOMP latticeModel = D3Q19_TRT_INCOMP( cm, lbm::force_model::SimpleConstant( setup.acceleration_L, real_t(0), real_t(0) ) );
+         D3Q19_TRT_INCOMP latticeModel = D3Q19_TRT_INCOMP( cm, lbm::force_model::SimpleConstant( setup.acceleration_L, 0_r, 0_r ) );
          run( config, latticeModel, fzyx, syncComm, fullComm, linearExplosion, refinementSelectionFunctions, setup, memoryPerCell, processMemoryLimit );
       }
       else
       {
          if( compressible )
          {
-            D3Q27_TRT_COMP latticeModel = D3Q27_TRT_COMP( cm, lbm::force_model::SimpleConstant( setup.acceleration_L, real_t(0), real_t(0) ) );
+            D3Q27_TRT_COMP latticeModel = D3Q27_TRT_COMP( cm, lbm::force_model::SimpleConstant( setup.acceleration_L, 0_r, 0_r ) );
             run( config, latticeModel, fzyx, syncComm, fullComm, linearExplosion, refinementSelectionFunctions, setup, memoryPerCell, processMemoryLimit );
          }
          else
          {
-            D3Q27_TRT_INCOMP latticeModel = D3Q27_TRT_INCOMP( cm, lbm::force_model::SimpleConstant( setup.acceleration_L, real_t(0), real_t(0) ) );
+            D3Q27_TRT_INCOMP latticeModel = D3Q27_TRT_INCOMP( cm, lbm::force_model::SimpleConstant( setup.acceleration_L, 0_r, 0_r ) );
             run( config, latticeModel, fzyx, syncComm, fullComm, linearExplosion, refinementSelectionFunctions, setup, memoryPerCell, processMemoryLimit );
          }
       }

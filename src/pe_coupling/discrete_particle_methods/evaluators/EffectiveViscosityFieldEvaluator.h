@@ -47,9 +47,9 @@ real_t calculateRescaledEffectiveViscosity( real_t fluidViscosity, real_t porosi
 // bottom boundary layer", Journal of Fluid Mechanics 796 (2016) 340–385. doi:10.1017/jfm.2016.246.
 real_t calculateEilersEffectiveViscosity( real_t fluidViscosity, real_t porosity )
 {
-   const real_t closePackingFraction = real_t(0.64);
-   const real_t intrinsicViscosity = real_t(2.5); //for monosized spheres
-   const real_t temp = real_t(1) + real_t(0.5) * intrinsicViscosity * ( real_t(1) - porosity ) / ( porosity  / closePackingFraction );
+   const real_t closePackingFraction = 0.64_r;
+   const real_t intrinsicViscosity = 2.5_r; //for monosized spheres
+   const real_t temp = 1_r + 0.5_r * intrinsicViscosity * ( 1_r - porosity ) / ( porosity  / closePackingFraction );
    return fluidViscosity * temp * temp;
 }
 
@@ -78,8 +78,8 @@ public:
       const ScalarField_T* svfField   = block->getData<ScalarField_T>(solidVolumeFractionFieldID_);
 
       WALBERLA_FOR_ALL_CELLS_XYZ(omegaField,
-          const real_t porosity = real_t(1) - svfField->get(x,y,z);
-          WALBERLA_ASSERT_FLOAT_UNEQUAL(porosity, real_t(0));
+          const real_t porosity = 1_r - svfField->get(x,y,z);
+          WALBERLA_ASSERT_FLOAT_UNEQUAL(porosity, 0_r);
 
           real_t effectiveViscosity = effectiveViscosityFunc_(fluidViscosity_, porosity);
 

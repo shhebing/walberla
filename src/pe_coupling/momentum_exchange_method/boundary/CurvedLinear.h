@@ -174,11 +174,11 @@ inline void CurvedLinear< LatticeModel_T, FlagField_T >::treatDirection( const c
    // depending on the implementation for the specific body, either an analytical formula (e.g. for the sphere) or a line search algorithm is used
    real_t delta = lbm::intersectionRatio( body, cellCenter, direction, tolerance );
 
-   WALBERLA_ASSERT_LESS_EQUAL( delta, real_t(1));
-   WALBERLA_ASSERT_GREATER_EQUAL( delta, real_t(0));
+   WALBERLA_ASSERT_LESS_EQUAL( delta, 1_r);
+   WALBERLA_ASSERT_GREATER_EQUAL( delta, 0_r);
 
-   real_t pdf_new = real_t(0);
-   real_t alpha = real_t(0);
+   real_t pdf_new = 0_r;
+   real_t alpha = 0_r;
 
    // get the cell indices of the cell further away from the obstacle
    const cell_idx_t xff = x - cell_idx_c( stencil::cx[ dir ] );

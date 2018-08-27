@@ -56,7 +56,7 @@ public:
 
       //TODO include dx force scaling
       WALBERLA_FOR_ALL_CELLS_XYZ( forceField,
-         forceField->get(x,y,z) += ( real_t(1) - solidVolumeFractionField->get(x,y,z) ) * externalForce_;
+         forceField->get(x,y,z) += ( 1_r - solidVolumeFractionField->get(x,y,z) ) * externalForce_;
       );
    }
 

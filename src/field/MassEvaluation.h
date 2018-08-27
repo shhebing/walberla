@@ -135,7 +135,7 @@ public:
       blocks_( blocks ), filter_( filter ),
       executionCounter_( uint_c(0) ), plotFrequency_( plotFrequency ), logFrequency_( logFrequency ), filename_( filename ),
       fieldId_( fieldId ),
-      initialMass_( real_t(0) ), minMass_( real_t(0) ), maxMass_( real_t(0) ),
+      initialMass_( 0_r ), minMass_( 0_r ), maxMass_( 0_r ),
       requiredSelectors_(requiredSelectors), incompatibleSelectors_( incompatibleSelectors )
    {
       auto _blocks = blocks.lock();
@@ -152,7 +152,7 @@ public:
       blocks_( blocks ), filter_( Filter_T() ),
       executionCounter_( uint_c(0) ), plotFrequency_( plotFrequency ), logFrequency_( logFrequency ), filename_( filename ),
       fieldId_( fieldId ),
-      initialMass_( real_t(0) ), minMass_( real_t(0) ), maxMass_( real_t(0) ),
+      initialMass_( 0_r ), minMass_( 0_r ), maxMass_( 0_r ),
       requiredSelectors_(requiredSelectors), incompatibleSelectors_( incompatibleSelectors )
    {
       static_assert( (boost::is_same< Filter_T, DefaultEvaluationFilter >::value),
@@ -209,7 +209,7 @@ void MassEvaluation< DensityField_T, Filter_T, Pseudo2D >::operator()()
    if( !log && !plot )
       return;
 
-   real_t mass( real_t(0) );
+   real_t mass( 0_r );
 
    auto blocks = blocks_.lock();
    WALBERLA_CHECK_NOT_NULLPTR( blocks, "Trying to access 'MassEvaluation' for a block storage object that doesn't exist anymore" );
