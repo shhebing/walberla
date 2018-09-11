@@ -36,6 +36,7 @@
 
 #include "field/AddToStorage.h"
 #include "field/communication/PackInfo.h"
+#include "field/StabilityChecker.h"
 
 #include "lbm/boundary/all.h"
 #include "lbm/communication/PdfFieldPackInfo.h"
@@ -269,134 +270,133 @@ namespace fluidizedBed {
 
 
     template <typename  collisionModel_T>
-    int runSimulation ( Environment & env){
+    int runSimulation ( Environment & env) {
 
-       uint_t processes = MPIManager::instance()->numProcesses();
+        uint_t processes = MPIManager::instance()->numProcesses();
 
-       FBfunc::SetupFB config;
+        FBfunc::SetupFB config;
 
-       auto model_parameters = env.config()->getBlock("Model");
+        auto model_parameters = env.config()->getBlock("Model");
 
-       const bool turb = model_parameters.getParameter<bool>("turbulence_model", false);
+        const bool turb = model_parameters.getParameter<bool>("turbulence_model", false);
 
 //////////////
 // TYPEDEFS //
 //////////////
 
-       typedef lbm::D3Q19<collisionModel_T, false> LatticeModel_T;
-       typedef typename LatticeModel_T::Stencil Stencil_T;
-       typedef lbm::PdfField<LatticeModel_T> PdfField_T;
+        typedef lbm::D3Q19<collisionModel_T, false> LatticeModel_T;
+        typedef typename LatticeModel_T::Stencil Stencil_T;
+        typedef lbm::PdfField<LatticeModel_T> PdfField_T;
 
 // boundary handling
 
-       typedef lbm::NoSlip<LatticeModel_T, flag_t> NoSlip_T;
-       typedef lbm::SimplePressure<LatticeModel_T, flag_t> SimplePressure_T;
-       typedef lbm::DynamicUBB<LatticeModel_T, flag_t, FBfunc::VelocityFunctor_T> UBB_T;
-       typedef pe_coupling::CurvedLinear<LatticeModel_T, FlagField_T> MO_T;
+        typedef lbm::NoSlip<LatticeModel_T, flag_t> NoSlip_T;
+        typedef lbm::SimplePressure<LatticeModel_T, flag_t> SimplePressure_T;
+        typedef lbm::DynamicUBB<LatticeModel_T, flag_t, FBfunc::VelocityFunctor_T> UBB_T;
+        typedef pe_coupling::CurvedLinear<LatticeModel_T, FlagField_T> MO_T;
 
-       typedef boost::tuples::tuple<NoSlip_T, SimplePressure_T, UBB_T, MO_T> BoundaryConditions_T;
-       typedef BoundaryHandling<FlagField_T, Stencil_T, BoundaryConditions_T> BoundaryHandling_T;
+        typedef boost::tuples::tuple<NoSlip_T, SimplePressure_T, UBB_T, MO_T> BoundaryConditions_T;
+        typedef BoundaryHandling<FlagField_T, Stencil_T, BoundaryConditions_T> BoundaryHandling_T;
 
-       typedef MyBoundaryHandling <BoundaryHandling_T, FlagField_T, PdfField_T, NoSlip_T, SimplePressure_T, UBB_T, MO_T> MyBoundaryHandling_T;
+        typedef MyBoundaryHandling<BoundaryHandling_T, FlagField_T, PdfField_T, NoSlip_T, SimplePressure_T, UBB_T, MO_T> MyBoundaryHandling_T;
 
 
 ///////////////////////////
 // SIMULATION PROPERTIES //
 ///////////////////////////
 
-       // GEOMETRY PARAMETERS
-       auto geo_parameters = env.config()->getBlock("Geometry");
+        // GEOMETRY PARAMETERS
+        auto geo_parameters = env.config()->getBlock("Geometry");
 
-       const real_t depth_SI = geo_parameters.getParameter<real_t>("depth", real_c(0.02));                         //[m]
-       const real_t width_SI = geo_parameters.getParameter<real_t>("width", real_c(0.10));                         //[m]
-       const real_t height_SI = geo_parameters.getParameter<real_t>("height", real_c(0.40));                         //[m]
-       const real_t offsetTop_SI = geo_parameters.getParameter<real_t>("offset_top", real_c(0.00));                         //[m]
-       const real_t offsetBot_SI = geo_parameters.getParameter<real_t>("offset_bot", real_c(0.00));                         //[m]
+        const real_t depth_SI = geo_parameters.getParameter<real_t>("depth", real_c(0.02));                         //[m]
+        const real_t width_SI = geo_parameters.getParameter<real_t>("width", real_c(0.10));                         //[m]
+        const real_t height_SI = geo_parameters.getParameter<real_t>("height", real_c(0.40));                         //[m]
+        const real_t offsetTop_SI = geo_parameters.getParameter<real_t>("offset_top", real_c(0.00));                         //[m]
+        const real_t offsetBot_SI = geo_parameters.getParameter<real_t>("offset_bot", real_c(0.00));                         //[m]
 
-       if (!geo_parameters.isDefined("depth")) {
-          WALBERLA_ABORT("You need to specify \"depth\" in the configuration file");
-       }
-       if (!geo_parameters.isDefined("width")) {
-          WALBERLA_ABORT("You need to specify \"width\" in the configuration file");
-       }
-       if (!geo_parameters.isDefined("height")) {
-          WALBERLA_ABORT("You need to specify \"height\" in the configuration file");
-       }
+        if (!geo_parameters.isDefined("depth")) {
+            WALBERLA_ABORT("You need to specify \"depth\" in the configuration file");
+        }
+        if (!geo_parameters.isDefined("width")) {
+            WALBERLA_ABORT("You need to specify \"width\" in the configuration file");
+        }
+        if (!geo_parameters.isDefined("height")) {
+            WALBERLA_ABORT("You need to specify \"height\" in the configuration file");
+        }
 
-       const real_t crossSectionArea_SI = width_SI * depth_SI;
+        const real_t crossSectionArea_SI = width_SI * depth_SI;
 
-       const bool xPeriodic = geo_parameters.getParameter<bool>("width_periodic", false);
-       const bool zPeriodic = geo_parameters.getParameter<bool>("depth_periodic", false);
+        const bool xPeriodic = geo_parameters.getParameter<bool>("width_periodic", false);
+        const bool zPeriodic = geo_parameters.getParameter<bool>("depth_periodic", false);
 
-       const bool twoSpecies = geo_parameters.getParameter<bool>("two_species", false);
-       //const bool createSpeciesWithRandomGenerator = geo_parameters.getParameter<bool>("create_species_with_random_generator", false);
+        const bool twoSpecies = geo_parameters.getParameter<bool>("two_species", false);
+        //const bool createSpeciesWithRandomGenerator = geo_parameters.getParameter<bool>("create_species_with_random_generator", false);
 
-       const real_t diameterA_SI = geo_parameters.getParameter<real_t>("diameter_A", real_c(0.00215));   //[m]
-       const real_t diameterB_SI = geo_parameters.getParameter<real_t>("diameter_B", real_c(0.00215));   //[m]
-       const real_t radiusStandardDeviationA = 0.5 * geo_parameters.getParameter<real_t>("diameter_standard_distribution_A", real_c(0.00000));
-       const real_t radiusStandardDeviationB = 0.5 * geo_parameters.getParameter<real_t>("diameter_standard_distribution_B", real_c(0.00000));
-       config.dx_SI = geo_parameters.getParameter<real_t>("cell_size", real_c(0.0002));
-       config.diameterA = diameterA_SI / config.dx_SI;
-       config.diameterB = diameterB_SI / config.dx_SI;
-       const real_t radiusA = real_c(config.diameterA * 0.5);
-       const real_t radiusB = real_c(config.diameterB * 0.5);
+        const real_t diameterA_SI = geo_parameters.getParameter<real_t>("diameter_A", real_c(0.00215));   //[m]
+        const real_t diameterB_SI = geo_parameters.getParameter<real_t>("diameter_B", real_c(0.00215));   //[m]
+        const real_t radiusStandardDeviationA = 0.5 * geo_parameters.getParameter<real_t>("diameter_standard_distribution_A", real_c(0.00000));
+        const real_t radiusStandardDeviationB = 0.5 * geo_parameters.getParameter<real_t>("diameter_standard_distribution_B", real_c(0.00000));
+        config.dx_SI = geo_parameters.getParameter<real_t>("cell_size", real_c(0.0002));
+        config.diameterA = diameterA_SI / config.dx_SI;
+        config.diameterB = diameterB_SI / config.dx_SI;
+        const real_t radiusA = real_c(config.diameterA * 0.5);
+        const real_t radiusB = real_c(config.diameterB * 0.5);
 
-       const uint_t xBlocks = geo_parameters.getParameter<uint_t>("blocks_width", uint_c(5));
-       const uint_t yBlocks = geo_parameters.getParameter<uint_t>("blocks_height", uint_c(20));
-       const uint_t zBlocks = geo_parameters.getParameter<uint_t>("blocks_depth", uint_c(1));
+        const uint_t xBlocks = geo_parameters.getParameter<uint_t>("blocks_width", uint_c(5));
+        const uint_t yBlocks = geo_parameters.getParameter<uint_t>("blocks_height", uint_c(20));
+        const uint_t zBlocks = geo_parameters.getParameter<uint_t>("blocks_depth", uint_c(1));
 
-       if (processes != (xBlocks * yBlocks * zBlocks)) {
-          WALBERLA_ABORT("number of processes must be equal to number of blocks ( here: " << (xBlocks * yBlocks * zBlocks) << " )");
-       }
+        if (processes != (xBlocks * yBlocks * zBlocks)) {
+            WALBERLA_ABORT("number of processes must be equal to number of blocks ( here: " << (xBlocks * yBlocks * zBlocks) << " )");
+        }
 
-       config.xlength = uint_c(std::round(width_SI / config.dx_SI));
-       config.ylength = uint_c(std::round((height_SI + offsetTop_SI + offsetBot_SI) / config.dx_SI));
-       config.zlength = uint_c(std::round(depth_SI / config.dx_SI));
-       config.offsetTop = offsetBot_SI / config.dx_SI;
-       config.offsetBot = offsetBot_SI / config.dx_SI;
+        config.xlength = uint_c(std::round(width_SI / config.dx_SI));
+        config.ylength = uint_c(std::round((height_SI + offsetTop_SI + offsetBot_SI) / config.dx_SI));
+        config.zlength = uint_c(std::round(depth_SI / config.dx_SI));
+        config.offsetTop = offsetBot_SI / config.dx_SI;
+        config.offsetBot = offsetBot_SI / config.dx_SI;
 
-       const bool spotInflow = geo_parameters.getParameter<bool>("spot_inflow", false);
-       real_t spotDiameter =  geo_parameters.getParameter<real_t>("spot_diameter", real_c(0.01));
-       spotDiameter = spotDiameter / config.dx_SI;
+        const bool spotInflow = geo_parameters.getParameter<bool>("spot_inflow", false);
+        real_t spotDiameter = geo_parameters.getParameter<real_t>("spot_diameter", real_c(0.01));
+        spotDiameter = spotDiameter / config.dx_SI;
 
-       // FLUIDIZED BED PARAMETERS
-       auto fb_parameters = env.config()->getBlock("FluidizedBed");
+        // FLUIDIZED BED PARAMETERS
+        auto fb_parameters = env.config()->getBlock("FluidizedBed");
 
-       config.nrParticlesA = fb_parameters.getParameter<uint_t>("#particles_A", uint_c(0));
-       config.nrParticlesB = fb_parameters.getParameter<uint_t>("#particles_B", uint_c(0));
-       const real_t densitySolidA_SI = fb_parameters.getParameter<real_t>("density_particle_A", real_c(22.5));         //[kg/m3] // alumina katalyst
-       const real_t densitySolidB_SI = fb_parameters.getParameter<real_t>("density_particle_B", real_c(22.5));         //[kg/m3]
-       config.densityFluid_SI = fb_parameters.getParameter<real_t>("density_fluid", real_c(1.2));          //[kg/m3]      //water
-       const real_t dynViscosity_SI = fb_parameters.getParameter<real_t>("dynamic_viscosity", real_c(1.84e-5));       //[Pa*s]  // viscosity of water
-       const real_t kinViscosity_SI = dynViscosity_SI / config.densityFluid_SI;                                       //[m2/s]
-       const real_t gravity_SI = fb_parameters.getParameter<real_t>("gravity", real_c(9.81));
+        config.nrParticlesA = fb_parameters.getParameter<uint_t>("#particles_A", uint_c(0));
+        config.nrParticlesB = fb_parameters.getParameter<uint_t>("#particles_B", uint_c(0));
+        const real_t densitySolidA_SI = fb_parameters.getParameter<real_t>("density_particle_A",
+                                                                           real_c(22.5));         //[kg/m3] // alumina katalyst
+        const real_t densitySolidB_SI = fb_parameters.getParameter<real_t>("density_particle_B", real_c(22.5));         //[kg/m3]
+        config.densityFluid_SI = fb_parameters.getParameter<real_t>("density_fluid", real_c(1.2));          //[kg/m3]      //water
+        const real_t dynViscosity_SI = fb_parameters.getParameter<real_t>("dynamic_viscosity",
+                                                                          real_c(1.84e-5));       //[Pa*s]  // viscosity of water
+        const real_t kinViscosity_SI = dynViscosity_SI / config.densityFluid_SI;                                       //[m2/s]
+        const real_t gravity_SI = fb_parameters.getParameter<real_t>("gravity", real_c(9.81));
 
-       config.densityRatioA = densitySolidA_SI / config.densityFluid_SI;
-       config.densityRatioB = densitySolidB_SI / config.densityFluid_SI;
+        config.densityRatioA = densitySolidA_SI / config.densityFluid_SI;
+        config.densityRatioB = densitySolidB_SI / config.densityFluid_SI;
 
-       real_t velocity_SI;
-       real_t particleReynoldsNumber_SI;
-       if (fb_parameters.isDefined("velocity")) {
-          velocity_SI = fb_parameters.getParameter<real_t>("velocity", real_c(0.35));
-          particleReynoldsNumber_SI = velocity_SI * diameterA_SI / kinViscosity_SI;
-       }
-       else if (fb_parameters.isDefined("particle_RE")) {
-          particleReynoldsNumber_SI = fb_parameters.getParameter<real_t>("particle_RE", real_c(48));
-          velocity_SI = particleReynoldsNumber_SI * kinViscosity_SI / diameterA_SI;
-       }
-       else if (fb_parameters.isDefined("volume_flow_rate")) {
-          real_t volumeFlowRate_SI = fb_parameters.getParameter<real_t>("volume_flow_rate", real_c(2.5));
-          velocity_SI = real_c(volumeFlowRate_SI / crossSectionArea_SI / 3600);
-          particleReynoldsNumber_SI = velocity_SI * diameterA_SI / kinViscosity_SI;
-       }
-       else {
-          WALBERLA_ABORT("You need to specify either \"volume_flow_rate\" or \"velocity\" or \"particle_RE\" in the configuration file");
-       }
+        real_t velocity_SI;
+        real_t particleReynoldsNumber_SI;
+        if (fb_parameters.isDefined("velocity")) {
+            velocity_SI = fb_parameters.getParameter<real_t>("velocity", real_c(0.35));
+            particleReynoldsNumber_SI = velocity_SI * diameterA_SI / kinViscosity_SI;
+        } else if (fb_parameters.isDefined("particle_RE")) {
+            particleReynoldsNumber_SI = fb_parameters.getParameter<real_t>("particle_RE", real_c(48));
+            velocity_SI = particleReynoldsNumber_SI * kinViscosity_SI / diameterA_SI;
+        } else if (fb_parameters.isDefined("volume_flow_rate")) {
+            real_t volumeFlowRate_SI = fb_parameters.getParameter<real_t>("volume_flow_rate", real_c(2.5));
+            velocity_SI = real_c(volumeFlowRate_SI / crossSectionArea_SI / 3600);
+            particleReynoldsNumber_SI = velocity_SI * diameterA_SI / kinViscosity_SI;
+        } else {
+            WALBERLA_ABORT("You need to specify either \"volume_flow_rate\" or \"velocity\" or \"particle_RE\" in the configuration file");
+        }
 
-       // SIMULATION PARAMETERS
-       auto sim_parameters = env.config()->getBlock("Simulation");
+        // SIMULATION PARAMETERS
+        auto sim_parameters = env.config()->getBlock("Simulation");
 
-       const bool useLubrication = sim_parameters.getParameter<bool>("use_lubrication", false);
+        const bool useLubrication = sim_parameters.getParameter<bool>("use_lubrication", false);
 
         const bool createPackedBed = sim_parameters.getParameter<bool>("create_packed_bed", false);
         const bool checkMaximumParticleVelocity = sim_parameters.getParameter<bool>("check_maximum_particle_velocity", true);
@@ -407,692 +407,723 @@ namespace fluidizedBed {
         const bool runPreliminaryTimeloop = sim_parameters.getParameter<bool>("run_preliminary_timeloop", false);
         const real_t eps = sim_parameters.getParameter<real_t>("eps", real_c(0.05));
 
-       const bool initializeFromCheckPointFile = sim_parameters.getParameter<bool>("initialize_from_checkpoint", false);
-       const bool enableCheckpointing = sim_parameters.getParameter<bool>("enable_checkpointing", false);
-       const std::string checkpointPathBodies = sim_parameters.getParameter<std::string>("path_to_checkpoint_bodies", "checkpoint_bodies.dat");
-       const std::string checkpointPathPdf = sim_parameters.getParameter<std::string>("path_to_checkpoint_pdf", "checkpoint_pdf.dat");
+        const bool initializeFromCheckPointFile = sim_parameters.getParameter<bool>("initialize_from_checkpoint", false);
+        const bool enableCheckpointing = sim_parameters.getParameter<bool>("enable_checkpointing", false);
+        const std::string checkpointPathBodies = sim_parameters.getParameter<std::string>("path_to_checkpoint_bodies", "checkpoint_bodies.dat");
+        const std::string checkpointPathPdf = sim_parameters.getParameter<std::string>("path_to_checkpoint_pdf", "checkpoint_pdf.dat");
 
-       config.evaluationFreq = sim_parameters.getParameter<uint_t>("evaluation_frequency", uint_c(100));
-       config.velCheckFreq = sim_parameters.getParameter<uint_t>("velocity_check_frequency", uint_c(10));
-       config.checkpointFreq = sim_parameters.getParameter<uint_t>("checkpoint_frequency", uint_c(100000)); //has to be large
-       config.stopVel = sim_parameters.getParameter<real_t>("abort_LBM_velocity", real_c(0.50));
+        config.evaluationFreq = sim_parameters.getParameter<uint_t>("evaluation_frequency", uint_c(100));
+        config.velCheckFreq = sim_parameters.getParameter<uint_t>("velocity_check_frequency", uint_c(10));
+        config.checkpointFreq = sim_parameters.getParameter<uint_t>("checkpoint_frequency", uint_c(100000)); //has to be large
+        config.stopVel = sim_parameters.getParameter<real_t>("abort_LBM_velocity", real_c(0.50));
         const bool useForceAveraging = sim_parameters.getParameter<bool>("use_force_averaging", true);
         config.lbmSubCycles = useForceAveraging ? real_t(2) : real_t(1);
 
-       if(sim_parameters.isDefined("time_step")) {
-          config.dt_SI = sim_parameters.getParameter<real_t>("time_step", real_c(1e-6));
-          config.velocity = velocity_SI * config.dt_SI / config.dx_SI;
-       }
-       else if (sim_parameters.isDefined("LBM_velocity")){
-          config.velocity = sim_parameters.getParameter("LBM_velocity", real_c(0.06));
-          config.dt_SI = config.velocity * config.dx_SI / velocity_SI;
-       }
-       else if (sim_parameters.isDefined("omega")){
-          real_t omegaTemp = sim_parameters.getParameter<real_t>("omega", real_c(1.90));
-          config.kinViscosity = lbm::collision_model::viscosityFromOmega(omegaTemp);
-          config.dt_SI =  config.kinViscosity / kinViscosity_SI * config.dx_SI * config.dx_SI;
-          config.velocity = velocity_SI * config.dt_SI / config.dx_SI;
-       }
-       else if (sim_parameters.isDefined("tau")){
-          real_t tauTemp = sim_parameters.getParameter<real_t>("tau", real_c(0.52));
-          config.kinViscosity = lbm::collision_model::viscosityFromOmega(real_c(1.0)/tauTemp);
-          config.dt_SI =  config.kinViscosity / kinViscosity_SI * config.dx_SI * config.dx_SI;
-          config.velocity = velocity_SI * config.dt_SI / config.dx_SI;
-       }
-       else {
-          WALBERLA_ABORT("You need to specify either \"time_step\" or \"LBM_velocity\" or \"omega\" or \"tau\" in the configuration file");
-       }
+        if (sim_parameters.isDefined("time_step")) {
+            config.dt_SI = sim_parameters.getParameter<real_t>("time_step", real_c(1e-6));
+            config.velocity = velocity_SI * config.dt_SI / config.dx_SI;
+        } else if (sim_parameters.isDefined("LBM_velocity")) {
+            config.velocity = sim_parameters.getParameter("LBM_velocity", real_c(0.06));
+            config.dt_SI = config.velocity * config.dx_SI / velocity_SI;
+        } else if (sim_parameters.isDefined("omega")) {
+            real_t omegaTemp = sim_parameters.getParameter<real_t>("omega", real_c(1.90));
+            config.kinViscosity = lbm::collision_model::viscosityFromOmega(omegaTemp);
+            config.dt_SI = config.kinViscosity / kinViscosity_SI * config.dx_SI * config.dx_SI;
+            config.velocity = velocity_SI * config.dt_SI / config.dx_SI;
+        } else if (sim_parameters.isDefined("tau")) {
+            real_t tauTemp = sim_parameters.getParameter<real_t>("tau", real_c(0.52));
+            config.kinViscosity = lbm::collision_model::viscosityFromOmega(real_c(1.0) / tauTemp);
+            config.dt_SI = config.kinViscosity / kinViscosity_SI * config.dx_SI * config.dx_SI;
+            config.velocity = velocity_SI * config.dt_SI / config.dx_SI;
+        } else {
+            WALBERLA_ABORT("You need to specify either \"time_step\" or \"LBM_velocity\" or \"omega\" or \"tau\" in the configuration file");
+        }
 
 
-       const real_t smagorinskyConstant = sim_parameters.getParameter<real_t>("smagorinsky_constant", real_c(0.1));
+        const real_t smagorinskyConstant = sim_parameters.getParameter<real_t>("smagorinsky_constant", real_c(0.1));
 
-       uint_t timesteps;
-       uint_t timestepsRamping;
+        uint_t timesteps;
+        uint_t timestepsRamping;
 
-       if (sim_parameters.isDefined("simulation_time")) {
-          real_t simTime = sim_parameters.getParameter<real_t>("simulation_time", real_c(1.0));
-          timesteps = uint_c(simTime / (config.lbmSubCycles * config.dt_SI));
-       }
-       else if (sim_parameters.isDefined("#time_steps")) {
-          timesteps = sim_parameters.getParameter<uint_t>("#time_steps", uint_c(100000));
-       }
-       else {
-          WALBERLA_ABORT("You need to specify either \"simulation_time\" or \"#time_steps\"  in the configuration file");
-       }
+        if (sim_parameters.isDefined("simulation_time")) {
+            real_t simTime = sim_parameters.getParameter<real_t>("simulation_time", real_c(1.0));
+            timesteps = uint_c(simTime / (config.lbmSubCycles * config.dt_SI));
+        } else if (sim_parameters.isDefined("#time_steps")) {
+            timesteps = sim_parameters.getParameter<uint_t>("#time_steps", uint_c(100000));
+        } else {
+            WALBERLA_ABORT("You need to specify either \"simulation_time\" or \"#time_steps\"  in the configuration file");
+        }
 
-       if (sim_parameters.isDefined("ramping_time")) {
-          real_t rampingTime = sim_parameters.getParameter<real_t>("ramping_time", real_c(0.0));
-          timestepsRamping = uint_c(rampingTime / (config.lbmSubCycles * config.dt_SI));
-       }
-       else {
-          timestepsRamping = sim_parameters.getParameter<uint_t>("#ramping_steps", uint_c(0));
-       }
+        if (sim_parameters.isDefined("ramping_time")) {
+            real_t rampingTime = sim_parameters.getParameter<real_t>("ramping_time", real_c(0.0));
+            timestepsRamping = uint_c(rampingTime / (config.lbmSubCycles * config.dt_SI));
+        } else {
+            timestepsRamping = sim_parameters.getParameter<uint_t>("#ramping_steps", uint_c(0));
+        }
 
-       const real_t initialRampingVelocityFactor = sim_parameters.getParameter<real_t>("initial_ramping_scaling", real_c(0.50));
+        const real_t initialRampingVelocityFactor = sim_parameters.getParameter<real_t>("initial_ramping_scaling", real_c(0.50));
 
-       const real_t initialSphereVel = geo_parameters.getParameter<real_t>("initial_sphere_random_velocity", real_c(0.0)) * (config.dt_SI / config.dx_SI);
-       const real_t initialSphereDistance = geo_parameters.getParameter<real_t>("initial_sphere_distance", real_c(diameterA_SI * 1.5)) / config.dx_SI;
+        const real_t initialSphereVel =
+                geo_parameters.getParameter<real_t>("initial_sphere_random_velocity", real_c(0.0)) * (config.dt_SI / config.dx_SI);
+        const real_t initialSphereDistance =
+                geo_parameters.getParameter<real_t>("initial_sphere_distance", real_c(diameterA_SI * 1.5)) / config.dx_SI;
 
 
-       config.kinViscosity = kinViscosity_SI * config.dt_SI / config.dx_SI / config.dx_SI;
-       config.gravity = gravity_SI * config.dt_SI * config.dt_SI / config.dx_SI;
+        config.kinViscosity = kinViscosity_SI * config.dt_SI / config.dx_SI / config.dx_SI;
+        config.gravity = gravity_SI * config.dt_SI * config.dt_SI / config.dx_SI;
 
-       const real_t FroudeNumber_SI = real_c(sqrt(velocity_SI * velocity_SI / (gravity_SI * diameterA_SI) / (config.densityRatioA - 1)));
-       const real_t ArrheniusNumber_SI = (densitySolidA_SI - config.densityFluid_SI) * config.densityFluid_SI * diameterA_SI * diameterA_SI * diameterA_SI * gravity_SI /
-                                         (dynViscosity_SI * dynViscosity_SI);
+        const real_t FroudeNumber_SI = real_c(sqrt(velocity_SI * velocity_SI / (gravity_SI * diameterA_SI) / (config.densityRatioA - 1)));
+        const real_t ArrheniusNumber_SI =
+                (densitySolidA_SI - config.densityFluid_SI) * config.densityFluid_SI * diameterA_SI * diameterA_SI * diameterA_SI * gravity_SI /
+                (dynViscosity_SI * dynViscosity_SI);
 
-       const real_t particleReynoldsNumber_LBM = config.velocity * config.diameterA / config.kinViscosity;
-       const real_t FroudeNumber_LBM = real_c(sqrt(config.velocity * config.velocity / (config.gravity * config.diameterA) / (config.densityRatioA - 1)));
-       const real_t galileiNumber = config.gravity * config.diameterA * config.diameterA * config.diameterA / ( config.kinViscosity * config.kinViscosity);
+        const real_t particleReynoldsNumber_LBM = config.velocity * config.diameterA / config.kinViscosity;
+        const real_t FroudeNumber_LBM = real_c(
+                sqrt(config.velocity * config.velocity / (config.gravity * config.diameterA) / (config.densityRatioA - 1)));
+        const real_t galileiNumber =
+                config.gravity * config.diameterA * config.diameterA * config.diameterA / (config.kinViscosity * config.kinViscosity);
 
-       const real_t UmfFroudenumber = real_c(33.7 * (sqrt(1 + 3.6e-5 * ArrheniusNumber_SI) - 1) / sqrt(ArrheniusNumber_SI));
-       const real_t REpmf = real_c(sqrt(33.7 * 33.7 + 0.0494 * ArrheniusNumber_SI) - 33.7);            // Wen You 1966
-       const real_t gravityPressure = real_c(config.nrParticlesA) * gravity_SI * (densitySolidA_SI - config.densityFluid_SI)
-                                      * (1.0 / 6.0 * math::PI * diameterA_SI * diameterA_SI * diameterA_SI) / crossSectionArea_SI;
+        const real_t UmfFroudenumber = real_c(33.7 * (sqrt(1 + 3.6e-5 * ArrheniusNumber_SI) - 1) / sqrt(ArrheniusNumber_SI));
+        const real_t REpmf = real_c(sqrt(33.7 * 33.7 + 0.0494 * ArrheniusNumber_SI) - 33.7);            // Wen You 1966
+        const real_t gravityPressure = real_c(config.nrParticlesA) * gravity_SI * (densitySolidA_SI - config.densityFluid_SI)
+                                       * (1.0 / 6.0 * math::PI * diameterA_SI * diameterA_SI * diameterA_SI) / crossSectionArea_SI;
 
-       const real_t omega = lbm::collision_model::omegaFromViscosity(config.kinViscosity);
+        const real_t omega = lbm::collision_model::omegaFromViscosity(config.kinViscosity);
 
-       // MATERIAL PARAMETERS
-       auto mat_parameters = env.config()->getBlock("Material");
+        // MATERIAL PARAMETERS
+        auto mat_parameters = env.config()->getBlock("Material");
 
         const bool useDEM = mat_parameters.getParameter<bool>("use_DEM", true);
 
-        const uint_t HCSITSMaxIterations       = mat_parameters.getParameter<uint_t>("HCSITS_max_iterations", uint_c(10));
+        const uint_t HCSITSMaxIterations = mat_parameters.getParameter<uint_t>("HCSITS_max_iterations", uint_c(10));
         const real_t HCSITSRelaxationParameter = mat_parameters.getParameter<real_t>("HCSITS_relaxation_parameter", real_c(0.7));
 
-       const real_t volumeA = real_c(4.0 / 3.0 * math::PI * radiusA * radiusA * radiusA);
-       const real_t volumeB = real_c(4.0 / 3.0 * math::PI * radiusB * radiusB * radiusB);
-       const real_t MijA = real_c(0.5 * config.densityRatioA * volumeA);
-       const real_t MijB = real_c(0.5 * config.densityRatioB * volumeB);
+        const real_t volumeA = real_c(4.0 / 3.0 * math::PI * radiusA * radiusA * radiusA);
+        const real_t volumeB = real_c(4.0 / 3.0 * math::PI * radiusB * radiusB * radiusB);
+        const real_t MijA = real_c(0.5 * config.densityRatioA * volumeA);
+        const real_t MijB = real_c(0.5 * config.densityRatioB * volumeB);
 
         real_t MijWall = MijA;
-        if (twoSpecies){
-            MijWall = 0.5 * (MijA +MijB);
+        if (twoSpecies) {
+            MijWall = 0.5 * (MijA + MijB);
         }
 
-        const real_t cdsA    = mat_parameters.getParameter<real_t>("static_friction_particles_A", real_c(0.5));           // static friction
-        const real_t cdsB    = mat_parameters.getParameter<real_t>("static_friction_particles_B", real_c(0.5));           // static friction
+        const real_t cdsA = mat_parameters.getParameter<real_t>("static_friction_particles_A", real_c(0.5));           // static friction
+        const real_t cdsB = mat_parameters.getParameter<real_t>("static_friction_particles_B", real_c(0.5));           // static friction
         const real_t cdsWall = mat_parameters.getParameter<real_t>("static_friction_particles_wall", real_c(0.5));        // static friction
-        const real_t cdfA    = mat_parameters.getParameter<real_t>("dynamic_friction_particles_A", real_c(0.5));          // dynamic friction
-        const real_t cdfB    = mat_parameters.getParameter<real_t>("dynamic_friction_particles_B", real_c(0.5));          // dynamic friction
+        const real_t cdfA = mat_parameters.getParameter<real_t>("dynamic_friction_particles_A", real_c(0.5));          // dynamic friction
+        const real_t cdfB = mat_parameters.getParameter<real_t>("dynamic_friction_particles_B", real_c(0.5));          // dynamic friction
         const real_t cdfWall = mat_parameters.getParameter<real_t>("dynamic_friction_wall", real_c(0.5));                 // dynamic friction
 
         const real_t poisson = real_c(0.2);                  // not used in DEM
-       const real_t youngsModulus = 100000;                 // not used in DEM
-       //const real_t restitution = real_c(0.8);              // not used in DEM
+        const real_t youngsModulus = 100000;                 // not used in DEM
+        //const real_t restitution = real_c(0.8);              // not used in DEM
 
-       // found in: Interface-resolved direct numerical simulation of the erosion of a sediment bed sheared by laminar channel flow
-       //           Kidanemariam and Uhlmann
-       //           DOI: 10.1016/j.ijmultiphaseflow.2014.08.008
+        // found in: Interface-resolved direct numerical simulation of the erosion of a sediment bed sheared by laminar channel flow
+        //           Kidanemariam and Uhlmann
+        //           DOI: 10.1016/j.ijmultiphaseflow.2014.08.008
 
-       //const real_t normalizedstiffness = real_c(13000);
-       //const real_t stiffness = normalizedstiffness * ((densityRatio-1)*gravity*volume/diameter);
+        //const real_t normalizedstiffness = real_c(13000);
+        //const real_t stiffness = normalizedstiffness * ((densityRatio-1)*gravity*volume/diameter);
 
-       // found in: Comparison between finite volume and lattice-Boltzmann method simulations of gas-fluidised beds: bed expansion and particle–fluid interaction force
-       // R. Third, Y. Chen, C. R. Müller
+        // found in: Comparison between finite volume and lattice-Boltzmann method simulations of gas-fluidised beds: bed expansion and particle–fluid interaction force
+        // R. Third, Y. Chen, C. R. Müller
 
-        const real_t restitutionParticlesA    = mat_parameters.getParameter<real_t>("restitution_particles_A", real_c(0.2));
-        const real_t restitutionParticlesB    = mat_parameters.getParameter<real_t>("restitution_particles_B", real_c(0.2));
-        const real_t restitutionWall         = mat_parameters.getParameter<real_t>("restitution_wall"     , real_c(0.2));
-        const real_t collisionTimeParticlesA  = mat_parameters.getParameter<real_t>("collision_time_particles_A", real_c(10));
-        const real_t collisionTimeParticlesB  = mat_parameters.getParameter<real_t>("collision_time_particles_B", real_c(10));
-        const real_t collisionTimeWall       = mat_parameters.getParameter<real_t>("collision_time_wall"     , real_c(10));
-        const real_t tangentialDampingFactorParticlesA = mat_parameters.getParameter<real_t>("tangential_damping_factor_particles_A", real_c(1.0));
-        const real_t tangentialDampingFactorParticlesB = mat_parameters.getParameter<real_t>("tangential_damping_factor_particles_B", real_c(1.0));
-        const real_t tangentialDampingFactorWall      = mat_parameters.getParameter<real_t>("tangential_damping_factor_wall"     , real_c(1.0));
-        const real_t timestepsPerCollision   = mat_parameters.getParameter<real_t>("timesteps_per_collision", real_c(100));
+        const real_t restitutionParticlesA = mat_parameters.getParameter<real_t>("restitution_particles_A", real_c(0.2));
+        const real_t restitutionParticlesB = mat_parameters.getParameter<real_t>("restitution_particles_B", real_c(0.2));
+        const real_t restitutionWall = mat_parameters.getParameter<real_t>("restitution_wall", real_c(0.2));
+        const real_t collisionTimeParticlesA = mat_parameters.getParameter<real_t>("collision_time_particles_A", real_c(10));
+        const real_t collisionTimeParticlesB = mat_parameters.getParameter<real_t>("collision_time_particles_B", real_c(10));
+        const real_t collisionTimeWall = mat_parameters.getParameter<real_t>("collision_time_wall", real_c(10));
+        const real_t tangentialDampingFactorParticlesA = mat_parameters.getParameter<real_t>("tangential_damping_factor_particles_A",
+                                                                                             real_c(1.0));
+        const real_t tangentialDampingFactorParticlesB = mat_parameters.getParameter<real_t>("tangential_damping_factor_particles_B",
+                                                                                             real_c(1.0));
+        const real_t tangentialDampingFactorWall = mat_parameters.getParameter<real_t>("tangential_damping_factor_wall", real_c(1.0));
+        const real_t timestepsPerCollision = mat_parameters.getParameter<real_t>("timesteps_per_collision", real_c(100));
 
-        const real_t minCollisionTime = std::min(collisionTimeParticlesA , std::min(collisionTimeParticlesB , collisionTimeWall));
+        const real_t minCollisionTime = std::min(collisionTimeParticlesA, std::min(collisionTimeParticlesB, collisionTimeWall));
 
-        config.peSubCycles = uint_c( std::round (timestepsPerCollision / minCollisionTime) );
+        config.peSubCycles = uint_c(std::round(timestepsPerCollision / minCollisionTime));
 
         // put eq(14) in eq(16) and solve for k_n
 
         // PARTICLES A
-        const real_t stiffnessNparticlesA = (MijA * math::PI *  math::PI) /
-                                           (collisionTimeParticlesA *  collisionTimeParticlesA * (1.0 - (log(restitutionParticlesA) * log(restitutionParticlesA))
-                                                                                                      / (math::PI * math::PI + log(restitutionParticlesA) * log(restitutionParticlesA))));
-        const real_t dampingNparticlesA   = - 2.0 * sqrt(MijA*stiffnessNparticlesA) * log(restitutionParticlesA) / sqrt(math::PI * math::PI + log(restitutionParticlesA) * log(restitutionParticlesA));
-        const real_t dampingTparticlesA   = dampingNparticlesA * tangentialDampingFactorParticlesA;
+        const real_t stiffnessNparticlesA = (MijA * math::PI * math::PI) /
+                                            (collisionTimeParticlesA * collisionTimeParticlesA *
+                                             (1.0 - (log(restitutionParticlesA) * log(restitutionParticlesA))
+                                                    / (math::PI * math::PI + log(restitutionParticlesA) * log(restitutionParticlesA))));
+        const real_t dampingNparticlesA = -2.0 * sqrt(MijA * stiffnessNparticlesA) * log(restitutionParticlesA) /
+                                          sqrt(math::PI * math::PI + log(restitutionParticlesA) * log(restitutionParticlesA));
+        const real_t dampingTparticlesA = dampingNparticlesA * tangentialDampingFactorParticlesA;
 
         // PARTICLES B
-        const real_t stiffnessNparticlesB = (MijB * math::PI *  math::PI) /
-                                            (collisionTimeParticlesB *  collisionTimeParticlesB * (1.0 - (log(restitutionParticlesB) * log(restitutionParticlesB))
-                                                                                                         / (math::PI * math::PI + log(restitutionParticlesB) * log(restitutionParticlesB))));
-        const real_t dampingNparticlesB   = - 2.0 * sqrt(MijB*stiffnessNparticlesB) * log(restitutionParticlesB) / sqrt(math::PI * math::PI + log(restitutionParticlesB) * log(restitutionParticlesB));
-        const real_t dampingTparticlesB   = dampingNparticlesB * tangentialDampingFactorParticlesB;
+        const real_t stiffnessNparticlesB = (MijB * math::PI * math::PI) /
+                                            (collisionTimeParticlesB * collisionTimeParticlesB *
+                                             (1.0 - (log(restitutionParticlesB) * log(restitutionParticlesB))
+                                                    / (math::PI * math::PI + log(restitutionParticlesB) * log(restitutionParticlesB))));
+        const real_t dampingNparticlesB = -2.0 * sqrt(MijB * stiffnessNparticlesB) * log(restitutionParticlesB) /
+                                          sqrt(math::PI * math::PI + log(restitutionParticlesB) * log(restitutionParticlesB));
+        const real_t dampingTparticlesB = dampingNparticlesB * tangentialDampingFactorParticlesB;
 
         // WALL
-        const real_t stiffnessNwall      = (MijWall * math::PI *  math::PI) /
-                                           (collisionTimeWall *  collisionTimeWall * (1.0 - (log(restitutionWall) * log(restitutionWall))
-                                                                                            / (math::PI * math::PI + log(restitutionWall) * log(restitutionWall))));
-        const real_t dampingNwall        = - 2.0 * sqrt(MijWall*stiffnessNwall) * log(restitutionWall) / sqrt(math::PI * math::PI + log(restitutionWall) * log(restitutionWall));
-        const real_t dampingTwall        = dampingNwall * tangentialDampingFactorWall;
+        const real_t stiffnessNwall = (MijWall * math::PI * math::PI) /
+                                      (collisionTimeWall * collisionTimeWall * (1.0 - (log(restitutionWall) * log(restitutionWall))
+                                                                                      / (math::PI * math::PI +
+                                                                                         log(restitutionWall) * log(restitutionWall))));
+        const real_t dampingNwall = -2.0 * sqrt(MijWall * stiffnessNwall) * log(restitutionWall) /
+                                    sqrt(math::PI * math::PI + log(restitutionWall) * log(restitutionWall));
+        const real_t dampingTwall = dampingNwall * tangentialDampingFactorWall;
 
-       // cdn=cdt
+        // cdn=cdt
 
-       // EVALUATION PARAMETERS
-       auto eval_parameters = env.config()->getBlock("Evaluation");
+        // EVALUATION PARAMETERS
+        auto eval_parameters = env.config()->getBlock("Evaluation");
 
-       const bool calculateCenterOfMass = eval_parameters.getParameter<bool>("mass_center", false);
-       const bool calculatePressureDrop = eval_parameters.getParameter<bool>("pressure_drop", false);
-       const bool calculateErgunPressure = eval_parameters.getParameter<bool>("ergun_pressure_drop", false);
-       const bool calculatePressureDifference = eval_parameters.getParameter<bool>("pressure_difference", false);
-       const bool calculateParticleFlux = eval_parameters.getParameter<bool>("particle_flux", false);
-       const bool calculateGranularTempGlobal = eval_parameters.getParameter<bool>("granular_temperature_global", false);
-       const bool calculateGranularTempLocal = eval_parameters.getParameter<bool>("granular_temperature_local", false);
-       const bool calculateSolidVolumeFraction = eval_parameters.getParameter<bool>("solid_volume_fraction", false);
-       //const bool calculateCollisions = eval_parameters.getParameter<bool>("collision_count", false);
+        const bool calculateCenterOfMass = eval_parameters.getParameter<bool>("mass_center", false);
+        const bool calculatePressureDrop = eval_parameters.getParameter<bool>("pressure_drop", false);
+        const bool calculateErgunPressure = eval_parameters.getParameter<bool>("ergun_pressure_drop", false);
+        const bool calculatePressureDifference = eval_parameters.getParameter<bool>("pressure_difference", false);
+        const bool calculateParticleFlux = eval_parameters.getParameter<bool>("particle_flux", false);
+        const bool calculateGranularTempGlobal = eval_parameters.getParameter<bool>("granular_temperature_global", false);
+        const bool calculateGranularTempLocal = eval_parameters.getParameter<bool>("granular_temperature_local", false);
+        const bool calculateSolidVolumeFraction = eval_parameters.getParameter<bool>("solid_volume_fraction", false);
+        //const bool calculateCollisions = eval_parameters.getParameter<bool>("collision_count", false);
 
-       const bool box1 = eval_parameters.getParameter<bool>("box1", false);
+        const bool box1 = eval_parameters.getParameter<bool>("box1", false);
 
-       real_t box1xSize = eval_parameters.getParameter<real_t>("box1_Size_x", real_t(0.02));
-       box1xSize = box1xSize / config.dx_SI;
-       real_t box1ySize = eval_parameters.getParameter<real_t>("box1_Size_y", real_t(0.02));
-       box1ySize = box1ySize / config.dx_SI;
-       real_t box1zSize = eval_parameters.getParameter<real_t>("box1_Size_z", real_t(0.02));
-       box1zSize = box1zSize / config.dx_SI;
+        real_t box1xSize = eval_parameters.getParameter<real_t>("box1_Size_x", real_t(0.02));
+        box1xSize = box1xSize / config.dx_SI;
+        real_t box1ySize = eval_parameters.getParameter<real_t>("box1_Size_y", real_t(0.02));
+        box1ySize = box1ySize / config.dx_SI;
+        real_t box1zSize = eval_parameters.getParameter<real_t>("box1_Size_z", real_t(0.02));
+        box1zSize = box1zSize / config.dx_SI;
 
-       real_t box1xCenter = eval_parameters.getParameter<real_t>("box1_Center_x", real_t(0.05));
-       box1xCenter = box1xCenter / config.dx_SI;
-       real_t box1yCenter = eval_parameters.getParameter<real_t>("box1_Center_y", real_t(0.05));
-       box1yCenter = box1yCenter / config.dx_SI;
-       real_t box1zCenter = eval_parameters.getParameter<real_t>("box1_Center_z", real_t(0.01));
-       box1zCenter = box1zCenter / config.dx_SI;
+        real_t box1xCenter = eval_parameters.getParameter<real_t>("box1_Center_x", real_t(0.05));
+        box1xCenter = box1xCenter / config.dx_SI;
+        real_t box1yCenter = eval_parameters.getParameter<real_t>("box1_Center_y", real_t(0.05));
+        box1yCenter = box1yCenter / config.dx_SI;
+        real_t box1zCenter = eval_parameters.getParameter<real_t>("box1_Center_z", real_t(0.01));
+        box1zCenter = box1zCenter / config.dx_SI;
 
-       const bool box2 = eval_parameters.getParameter<bool>("box2", false);
+        const bool box2 = eval_parameters.getParameter<bool>("box2", false);
 
-       real_t box2xSize = eval_parameters.getParameter<real_t>("box2_Size_x", real_t(0.02));
-       box2xSize = box2xSize / config.dx_SI;
-       real_t box2ySize = eval_parameters.getParameter<real_t>("box2_Size_y", real_t(0.02));
-       box2ySize = box2ySize / config.dx_SI;
-       real_t box2zSize = eval_parameters.getParameter<real_t>("box2_Size_z", real_t(0.02));
-       box2zSize = box2zSize / config.dx_SI;
+        real_t box2xSize = eval_parameters.getParameter<real_t>("box2_Size_x", real_t(0.02));
+        box2xSize = box2xSize / config.dx_SI;
+        real_t box2ySize = eval_parameters.getParameter<real_t>("box2_Size_y", real_t(0.02));
+        box2ySize = box2ySize / config.dx_SI;
+        real_t box2zSize = eval_parameters.getParameter<real_t>("box2_Size_z", real_t(0.02));
+        box2zSize = box2zSize / config.dx_SI;
 
-       real_t box2xCenter = eval_parameters.getParameter<real_t>("box2_Center_x", real_t(0.05));
-       box2xCenter = box2xCenter / config.dx_SI;
-       real_t box2yCenter = eval_parameters.getParameter<real_t>("box2_Center_y", real_t(0.10));
-       box2yCenter = box2yCenter / config.dx_SI;
-       real_t box2zCenter = eval_parameters.getParameter<real_t>("box2_Center_z", real_t(0.01));
-       box2zCenter = box2zCenter / config.dx_SI;
+        real_t box2xCenter = eval_parameters.getParameter<real_t>("box2_Center_x", real_t(0.05));
+        box2xCenter = box2xCenter / config.dx_SI;
+        real_t box2yCenter = eval_parameters.getParameter<real_t>("box2_Center_y", real_t(0.10));
+        box2yCenter = box2yCenter / config.dx_SI;
+        real_t box2zCenter = eval_parameters.getParameter<real_t>("box2_Center_z", real_t(0.01));
+        box2zCenter = box2zCenter / config.dx_SI;
 
-       const bool box3 = eval_parameters.getParameter<bool>("box3", false);
+        const bool box3 = eval_parameters.getParameter<bool>("box3", false);
 
-       real_t box3xSize = eval_parameters.getParameter<real_t>("box3_Size_x", real_t(0.02));
-       box3xSize = box3xSize / config.dx_SI;
-       real_t box3ySize = eval_parameters.getParameter<real_t>("box3_Size_y", real_t(0.02));
-       box3ySize = box3ySize / config.dx_SI;
-       real_t box3zSize = eval_parameters.getParameter<real_t>("box3_Size_z", real_t(0.02));
-       box3zSize = box3zSize / config.dx_SI;
+        real_t box3xSize = eval_parameters.getParameter<real_t>("box3_Size_x", real_t(0.02));
+        box3xSize = box3xSize / config.dx_SI;
+        real_t box3ySize = eval_parameters.getParameter<real_t>("box3_Size_y", real_t(0.02));
+        box3ySize = box3ySize / config.dx_SI;
+        real_t box3zSize = eval_parameters.getParameter<real_t>("box3_Size_z", real_t(0.02));
+        box3zSize = box3zSize / config.dx_SI;
 
-       real_t box3xCenter = eval_parameters.getParameter<real_t>("box3_Center_x", real_t(0.05));
-       box3xCenter = box3xCenter / config.dx_SI;
-       real_t box3yCenter = eval_parameters.getParameter<real_t>("box3_Center_y", real_t(0.15));
-       box3yCenter = box3yCenter / config.dx_SI;
-       real_t box3zCenter = eval_parameters.getParameter<real_t>("box3_Center_z", real_t(0.01));
-       box3zCenter = box3zCenter / config.dx_SI;
+        real_t box3xCenter = eval_parameters.getParameter<real_t>("box3_Center_x", real_t(0.05));
+        box3xCenter = box3xCenter / config.dx_SI;
+        real_t box3yCenter = eval_parameters.getParameter<real_t>("box3_Center_y", real_t(0.15));
+        box3yCenter = box3yCenter / config.dx_SI;
+        real_t box3zCenter = eval_parameters.getParameter<real_t>("box3_Center_z", real_t(0.01));
+        box3zCenter = box3zCenter / config.dx_SI;
 
-       // VTK PARAMETERS
-       auto vtk_parameters = env.config()->getBlock("VTK");
+        // VTK PARAMETERS
+        auto vtk_parameters = env.config()->getBlock("VTK");
 
-       const bool writePackedBed = vtk_parameters.getParameter<bool>("write_packed_bed", false);
-       const uint_t frequencyPackedBed = vtk_parameters.getParameter<uint_t>("frequency_packed_bed", uint_c(500));
+        const bool writePackedBed = vtk_parameters.getParameter<bool>("write_packed_bed", false);
+        const uint_t frequencyPackedBed = vtk_parameters.getParameter<uint_t>("frequency_packed_bed", uint_c(500));
 
-       const bool writeSpheres = vtk_parameters.getParameter<bool>("write_spheres", false);
-       const uint_t frequencySpheres = vtk_parameters.getParameter<uint_t>("frequency_spheres", uint_c(200));
+        const bool writeSpheres = vtk_parameters.getParameter<bool>("write_spheres", false);
+        const uint_t frequencySpheres = vtk_parameters.getParameter<uint_t>("frequency_spheres", uint_c(200));
 
-       const bool writeFlagField = vtk_parameters.getParameter<bool>("write_flag_field", false);
-       const uint_t frequencyFlagField = vtk_parameters.getParameter<uint_t>("frequency_flag_field", uint_c(200000));
+        const bool writeFlagField = vtk_parameters.getParameter<bool>("write_flag_field", false);
+        const uint_t frequencyFlagField = vtk_parameters.getParameter<uint_t>("frequency_flag_field", uint_c(200000));
 
-       const bool writeFluidField = vtk_parameters.getParameter<bool>("write_fluid_field", false);
-       const uint_t frequencyFluidField = vtk_parameters.getParameter<uint_t>("frequency_fluid_field", uint_c(50000));
-       const real_t samplingResolutionFluidField = vtk_parameters.getParameter<real_t>("sampling_resolution_fluid_field", real_c(2.0));
+        const bool writeFluidField = vtk_parameters.getParameter<bool>("write_fluid_field", false);
+        const uint_t frequencyFluidField = vtk_parameters.getParameter<uint_t>("frequency_fluid_field", uint_c(50000));
+        const real_t samplingResolutionFluidField = vtk_parameters.getParameter<real_t>("sampling_resolution_fluid_field", real_c(2.0));
 
-       const bool writeOmega = vtk_parameters.getParameter<bool>("write_omega", false);
-       const uint_t frequencyOmega = vtk_parameters.getParameter<uint_t>("frequency_omega", uint_c(50000));
-       const real_t samplingResolutionOmega = vtk_parameters.getParameter<real_t>("sampling_resolution_omega", real_c(2.0));
+        const bool writeOmega = vtk_parameters.getParameter<bool>("write_omega", false);
+        const uint_t frequencyOmega = vtk_parameters.getParameter<uint_t>("frequency_omega", uint_c(50000));
+        const real_t samplingResolutionOmega = vtk_parameters.getParameter<real_t>("sampling_resolution_omega", real_c(2.0));
 
 
-       ///////////////////////////
-       // BLOCK STRUCTURE SETUP //
-       ///////////////////////////
+        ///////////////////////////
+        // BLOCK STRUCTURE SETUP //
+        ///////////////////////////
 
-       const uint_t xCells = config.xlength / xBlocks;
-       const uint_t yCells = config.ylength / yBlocks;
-       const uint_t zCells = config.zlength / zBlocks;
+        const uint_t xCells = config.xlength / xBlocks;
+        const uint_t yCells = config.ylength / yBlocks;
+        const uint_t zCells = config.zlength / zBlocks;
 
-       // ASSERTS
-       WALBERLA_CHECK_EQUAL(config.xlength, xCells * xBlocks);
-       WALBERLA_CHECK_EQUAL(config.ylength, yCells * yBlocks);
-       WALBERLA_CHECK_EQUAL(config.zlength, zCells * zBlocks);
+        // ASSERTS
+        WALBERLA_CHECK_EQUAL(config.xlength, xCells * xBlocks);
+        WALBERLA_CHECK_EQUAL(config.ylength, yCells * yBlocks);
+        WALBERLA_CHECK_EQUAL(config.zlength, zCells * zBlocks);
 
-       const real_t dx = real_t(1);
-       const real_t overlap = real_c(1.5) * dx;
+        const real_t dx = real_t(1);
+        const real_t overlap = real_c(1.5) * dx;
 
-       auto blocks = blockforest::createUniformBlockGrid(xBlocks, yBlocks, zBlocks, xCells, yCells, zCells, dx, true,
-                                                         xPeriodic, false, zPeriodic);
+        auto blocks = blockforest::createUniformBlockGrid(xBlocks, yBlocks, zBlocks, xCells, yCells, zCells, dx, true,
+                                                          xPeriodic, false, zPeriodic);
 
-       // LOCAL VOLUME FOR SOLID FRACTION CALCULATION AND GRANULAR TEMPERATURE LOCALLY
-       const AABB probe1((blocks->getDomain().xMin() < (box1xCenter - box1xSize / 2.0)) ? (box1xCenter - box1xSize / 2.0) : blocks->getDomain().xMin(),
-                         (blocks->getDomain().yMin() < (box1yCenter - box1ySize / 2.0)) ? (box1yCenter - box1ySize / 2.0) : blocks->getDomain().yMin(),
-                         (blocks->getDomain().zMin() < (box1zCenter - box1zSize / 2.0)) ? (box1zCenter - box1zSize / 2.0) : blocks->getDomain().zMin(),
-                         (blocks->getDomain().xMax() > (box1xCenter + box1xSize / 2.0)) ? (box1xCenter + box1xSize / 2.0) : blocks->getDomain().xMax(),
-                         (blocks->getDomain().yMax() > (box1yCenter + box1ySize / 2.0)) ? (box1yCenter + box1ySize / 2.0) : blocks->getDomain().yMax(),
-                         (blocks->getDomain().zMax() > (box1zCenter + box1zSize / 2.0)) ? (box1zCenter + box1zSize / 2.0) : blocks->getDomain().zMax());
+        // LOCAL VOLUME FOR SOLID FRACTION CALCULATION AND GRANULAR TEMPERATURE LOCALLY
+        const AABB probe1(
+                (blocks->getDomain().xMin() < (box1xCenter - box1xSize / 2.0)) ? (box1xCenter - box1xSize / 2.0) : blocks->getDomain().xMin(),
+                (blocks->getDomain().yMin() < (box1yCenter - box1ySize / 2.0)) ? (box1yCenter - box1ySize / 2.0) : blocks->getDomain().yMin(),
+                (blocks->getDomain().zMin() < (box1zCenter - box1zSize / 2.0)) ? (box1zCenter - box1zSize / 2.0) : blocks->getDomain().zMin(),
+                (blocks->getDomain().xMax() > (box1xCenter + box1xSize / 2.0)) ? (box1xCenter + box1xSize / 2.0) : blocks->getDomain().xMax(),
+                (blocks->getDomain().yMax() > (box1yCenter + box1ySize / 2.0)) ? (box1yCenter + box1ySize / 2.0) : blocks->getDomain().yMax(),
+                (blocks->getDomain().zMax() > (box1zCenter + box1zSize / 2.0)) ? (box1zCenter + box1zSize / 2.0) : blocks->getDomain().zMax());
 
-       const AABB probe2((blocks->getDomain().xMin() < (box2xCenter - box2xSize / 2.0)) ? (box2xCenter - box2xSize / 2.0) : blocks->getDomain().xMin(),
-                         (blocks->getDomain().yMin() < (box2yCenter - box2ySize / 2.0)) ? (box2yCenter - box2ySize / 2.0) : blocks->getDomain().yMin(),
-                         (blocks->getDomain().zMin() < (box2zCenter - box2zSize / 2.0)) ? (box2zCenter - box2zSize / 2.0) : blocks->getDomain().zMin(),
-                         (blocks->getDomain().xMax() > (box2xCenter + box2xSize / 2.0)) ? (box2xCenter + box2xSize / 2.0) : blocks->getDomain().xMax(),
-                         (blocks->getDomain().yMax() > (box2yCenter + box2ySize / 2.0)) ? (box2yCenter + box2ySize / 2.0) : blocks->getDomain().yMax(),
-                         (blocks->getDomain().zMax() > (box2zCenter + box2zSize / 2.0)) ? (box2zCenter + box2zSize / 2.0) : blocks->getDomain().zMax());
+        const AABB probe2(
+                (blocks->getDomain().xMin() < (box2xCenter - box2xSize / 2.0)) ? (box2xCenter - box2xSize / 2.0) : blocks->getDomain().xMin(),
+                (blocks->getDomain().yMin() < (box2yCenter - box2ySize / 2.0)) ? (box2yCenter - box2ySize / 2.0) : blocks->getDomain().yMin(),
+                (blocks->getDomain().zMin() < (box2zCenter - box2zSize / 2.0)) ? (box2zCenter - box2zSize / 2.0) : blocks->getDomain().zMin(),
+                (blocks->getDomain().xMax() > (box2xCenter + box2xSize / 2.0)) ? (box2xCenter + box2xSize / 2.0) : blocks->getDomain().xMax(),
+                (blocks->getDomain().yMax() > (box2yCenter + box2ySize / 2.0)) ? (box2yCenter + box2ySize / 2.0) : blocks->getDomain().yMax(),
+                (blocks->getDomain().zMax() > (box2zCenter + box2zSize / 2.0)) ? (box2zCenter + box2zSize / 2.0) : blocks->getDomain().zMax());
 
-       const AABB probe3((blocks->getDomain().xMin() < (box3xCenter - box3xSize / 2.0)) ? (box3xCenter - box3xSize / 2.0) : blocks->getDomain().xMin(),
-                         (blocks->getDomain().yMin() < (box3yCenter - box3ySize / 2.0)) ? (box3yCenter - box3ySize / 2.0) : blocks->getDomain().yMin(),
-                         (blocks->getDomain().zMin() < (box3zCenter - box3zSize / 2.0)) ? (box3zCenter - box3zSize / 2.0) : blocks->getDomain().zMin(),
-                         (blocks->getDomain().xMax() > (box3xCenter + box3xSize / 2.0)) ? (box3xCenter + box3xSize / 2.0) : blocks->getDomain().xMax(),
-                         (blocks->getDomain().yMax() > (box3yCenter + box3ySize / 2.0)) ? (box3yCenter + box3ySize / 2.0) : blocks->getDomain().yMax(),
-                         (blocks->getDomain().zMax() > (box3zCenter + box3zSize / 2.0)) ? (box3zCenter + box3zSize / 2.0) : blocks->getDomain().zMax());
+        const AABB probe3(
+                (blocks->getDomain().xMin() < (box3xCenter - box3xSize / 2.0)) ? (box3xCenter - box3xSize / 2.0) : blocks->getDomain().xMin(),
+                (blocks->getDomain().yMin() < (box3yCenter - box3ySize / 2.0)) ? (box3yCenter - box3ySize / 2.0) : blocks->getDomain().yMin(),
+                (blocks->getDomain().zMin() < (box3zCenter - box3zSize / 2.0)) ? (box3zCenter - box3zSize / 2.0) : blocks->getDomain().zMin(),
+                (blocks->getDomain().xMax() > (box3xCenter + box3xSize / 2.0)) ? (box3xCenter + box3xSize / 2.0) : blocks->getDomain().xMax(),
+                (blocks->getDomain().yMax() > (box3yCenter + box3ySize / 2.0)) ? (box3yCenter + box3ySize / 2.0) : blocks->getDomain().yMax(),
+                (blocks->getDomain().zMax() > (box3zCenter + box3zSize / 2.0)) ? (box3zCenter + box3zSize / 2.0) : blocks->getDomain().zMax());
 
-       // Transformation of AABB to CellInterval for evaluation functions
-       if (box1) {
-          config.probesAABB.push_back(probe1);
-          config.probesCell.push_back(blocks->getCellBBFromAABB(probe1));
-       }
-       if (box2) {
-          config.probesAABB.push_back(probe2);
-          config.probesCell.push_back(blocks->getCellBBFromAABB(probe2));
-       }
-       if (box3) {
-          config.probesAABB.push_back(probe3);
-          config.probesCell.push_back(blocks->getCellBBFromAABB(probe3));
-       }
+        // Transformation of AABB to CellInterval for evaluation functions
+        if (box1) {
+            config.probesAABB.push_back(probe1);
+            config.probesCell.push_back(blocks->getCellBBFromAABB(probe1));
+        }
+        if (box2) {
+            config.probesAABB.push_back(probe2);
+            config.probesCell.push_back(blocks->getCellBBFromAABB(probe2));
+        }
+        if (box3) {
+            config.probesAABB.push_back(probe3);
+            config.probesCell.push_back(blocks->getCellBBFromAABB(probe3));
+        }
 
-       const real_t yLowerPlane = config.offsetBot <= 0.0 ? 0.5                          : config.offsetBot - 0.5;
-       const real_t yUpperPlane = config.offsetTop <= 0.0 ? real_c(config.ylength) - 0.5 : real_c(config.ylength) - config.offsetTop + 0.5;
+        const real_t yLowerPlane = config.offsetBot <= 0.0 ? 0.5 : config.offsetBot - 0.5;
+        const real_t yUpperPlane = config.offsetTop <= 0.0 ? real_c(config.ylength) - 0.5 : real_c(config.ylength) - config.offsetTop + 0.5;
 
-       const AABB lowerPlaneAABB(blocks->getDomain().xMin(), yLowerPlane, blocks->getDomain().zMin(),
-                                 blocks->getDomain().xMax(), yLowerPlane, blocks->getDomain().zMax());
-       const AABB upperPlaneAABB(blocks->getDomain().xMin(), yUpperPlane, blocks->getDomain().zMin(),
-                                 blocks->getDomain().xMax(), yUpperPlane, blocks->getDomain().zMax());
+        const AABB lowerPlaneAABB(blocks->getDomain().xMin(), yLowerPlane, blocks->getDomain().zMin(),
+                                  blocks->getDomain().xMax(), yLowerPlane, blocks->getDomain().zMax());
+        const AABB upperPlaneAABB(blocks->getDomain().xMin(), yUpperPlane, blocks->getDomain().zMin(),
+                                  blocks->getDomain().xMax(), yUpperPlane, blocks->getDomain().zMax());
 
-       const CellInterval lowerCellPlane = blocks->getCellBBFromAABB(lowerPlaneAABB);
-       const CellInterval upperCellPlane = blocks->getCellBBFromAABB(upperPlaneAABB);
+        const CellInterval lowerCellPlane = blocks->getCellBBFromAABB(lowerPlaneAABB);
+        const CellInterval upperCellPlane = blocks->getCellBBFromAABB(upperPlaneAABB);
 
-       /////////////////
-       // PE COUPLING //
-       /////////////////
+        /////////////////
+        // PE COUPLING //
+        /////////////////
 
-       shared_ptr<pe::BodyStorage> globalBodyStorage = make_shared<pe::BodyStorage>();
-       pe::SetBodyTypeIDs<BodyTypeTuple>::execute();
+        shared_ptr<pe::BodyStorage> globalBodyStorage = make_shared<pe::BodyStorage>();
+        pe::SetBodyTypeIDs<BodyTypeTuple>::execute();
 
-       auto bodyStorageID = blocks->addBlockData(pe::createStorageDataHandling<BodyTypeTuple>(), "pe Body Storage");
-       auto ccdID = blocks->addBlockData(pe::ccd::createHashGridsDataHandling(globalBodyStorage, bodyStorageID), "CCD");
+        auto bodyStorageID = blocks->addBlockData(pe::createStorageDataHandling<BodyTypeTuple>(), "pe Body Storage");
 
-        const auto materialA    = pe::createMaterial("myMatA"   , config.densityRatioA,
-                                                     restitutionParticlesA, cdsA, cdfA, poisson, youngsModulus, stiffnessNparticlesA, dampingNparticlesA, dampingTparticlesA);
-        const auto materialB    = pe::createMaterial("myMatB"   , config.densityRatioB,
-                                                     restitutionParticlesB, cdsB, cdfB, poisson, youngsModulus, stiffnessNparticlesB, dampingNparticlesA, dampingTparticlesB);
-        const auto materialWall = pe::createMaterial("myMatWall", 0.5*(config.densityRatioA+config.densityRatioB),
-                                                     restitutionWall, cdsWall, cdfWall, poisson, youngsModulus, stiffnessNwall, dampingNwall, dampingTwall);
+        const auto materialA = pe::createMaterial("myMatA", config.densityRatioA,
+                                                  restitutionParticlesA, cdsA, cdfA, poisson, youngsModulus, stiffnessNparticlesA,
+                                                  dampingNparticlesA, dampingTparticlesA);
+        const auto materialB = pe::createMaterial("myMatB", config.densityRatioB,
+                                                  restitutionParticlesB, cdsB, cdfB, poisson, youngsModulus, stiffnessNparticlesB,
+                                                  dampingNparticlesA, dampingTparticlesB);
+        const auto materialWall = pe::createMaterial("myMatWall", 0.5 * (config.densityRatioA + config.densityRatioB),
+                                                     restitutionWall, cdsWall, cdfWall, poisson, youngsModulus, stiffnessNwall, dampingNwall,
+                                                     dampingTwall);
 
         // fixed geometry
-       if (!zPeriodic) {
-          pe::createPlane(*globalBodyStorage, 0, Vector3<real_t>(0, 0, 1), Vector3<real_t>(0, 0, 0), materialWall);                                                           // front
-          pe::createPlane(*globalBodyStorage, 0, Vector3<real_t>(0, 0, -1), Vector3<real_t>(0, 0, real_c(config.zlength)), materialWall);                                     // back
-       }
+        if (!zPeriodic) {
+            pe::createPlane(*globalBodyStorage, 0, Vector3<real_t>(0, 0, 1), Vector3<real_t>(0, 0, 0),
+                            materialWall);                                                           // front
+            pe::createPlane(*globalBodyStorage, 0, Vector3<real_t>(0, 0, -1), Vector3<real_t>(0, 0, real_c(config.zlength)),
+                            materialWall);                                     // back
+        }
 
-       if (!xPeriodic) {
-          pe::createPlane(*globalBodyStorage, 0, Vector3<real_t>(1, 0, 0), Vector3<real_t>(0, 0, 0), materialWall);                                                           // left
-          pe::createPlane(*globalBodyStorage, 0, Vector3<real_t>(-1, 0, 0), Vector3<real_t>(real_c(config.xlength), 0, 0), materialWall);                                     // right
-       }
+        if (!xPeriodic) {
+            pe::createPlane(*globalBodyStorage, 0, Vector3<real_t>(1, 0, 0), Vector3<real_t>(0, 0, 0),
+                            materialWall);                                                           // left
+            pe::createPlane(*globalBodyStorage, 0, Vector3<real_t>(-1, 0, 0), Vector3<real_t>(real_c(config.xlength), 0, 0),
+                            materialWall);                                     // right
+        }
 
-       pe::createPlane(*globalBodyStorage, 0, Vector3<real_t>(0,  1, 0), Vector3<real_t>(0, config.offsetBot                         , 0), materialWall);                            // bottom
-       pe::createPlane(*globalBodyStorage, 0, Vector3<real_t>(0, -1, 0), Vector3<real_t>(0, real_c(config.ylength) - config.offsetTop, 0), materialWall);                            // top
+        pe::createPlane(*globalBodyStorage, 0, Vector3<real_t>(0, 1, 0), Vector3<real_t>(0, config.offsetBot, 0),
+                        materialWall);                            // bottom
+        pe::createPlane(*globalBodyStorage, 0, Vector3<real_t>(0, -1, 0), Vector3<real_t>(0, real_c(config.ylength) - config.offsetTop, 0),
+                        materialWall);                            // top
 
-       vtk::writeDomainDecomposition(blocks, "domain_decomposition");
+        vtk::writeDomainDecomposition(blocks, "domain_decomposition");
 
-       ///////////////////
-       // PE SIMULATION //
-       ///////////////////
+        ///////////////////
+        // PE SIMULATION //
+        ///////////////////
 
-       //create empty pdf field
-       BlockDataID pdfFieldID;
+        //create empty pdf field
+        BlockDataID pdfFieldID;
 
-       // create omega  field for turbulence model
-       BlockDataID omegaFieldID = field::addToStorage<ScalarField_T>(blocks, "omega field", omega, field::zyxf, FieldGhostLayers);
+        // create omega  field for turbulence model
+        BlockDataID omegaFieldID = field::addToStorage<ScalarField_T>(blocks, "omega field", omega, field::fzyx, FieldGhostLayers);
 
-       // create appropriate lattice model
-       LatticeModel_T latticeModel = LatticeModelCreator<collisionModel_T>::makeLatticeModel(omegaFieldID, omega);
+        // create appropriate lattice model
+        LatticeModel_T latticeModel = LatticeModelCreator<collisionModel_T>::makeLatticeModel(omegaFieldID, omega);
 
-          uint_t numberCreatedParticlesA = uint_c(0);
-          uint_t numberCreatedParticlesB = uint_c(0);
+        uint_t numberCreatedParticlesA = uint_c(0);
+        uint_t numberCreatedParticlesB = uint_c(0);
 
-       if (initializeFromCheckPointFile) {
+        if (initializeFromCheckPointFile) {
 
-          WALBERLA_LOG_INFO_ON_ROOT("Initializing data from checkpoint file!");
+            WALBERLA_LOG_INFO_ON_ROOT("Initializing data from checkpoint file!");
 
-          WALBERLA_LOG_RESULT_ON_ROOT("Reading body data from checkpoint file");
+            WALBERLA_LOG_RESULT_ON_ROOT("Reading body from checkpoint file");
 
-          bodyStorageID = blocks->loadBlockData(checkpointPathBodies, pe::createStorageDataHandling<BodyTypeTuple>());
+            bodyStorageID = blocks->loadBlockData(checkpointPathBodies, pe::createStorageDataHandling<BodyTypeTuple>());
 
-          for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt) {
-             pe::ccd::ICCD *ccd = blockIt->getData<pe::ccd::ICCD>(ccdID);
-             ccd->reloadBodies();
-          }
+            WALBERLA_LOG_RESULT_ON_ROOT("Reading pdf from checkpoint file");
 
+            shared_ptr<lbm::internal::PdfFieldHandling<LatticeModel_T> > pdfDataHandling =
+                    make_shared<lbm::internal::PdfFieldHandling<LatticeModel_T> >(blocks, latticeModel, false, Vector3<real_t>(0), real_t(1),
+                                                                                  FieldGhostLayers, field::fzyx);
+            // add pdf field
+            pdfFieldID = (blocks->getBlockStorage()).loadBlockData(checkpointPathPdf, pdfDataHandling, "pdf field (fzyx)");
 
-          WALBERLA_LOG_RESULT_ON_ROOT("Reading pdf data from file checkpoint file");
+        } else {
 
-          shared_ptr<lbm::internal::PdfFieldHandling<LatticeModel_T> > pdfDataHandling =
-                make_shared<lbm::internal::PdfFieldHandling<LatticeModel_T> >(blocks, latticeModel, false, Vector3<real_t>(0), real_t(1), FieldGhostLayers, field::zyxf);
-          // add pdf field
-          pdfFieldID = (blocks->getBlockStorage()).loadBlockData(checkpointPathPdf, pdfDataHandling, "pdf field (zyxf)");
+            std::mt19937 rnd(MPIManager::instance()->rank());
 
-       } else {
+            std::default_random_engine gen(MPIManager::instance()->rank());
+            std::normal_distribution<real_t> distributionA(radiusA, radiusStandardDeviationA);
+            std::normal_distribution<real_t> distributionB(radiusB, radiusStandardDeviationB);
 
-          std::mt19937 rnd(MPIManager::instance()->rank());
+            pe::SphereID sphere;
 
-          std::default_random_engine gen(MPIManager::instance()->rank());
-          std::normal_distribution<real_t>  distributionA (radiusA, radiusStandardDeviationA);
-          std::normal_distribution<real_t>  distributionB (radiusB, radiusStandardDeviationB);
+            real_t ratioAB = real_c(config.nrParticlesA) / real_c(config.nrParticlesB);
 
-           pe::SphereID sphere;
+            real_t xInterval = initialSphereDistance;
+            real_t yInterval = initialSphereDistance;
+            real_t zInterval = initialSphereDistance;
 
-          real_t ratioAB = real_c(config.nrParticlesA) / real_c(config.nrParticlesB);
+            const uint_t rows = uint_c(real_c(config.xlength) / xInterval);
+            const uint_t columns = uint_c(real_c(config.zlength) / zInterval);
 
-          for (unsigned int i = 0; i < (config.nrParticlesA + config.nrParticlesB); ++i) {
+            xInterval = real_c(config.xlength) / real_c(rows);
+            zInterval = real_c(config.zlength) / real_c(columns);
 
-             real_t xInterval = initialSphereDistance;
-             real_t yInterval = initialSphereDistance;
-             real_t zInterval = initialSphereDistance;
+            if (twoSpecies) {
+                for (unsigned int i = 0; i < (config.nrParticlesA + config.nrParticlesB); ++i) {
+                    if (real_c(numberCreatedParticlesA + 1) < ratioAB * real_c(numberCreatedParticlesB + 1)) {
 
-             const uint_t rows    = uint_c(real_c(config.xlength) / xInterval);
-             const uint_t columns = uint_c(real_c(config.zlength) / zInterval);
+                        sphere = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, i + 1,
+                                                  Vector3<real_t>(0.5 * xInterval + xInterval * real_c((i % (rows * columns)) / columns),
+                                                                  config.offsetBot + 0.5 * yInterval + yInterval * real_c(i / (rows * columns)),
+                                                                  0.5 * zInterval + zInterval * real_c((i % columns))),
+                                                  distributionA(gen), materialA);
 
-             xInterval = real_c(config.xlength) / real_c(rows);
-             zInterval = real_c(config.zlength) / real_c(columns);
+                        if (sphere != NULL) {
 
-             if (twoSpecies){
+                            ++numberCreatedParticlesA;
 
-            	 if ( real_c(numberCreatedParticlesA + 1) < ratioAB * real_c(numberCreatedParticlesB + 1) ) {
+                            if (initialSphereVel > 0.0) {
+                                sphere->setLinearVel(math::realRandom(-initialSphereVel, initialSphereVel, rnd),
+                                                     math::realRandom(-initialSphereVel, initialSphereVel, rnd),
+                                                     math::realRandom(-initialSphereVel, initialSphereVel, rnd));
+                            }
+                        }
+                    } else {
 
-            	 sphere = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, i + 1,
-            	                                        Vector3<real_t>(0.5 * xInterval + xInterval * real_c((i % (rows * columns)) / columns),
-            	                                     config.offsetBot + 0.5 * yInterval + yInterval * real_c(i / (rows * columns)),
-            	                                                        0.5 * zInterval + zInterval * real_c((i % columns))),
-                                           distributionA(gen), materialA);
+                        sphere = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, i + 1,
+                                                  Vector3<real_t>(0.5 * xInterval + xInterval * real_c((i % (rows * columns)) / columns),
+                                                                  config.offsetBot + 0.5 * yInterval + yInterval * real_c(i / (rows * columns)),
+                                                                  0.5 * zInterval + zInterval * real_c((i % columns))),
+                                                  distributionB(gen), materialB);
 
-            	              if (sphere != NULL) {
+                        if (sphere != NULL) {
 
-            	                 ++numberCreatedParticlesA;
+                            ++numberCreatedParticlesB;
 
-            	                 if ( initialSphereVel > 0.0 ) {
-            	                    sphere->setLinearVel(math::realRandom(-initialSphereVel, initialSphereVel, rnd), math::realRandom(-initialSphereVel, initialSphereVel, rnd),
-            	                                         math::realRandom(-initialSphereVel, initialSphereVel, rnd));
-            	                 }
-            	              }
-            	 } else {
+                            if (initialSphereVel > 0.0) {
+                                sphere->setLinearVel(math::realRandom(-initialSphereVel, initialSphereVel, rnd),
+                                                     math::realRandom(-initialSphereVel, initialSphereVel, rnd),
+                                                     math::realRandom(-initialSphereVel, initialSphereVel, rnd));
+                            }
+                        }
 
-            		 sphere = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, i + 1,
-            		             	                                        Vector3<real_t>(0.5 * xInterval + xInterval * real_c((i % (rows * columns)) / columns),
-            		             	                                     config.offsetBot + 0.5 * yInterval + yInterval * real_c(i / (rows * columns)),
-            		             	                                                        0.5 * zInterval + zInterval * real_c((i % columns))),
-                                               distributionB(gen), materialB);
-
-            		             	              if (sphere != NULL) {
-
-            		             	                 ++numberCreatedParticlesB;
-
-            		             	                 if ( initialSphereVel > 0.0 ) {
-            		             	                    sphere->setLinearVel(math::realRandom(-initialSphereVel, initialSphereVel, rnd), math::realRandom(-initialSphereVel, initialSphereVel, rnd),
-            		             	                                         math::realRandom(-initialSphereVel, initialSphereVel, rnd));
-            		             	                 }
-            		             	              }
-
-            	 }
-
-             }
-             else
-             {
-
-             sphere = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, i + 1,
-                                       Vector3<real_t>(0.5 * xInterval + xInterval * real_c((i % (rows * columns)) / columns),
-                                    config.offsetBot + 0.5 * yInterval + yInterval * real_c(i / (rows * columns)),
-                                                       0.5 * zInterval + zInterval * real_c((i % columns))),
-                                       distributionA(gen), materialA);
-
-             if (sphere != NULL) {
-
-                ++numberCreatedParticlesA;
-
-                if ( initialSphereVel > 0.0 ) {
-                   sphere->setLinearVel(math::realRandom(-initialSphereVel, initialSphereVel, rnd), math::realRandom(-initialSphereVel, initialSphereVel, rnd),
-                                        math::realRandom(-initialSphereVel, initialSphereVel, rnd));
+                    }
                 }
-             }
-             }
+            } else {
+                for (unsigned int i = 0; i < (config.nrParticlesA + config.nrParticlesB); ++i) {
 
-          }
+                    sphere = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, i + 1,
+                                              Vector3<real_t>(0.5 * xInterval + xInterval * real_c((i % (rows * columns)) / columns),
+                                                              config.offsetBot + 0.5 * yInterval + yInterval * real_c(i / (rows * columns)),
+                                                              0.5 * zInterval + zInterval * real_c((i % columns))),
+                                              distributionA(gen), materialA);
 
-          WALBERLA_MPI_SECTION(){
-             mpi::allReduceInplace(numberCreatedParticlesA, mpi::SUM);
-             mpi::allReduceInplace(numberCreatedParticlesB, mpi::SUM);
-          }
+                    if (sphere != NULL) {
 
-          WALBERLA_ROOT_SECTION() {
-          std::cout << "Number of created particles A is:     " << numberCreatedParticlesA << std::endl;
-          std::cout << "Number of created particles B is:     " << numberCreatedParticlesB << std::endl << std::endl;
-          }
+                        ++numberCreatedParticlesA;
 
-          ///////////////////
-          // PACKED BED ////
-          //////////////////
+                        if (initialSphereVel > 0.0) {
+                            sphere->setLinearVel(math::realRandom(-initialSphereVel, initialSphereVel, rnd),
+                                                 math::realRandom(-initialSphereVel, initialSphereVel, rnd),
+                                                 math::realRandom(-initialSphereVel, initialSphereVel, rnd));
+                        }
+                    }
+                }
+            }
 
-          if (createPackedBed) {
+            WALBERLA_MPI_SECTION() {
+                mpi::allReduceInplace(numberCreatedParticlesA, mpi::SUM);
+                mpi::allReduceInplace(numberCreatedParticlesB, mpi::SUM);
+            }
 
-             // spheres_init
-             auto sphereVtkOutputInit   = make_shared<pe::SphereVtkOutput>( bodyStorageID, blocks->getBlockStorage() );
-             auto sphereVtkWriterInit   = vtk::createVTKOutput_PointData( sphereVtkOutputInit, "spheres_init");
+            WALBERLA_ROOT_SECTION() {
+                std::cout << "Number of created particles A is:     " << numberCreatedParticlesA << std::endl;
+                std::cout << "Number of created particles B is:     " << numberCreatedParticlesB << std::endl << std::endl;
+            }
 
-             sphereVtkWriterInit->write();
+            ///////////////////
+            // PACKED BED ////
+            //////////////////
 
-             // set up synchronization procedure
-             std::function<void(void)> syncCall_PE = std::bind(pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID,
-                                                                static_cast<WcTimingTree *>(NULL),
-                                                                overlap, false);
+            if (createPackedBed) {
 
-             // set up collision response, here DEM solver
-             auto fcdID_PE = blocks->addBlockData(pe::fcd::createGenericFCDDataHandling<BodyTypeTuple, pe::fcd::AnalyticCollideFunctor>(), "FCD");
+                // spheres_init
+                auto sphereVtkOutputInit = make_shared<pe::SphereVtkOutput>(bodyStorageID, blocks->getBlockStorage());
+                auto sphereVtkWriterInit = vtk::createVTKOutput_PointData(sphereVtkOutputInit, "spheres_init");
 
-              std::unique_ptr<pe::cr::ICR> cr_PE;
-              if (useDEM)
-              {
-                  cr_PE = std::make_unique<pe::cr::DEM>(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID_PE);
-                  WALBERLA_LOG_INFO_ON_ROOT("Using DEM!");
-              } else {
-                  cr_PE = std::make_unique<pe::cr::HCSITS>(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID_PE);
-                  pe::cr::HCSITS* hcsits_PE = static_cast<pe::cr::HCSITS*>(cr_PE.get());
-                  hcsits_PE->setMaxIterations(HCSITSMaxIterations);
-                  hcsits_PE->setRelaxationParameter(HCSITSRelaxationParameter);
-                  WALBERLA_LOG_INFO_ON_ROOT("Using HCSITS!");
-              }
+                sphereVtkWriterInit->write();
 
-             cr_PE->setGlobalLinearAcceleration(pe::Vec3(0.0, - (config.gravity), 0.0));
+                // set up synchronization procedure
+                std::function<void(void)> syncCall_PE = std::bind(pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()),
+                                                                  bodyStorageID,
+                                                                  static_cast<WcTimingTree *>(NULL),
+                                                                  overlap, false);
 
-             real_t avgVel = real_c(100.0);
-             real_t maxVel = real_c(100.0);
-             real_t currentSettleVelocity = real_c(100.0);
-             uint_t itPE = uint_c(0);
-             real_t velocityConversion = config.dx_SI / config.dt_SI;
+                auto ccdID_PE = blocks->addBlockData(pe::ccd::createHashGridsDataHandling(globalBodyStorage, bodyStorageID), "CCD_PE");
 
-             while ((currentSettleVelocity > settleVelocity) || (itPE < 4999)) {
+                // set up collision response, here DEM solver
+                auto fcdID_PE = blocks->addBlockData(pe::fcd::createGenericFCDDataHandling<BodyTypeTuple, pe::fcd::AnalyticCollideFunctor>(),
+                                                     "FCD_PE");
 
-                cr_PE->timestep( peAccelerator / real_c(config.peSubCycles));
-                syncCall_PE();
-                ++itPE;
-
-                if (writePackedBed && itPE % frequencyPackedBed == 0){
-                   sphereVtkWriterInit->write();
+                std::unique_ptr<pe::cr::ICR> cr_PE;
+                if (useDEM) {
+                    cr_PE = std::make_unique<pe::cr::DEM>(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID_PE, fcdID_PE);
+                    WALBERLA_LOG_INFO_ON_ROOT("Using DEM!");
+                } else {
+                    cr_PE = std::make_unique<pe::cr::HCSITS>(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID_PE,
+                                                             fcdID_PE);
+                    pe::cr::HCSITS *hcsits_PE = static_cast<pe::cr::HCSITS *>(cr_PE.get());
+                    hcsits_PE->setMaxIterations(HCSITSMaxIterations);
+                    hcsits_PE->setRelaxationParameter(HCSITSRelaxationParameter);
+                    WALBERLA_LOG_INFO_ON_ROOT("Using HCSITS!");
                 }
 
-                if ((itPE) % settleCheckFrequency == 0) {
+                cr_PE->setGlobalLinearAcceleration(pe::Vec3(0.0, -(config.gravity), 0.0));
 
-                   avgVel = FBfunc::getAvgVel(blocks, bodyStorageID, numberCreatedParticlesA + numberCreatedParticlesB) * velocityConversion;
-                   maxVel = FBfunc::getMaxVel(blocks, bodyStorageID)                                                    * velocityConversion;
+                real_t avgVel = real_c(100.0);
+                real_t maxVel = real_c(100.0);
+                real_t currentSettleVelocity = real_c(100.0);
+                uint_t itPE = uint_c(0);
+                real_t velocityConversion = config.dx_SI / config.dt_SI;
 
-                   if(checkMaximumParticleVelocity){
-                      currentSettleVelocity = maxVel;
-                   } else {
-                      currentSettleVelocity = avgVel;
-                   }
+                while ((currentSettleVelocity > settleVelocity) || (itPE < 4999)) {
 
-                   WALBERLA_ROOT_SECTION() {
-                      std::cout << "Time step " << itPE << std::endl;
-                      std::cout << "Average Velocity:   " << avgVel << " m/s" << std::endl;
-                      std::cout << "Maximum Velocity:   " << maxVel << " m/s" << std::endl << std::endl;
-                   }
+                    cr_PE->timestep(peAccelerator / real_c(config.peSubCycles));
+                    syncCall_PE();
+                    ++itPE;
+
+                    if (writePackedBed && itPE % frequencyPackedBed == 0) {
+                        sphereVtkWriterInit->write();
+                    }
+
+                    if ((itPE) % settleCheckFrequency == 0) {
+
+                        avgVel =
+                                FBfunc::getAvgVel(blocks, bodyStorageID, numberCreatedParticlesA + numberCreatedParticlesB) * velocityConversion;
+                        maxVel = FBfunc::getMaxVel(blocks, bodyStorageID) * velocityConversion;
+
+                        if (checkMaximumParticleVelocity) {
+                            currentSettleVelocity = maxVel;
+                        } else {
+                            currentSettleVelocity = avgVel;
+                        }
+
+                        WALBERLA_ROOT_SECTION() {
+                            std::cout << "Time step " << itPE << std::endl;
+                            std::cout << "Average Velocity:   " << avgVel << " m/s" << std::endl;
+                            std::cout << "Maximum Velocity:   " << maxVel << " m/s" << std::endl << std::endl;
+                        }
+                    }
                 }
-             }
 
 
-             cr_PE->setGlobalLinearAcceleration(pe::Vec3(0.0, 0.0, 0.0));
-             FBfunc::restSphere(blocks, bodyStorageID);
+                cr_PE->setGlobalLinearAcceleration(pe::Vec3(0.0, 0.0, 0.0));
+                FBfunc::restSphere(blocks, bodyStorageID);
 
-             avgVel = FBfunc::getAvgVel(blocks, bodyStorageID, (numberCreatedParticlesA + numberCreatedParticlesB)) * velocityConversion;
-             avgVel = FBfunc::getAvgVel(blocks, bodyStorageID, (numberCreatedParticlesA + numberCreatedParticlesB)) * velocityConversion;
-             maxVel = FBfunc::getMaxVel(blocks, bodyStorageID) * velocityConversion;
+                avgVel = FBfunc::getAvgVel(blocks, bodyStorageID, (numberCreatedParticlesA + numberCreatedParticlesB)) * velocityConversion;
+                avgVel = FBfunc::getAvgVel(blocks, bodyStorageID, (numberCreatedParticlesA + numberCreatedParticlesB)) * velocityConversion;
+                maxVel = FBfunc::getMaxVel(blocks, bodyStorageID) * velocityConversion;
 
-             WALBERLA_ROOT_SECTION() {
-                std::cout << "||||||||||||| END OF PE SIM ||||||||||||||" << std::endl;
-                std::cout << "Average Velocity:   " << avgVel << " m/s" << std::endl;
-                std::cout << "Maximum Velocity:   " << maxVel << " m/s" << std::endl << std::endl;
-             }
-          }
-
-
-          ////////////////////
-          // PACKED BED END //
-          ////////////////////
+                WALBERLA_ROOT_SECTION() {
+                    std::cout << "||||||||||||| END OF PE SIM ||||||||||||||" << std::endl;
+                    std::cout << "Average Velocity:   " << avgVel << " m/s" << std::endl;
+                    std::cout << "Maximum Velocity:   " << maxVel << " m/s" << std::endl << std::endl;
+                }
+            }
 
 
-          WALBERLA_ROOT_SECTION() {
-              std::cout << "\nSetup Information\n" << std::endl;
-              std::cout << "Physical time step is:                " << config.dt_SI << " s" << std::endl;
-              std::cout << "Physical cell size is:                " << config.dx_SI << " m" << std::endl;
-              std::cout << "Particle Reynoldsnumber(LBM) is:      " << particleReynoldsNumber_LBM << std::endl;
-              std::cout << "Froudenumber(LBM) is:                 " << FroudeNumber_LBM << std::endl;
-              std::cout << "Minimum Fluidization Re number is:    " << REpmf << std::endl;
-              std::cout << "LBM velocity is:                      " << config.velocity << std::endl;
-              std::cout << "LBM viscosity is:                     " << config.kinViscosity << std::endl;
-              std::cout << "Omega is:                             " << omega << std::endl << std::endl;
-
-              std::ofstream output;
-              output.open("Setup.txt");
-              output << "Domain size in X direction:           " << config.xlength << std::endl;
-              output << "Domain size in Y direction:           " << config.ylength << std::endl;
-              output << "Domain size in Z direction:           " << config.zlength << std::endl;
-              output << "Number of processes:                  " << processes << std::endl;
-              output << "Physical time step is:                " << config.dt_SI << " s" << std::endl;
-              output << "Physical cell size is:                " << config.dx_SI << " m" << std::endl;
-              output << "Number of particles A is:             " << config.nrParticlesA << std::endl;
-              if (twoSpecies) {
-                  output << "Number of particles B is:             " << config.nrParticlesA << std::endl;
-              }
-              if (!initializeFromCheckPointFile) {
-                  output << "Number of created particles A is:     " << numberCreatedParticlesA << std::endl;
-                  if (twoSpecies) {
-                      output << "Number of created particles B is:     " << numberCreatedParticlesB << std::endl;
-                  }
-
-              }
-              output << "Cells per diameter :                  " << config.diameterA << std::endl;
-              output << "Fluid density is:                     " << config.densityFluid_SI << " kg/m3" << std::endl;
-              output << "Fluid viscosity is:                   " << dynViscosity_SI << std::endl;
-              output << "Particle density is:                  " << densitySolidA_SI << " kg/m3" << std::endl;
-              output << "Inflow velocity is:                   " << velocity_SI << " m/s" << std::endl;
-              output << "Normal Stiffness A is:                " << stiffnessNparticlesA << std::endl;
-              if (twoSpecies) {
-                  output << "Normal Stiffness B is:                " << stiffnessNparticlesB << std::endl;
-              }
-              output << "Normal Stiffness Wall is:             " << stiffnessNwall << std::endl;
-              output << "Normal Damping A is:                  " << dampingNparticlesA << std::endl;
-              if (twoSpecies) {
-                  output << "Normal Damping B is:                    " << dampingNparticlesB << std::endl;
-              }
-              output << "Normal Damping Wall is:               " << dampingNwall << std::endl;
-              output << "Tangential Damping A is:              " << dampingTparticlesA << std::endl;
-              if (twoSpecies) {
-                  output << "Tangential Damping B is:                " << dampingTparticlesB << std::endl;
-              }
-              output << "Tangential Damping Wall is:           " << dampingTwall << std::endl;
-              output << "Particle Reynoldsnumber(SI) is:       " << particleReynoldsNumber_SI << std::endl;
-              output << "Particle Reynoldsnumber(LBM) is:      " << particleReynoldsNumber_LBM << std::endl;
-              output << "Froudenumber(SI) is:                  " << FroudeNumber_SI << std::endl;
-              output << "Froudenumber(LBM) is:                 " << FroudeNumber_LBM << std::endl;
-              output << "Arrhenius number is:                  " << ArrheniusNumber_SI << std::endl;
-              output << "Galilei number is:                    " << galileiNumber << std::endl;
-              output << "Minimum Fluidization Re number is:    " << REpmf << std::endl;
-              output << "Minimum Fluidization Fr number is:    " << UmfFroudenumber << std::endl;
-              output << "LBM velocity is:                      " << config.velocity << std::endl;
-              output << "LBM gravity is:                       " << config.gravity << std::endl;
-              output << "LBM viscosity is:                     " << config.kinViscosity << std::endl;
-              output << "Pressure due to gravity is:           " << gravityPressure << " Pa" << std::endl;
-              output << "Omega is:                             " << omega << std::endl << std::endl;
-              output.close();
-          }
+            ////////////////////
+            // PACKED BED END //
+            ////////////////////
 
 
-          // add pdf field
-          pdfFieldID = lbm::addPdfFieldToStorage(blocks, "pdf field (fzyx)", latticeModel,
-                                                 Vector3<real_t>(real_t(0), spotInflow ? real_t(0.0): initialRampingVelocityFactor * config.velocity, real_t(0)), real_t(1),
-                                                 uint_t(1), field::fzyx);
+            WALBERLA_ROOT_SECTION() {
+                std::cout << "\nSetup Information\n" << std::endl;
+                std::cout << "Physical time step is:                " << config.dt_SI << " s" << std::endl;
+                std::cout << "Physical cell size is:                " << config.dx_SI << " m" << std::endl;
+                std::cout << "Particle Reynoldsnumber(LBM) is:      " << particleReynoldsNumber_LBM << std::endl;
+                std::cout << "Froudenumber(LBM) is:                 " << FroudeNumber_LBM << std::endl;
+                std::cout << "Minimum Fluidization Re number is:    " << REpmf << std::endl;
+                std::cout << "LBM velocity is:                      " << config.velocity << std::endl;
+                std::cout << "LBM viscosity is:                     " << config.kinViscosity << std::endl;
+                std::cout << "Omega is:                             " << omega << std::endl << std::endl;
 
-       }
+                std::ofstream output;
+                output.open("Setup.txt");
+                output << "Domain size in X direction:           " << config.xlength << std::endl;
+                output << "Domain size in Y direction:           " << config.ylength << std::endl;
+                output << "Domain size in Z direction:           " << config.zlength << std::endl;
+                output << "Number of processes:                  " << processes << std::endl;
+                output << "Physical time step is:                " << config.dt_SI << " s" << std::endl;
+                output << "Physical cell size is:                " << config.dx_SI << " m" << std::endl;
+                output << "Number of particles A is:             " << config.nrParticlesA << std::endl;
+                if (twoSpecies) {
+                    output << "Number of particles B is:             " << config.nrParticlesA << std::endl;
+                }
+                if (!initializeFromCheckPointFile) {
+                    output << "Number of created particles A is:     " << numberCreatedParticlesA << std::endl;
+                    if (twoSpecies) {
+                        output << "Number of created particles B is:     " << numberCreatedParticlesB << std::endl;
+                    }
 
-       // set up synchronization procedure
-       std::function<void(void)> syncCall = std::bind(pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID,
-                                                          static_cast<WcTimingTree *>(NULL),
-                                                          overlap, false);
+                }
+                output << "Cells per diameter :                  " << config.diameterA << std::endl;
+                output << "Fluid density is:                     " << config.densityFluid_SI << " kg/m3" << std::endl;
+                output << "Fluid viscosity is:                   " << dynViscosity_SI << std::endl;
+                output << "Particle density is:                  " << densitySolidA_SI << " kg/m3" << std::endl;
+                output << "Inflow velocity is:                   " << velocity_SI << " m/s" << std::endl;
+                output << "Normal Stiffness A is:                " << stiffnessNparticlesA << std::endl;
+                if (twoSpecies) {
+                    output << "Normal Stiffness B is:                " << stiffnessNparticlesB << std::endl;
+                }
+                output << "Normal Stiffness Wall is:             " << stiffnessNwall << std::endl;
+                output << "Normal Damping A is:                  " << dampingNparticlesA << std::endl;
+                if (twoSpecies) {
+                    output << "Normal Damping B is:                    " << dampingNparticlesB << std::endl;
+                }
+                output << "Normal Damping Wall is:               " << dampingNwall << std::endl;
+                output << "Tangential Damping A is:              " << dampingTparticlesA << std::endl;
+                if (twoSpecies) {
+                    output << "Tangential Damping B is:                " << dampingTparticlesB << std::endl;
+                }
+                output << "Tangential Damping Wall is:           " << dampingTwall << std::endl;
+                output << "Particle Reynoldsnumber(SI) is:       " << particleReynoldsNumber_SI << std::endl;
+                output << "Particle Reynoldsnumber(LBM) is:      " << particleReynoldsNumber_LBM << std::endl;
+                output << "Froudenumber(SI) is:                  " << FroudeNumber_SI << std::endl;
+                output << "Froudenumber(LBM) is:                 " << FroudeNumber_LBM << std::endl;
+                output << "Arrhenius number is:                  " << ArrheniusNumber_SI << std::endl;
+                output << "Galilei number is:                    " << galileiNumber << std::endl;
+                output << "Minimum Fluidization Re number is:    " << REpmf << std::endl;
+                output << "Minimum Fluidization Fr number is:    " << UmfFroudenumber << std::endl;
+                output << "LBM velocity is:                      " << config.velocity << std::endl;
+                output << "LBM gravity is:                       " << config.gravity << std::endl;
+                output << "LBM viscosity is:                     " << config.kinViscosity << std::endl;
+                output << "Pressure due to gravity is:           " << gravityPressure << " Pa" << std::endl;
+                output << "Omega is:                             " << omega << std::endl << std::endl;
+                output.close();
+            }
 
-       syncCall();
 
-       // Communication scheme
-       std::function<void()> commFunction;
+            // add pdf field
+            pdfFieldID = lbm::addPdfFieldToStorage(blocks, "pdf field (fzyx)", latticeModel,
+                                                   Vector3<real_t>(real_t(0),
+                                                                   spotInflow ? real_t(0.0) : initialRampingVelocityFactor * config.velocity,
+                                                                   real_t(0)), real_t(1),
+                                                   uint_t(1), field::fzyx);
+        }
 
-       blockforest::communication::UniformBufferedScheme<Stencil_T> scheme(blocks);
-       scheme.addPackInfo(make_shared<lbm::PdfFieldPackInfo<LatticeModel_T> >(pdfFieldID));
-       commFunction = scheme;
+        // set up synchronization procedure
+        std::function<void(void)> syncCall = std::bind(pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID,
+                                                       static_cast<WcTimingTree *>(NULL), overlap, false);
 
-       commFunction();
+        syncCall();
+
+        // Communication scheme
+        std::function<void()> commFunction;
+
+        blockforest::communication::UniformBufferedScheme<Stencil_T> scheme(blocks);
+        scheme.addPackInfo(make_shared<lbm::PdfFieldPackInfo<LatticeModel_T> >(pdfFieldID));
+        commFunction = scheme;
+
+        commFunction();
 
 
-       ////////////////////////
-       // ADD DATA TO BLOCKS //
-       ////////////////////////
+        ////////////////////////
+        // ADD DATA TO BLOCKS //
+        ////////////////////////
 
-       // set up collision response, here DEM solver
-       auto fcdID = blocks->addBlockData(pe::fcd::createGenericFCDDataHandling<BodyTypeTuple, pe::fcd::AnalyticCollideFunctor>(), "FCD");
+        auto ccdID = blocks->addBlockData(pe::ccd::createHashGridsDataHandling(globalBodyStorage, bodyStorageID), "CCD");
+
+        for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt) {
+            pe::ccd::ICCD* ccd = blockIt->getData<pe::ccd::ICCD>(ccdID);
+            ccd->reloadBodies();
+        }
+
+        // set up collision response, here DEM solver
+        auto fcdID = blocks->addBlockData(pe::fcd::createGenericFCDDataHandling<BodyTypeTuple, pe::fcd::AnalyticCollideFunctor>(), "FCD");
 
         std::unique_ptr<pe::cr::ICR> cr;
-        if (useDEM)
-        {
+        if (useDEM) {
             cr = std::make_unique<pe::cr::DEM>(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID);
         } else {
             cr = std::make_unique<pe::cr::HCSITS>(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID);
-            pe::cr::HCSITS* hcsits = static_cast<pe::cr::HCSITS*>(cr.get());
+            pe::cr::HCSITS *hcsits = static_cast<pe::cr::HCSITS *>(cr.get());
             hcsits->setMaxIterations(HCSITSMaxIterations);
             hcsits->setRelaxationParameter(HCSITSRelaxationParameter);
         }
+
+        for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt){
+            pe::ccd::ICCD *ccd = blockIt->getData<pe::ccd::ICCD>(ccdID);
+                std::cout << "Bodies: " << ccd->getObservedBodyCount() << std::endl ;
+    }
 
        // add flag field
        BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>(blocks, "flag field");
 
        // add body field
-       BlockDataID bodyFieldID = field::addToStorage<BodyField_T>(blocks, "body field", NULL, field::zyxf);
+       BlockDataID bodyFieldID = field::addToStorage<BodyField_T>(blocks, "body field", NULL, field::fzyx);
 
        // Object for keeping track of time
        shared_ptr<lbm::TimeTracker> timeTrack = make_shared<lbm::TimeTracker>();
+
+        if(initializeFromCheckPointFile){
+            timestepsRamping = uint_t(0);
+        }
 
         BlockDataID boundaryHandlingID = blocks->addStructuredBlockData<BoundaryHandling_T>(
              MyBoundaryHandling_T(flagFieldID, pdfFieldID, bodyFieldID, xPeriodic, zPeriodic, spotInflow, spotDiameter, real_c(config.xlength)*0.5,
@@ -1130,6 +1161,57 @@ namespace fluidizedBed {
        ////////////////////
 
        SweepTimeloop timeloop(blocks->getBlockStorage(), timesteps);
+
+        ////////////////
+        // VTK OUTPUT //
+        ////////////////
+
+        if (writeSpheres) {
+            auto sphereVtkOutput = make_shared<pe::SphereVtkOutput>(bodyStorageID, blocks->getBlockStorage());
+            auto sphereVTK = vtk::createVTKOutput_PointData(sphereVtkOutput, "spheres", frequencySpheres);
+            timeloop.addFuncAfterTimeStep(vtk::writeFiles(sphereVTK), "VTK (sphere data)");
+        }
+
+        if (writeOmega) {
+            auto omegaVTK = vtk::createVTKOutput_BlockData(blocks, "omega", frequencyOmega, 0);          // 0 => no fieldghostlayer
+            omegaVTK->addCellDataWriter(make_shared<field::VTKWriter<ScalarField_T, float >>(omegaFieldID, "omega_field"));
+            omegaVTK->setSamplingResolution(samplingResolutionOmega);
+            timeloop.addFuncAfterTimeStep(vtk::writeFiles(omegaVTK), "VTK (omega field data)");
+        }
+
+        if (writeFlagField) {
+            // flag field (ghost layers are also written)
+            auto flagFieldVTK = vtk::createVTKOutput_BlockData(blocks, "flag_field", frequencyFlagField, FieldGhostLayers);
+            flagFieldVTK->addCellDataWriter(make_shared<field::VTKWriter<FlagField_T> >(flagFieldID, "FlagField"));
+            timeloop.addFuncAfterTimeStep(vtk::writeFiles(flagFieldVTK), "VTK (flag field data)");
+        }
+
+        if (writeFluidField) {
+            // pdf field (ghost layers cannot be written because re-sampling/coarsening is applied)
+            auto pdfFieldVTK = vtk::createVTKOutput_BlockData(blocks, "fluid_field", frequencyFluidField, 0, false);      // 0 => no fieldghostlayer
+            pdfFieldVTK->setSamplingResolution(samplingResolutionFluidField);
+
+            blockforest::communication::UniformBufferedScheme<stencil::D3Q27> pdfGhostLayerSync(blocks);
+            pdfGhostLayerSync.addPackInfo(make_shared<field::communication::PackInfo<PdfField_T> >(pdfFieldID));
+            pdfFieldVTK->addBeforeFunction(pdfGhostLayerSync);
+
+            field::FlagFieldCellFilter<FlagField_T> fluidFilter(flagFieldID);
+            fluidFilter.addFlag(FBfunc::Fluid_Flag);
+            pdfFieldVTK->addCellInclusionFilter(fluidFilter);
+
+            pdfFieldVTK->addCellDataWriter(make_shared<lbm::VelocityVTKWriter<LatticeModel_T, float> >(pdfFieldID, "VelocityFromPDF"));
+            pdfFieldVTK->addCellDataWriter(make_shared<lbm::DensityVTKWriter<LatticeModel_T, float> >(pdfFieldID, "DensityFromPDF"));
+
+            timeloop.addFuncAfterTimeStep(vtk::writeFiles(pdfFieldVTK), "VTK (fluid field data)");
+        }
+
+        ////////////////
+        // VTK END    //
+        ////////////////
+
+        timeloop.addFuncAfterTimeStep(
+                makeSharedFunctor( field::makeStabilityChecker< lbm::PdfField< LatticeModel_T >, FlagField_T >(
+                        blocks, pdfFieldID, flagFieldID, FBfunc::Fluid_Flag, uint_t(1), true, true ) ), "LBM stability check" );
 
         // sweep for updating the pe body mapping into the LBM simulation
         timeloop.add() << Sweep(
@@ -1233,58 +1315,6 @@ namespace fluidizedBed {
        // advance pe rigid body simulation
        timeloop.addFuncAfterTimeStep( pe_coupling::TimeStep( blocks, bodyStorageID, *cr, syncCall, config.lbmSubCycles, config.peSubCycles ), "pe Time Step" );
 
-       ////////////////
-       // VTK OUTPUT //
-       ////////////////
-
-       ////////////////////
-       // MAIN TIME LOOP //
-       ////////////////////
-
-       if (writeSpheres) {
-          auto sphereVtkOutput = make_shared<pe::SphereVtkOutput>(bodyStorageID, blocks->getBlockStorage());
-          auto sphereVTK = vtk::createVTKOutput_PointData(sphereVtkOutput, "spheres", frequencySpheres);
-          timeloop.addFuncAfterTimeStep(vtk::writeFiles(sphereVTK), "VTK (sphere data)");
-       }
-
-       if (writeOmega) {
-          auto omegaVTK = vtk::createVTKOutput_BlockData(blocks, "omega", frequencyOmega, 0);          // 0 => no fieldghostlayer
-          omegaVTK->addCellDataWriter(make_shared<field::VTKWriter<ScalarField_T, float >>(omegaFieldID, "omega_field"));
-          omegaVTK->setSamplingResolution(samplingResolutionOmega);
-          timeloop.addFuncAfterTimeStep(vtk::writeFiles(omegaVTK), "VTK (omega field data)");
-       }
-
-       if (writeFlagField) {
-          // flag field (ghost layers are also written)
-          auto flagFieldVTK = vtk::createVTKOutput_BlockData(blocks, "flag_field", frequencyFlagField, FieldGhostLayers);
-          flagFieldVTK->addCellDataWriter(make_shared<field::VTKWriter<FlagField_T> >(flagFieldID, "FlagField"));
-          timeloop.addFuncAfterTimeStep(vtk::writeFiles(flagFieldVTK), "VTK (flag field data)");
-       }
-
-       if (writeFluidField) {
-          // pdf field (ghost layers cannot be written because re-sampling/coarsening is applied)
-          auto pdfFieldVTK = vtk::createVTKOutput_BlockData(blocks, "fluid_field", frequencyFluidField, 0, false);      // 0 => no fieldghostlayer
-           pdfFieldVTK->setSamplingResolution(samplingResolutionFluidField);
-
-          blockforest::communication::UniformBufferedScheme<stencil::D3Q27> pdfGhostLayerSync(blocks);
-          pdfGhostLayerSync.addPackInfo(make_shared<field::communication::PackInfo<PdfField_T> >(pdfFieldID));
-          pdfFieldVTK->addBeforeFunction(pdfGhostLayerSync);
-
-          field::FlagFieldCellFilter<FlagField_T> fluidFilter(flagFieldID);
-          fluidFilter.addFlag(FBfunc::Fluid_Flag);
-          pdfFieldVTK->addCellInclusionFilter(fluidFilter);
-
-          pdfFieldVTK->addCellDataWriter(make_shared<lbm::VelocityVTKWriter<LatticeModel_T, float> >(pdfFieldID, "VelocityFromPDF"));
-          pdfFieldVTK->addCellDataWriter(make_shared<lbm::DensityVTKWriter<LatticeModel_T, float> >(pdfFieldID, "DensityFromPDF"));
-
-          timeloop.addFuncAfterTimeStep(vtk::writeFiles(pdfFieldVTK), "VTK (fluid field data)");
-       }
-
-       ////////////////
-       // VTK END    //
-       ////////////////
-
-
        // Obstacle test
        timeloop.addFuncAfterTimeStep(FBfunc::ObstacleLocationCheck(blocks, bodyStorageID, blocks->getDomain(),
                                                                 (xPeriodic || zPeriodic) ? radiusA + real_c(2) * overlap : real_c(2) * overlap), "Obstacle Location Check");
@@ -1306,7 +1336,7 @@ namespace fluidizedBed {
        // EXECUTE SIMULATIONS  //
        //////////////////////////
 
-        if (runPreliminaryTimeloop) {
+        if (runPreliminaryTimeloop && !initializeFromCheckPointFile) {
             WALBERLA_ROOT_SECTION()
             {
                 std::cout << std::endl << "||||||||||||| PRELIMINARY SIM ||||||||||||||" << std::endl;
@@ -1324,7 +1354,7 @@ namespace fluidizedBed {
                 // perform a single simulation step
                 timeloopPRE.singleStep(timeloopTimingPRE);
 
-                if (timeloopPRE.getCurrentTimeStep() % uint_t(10) == uint_t(0)) {
+                if (timeloopPRE.getCurrentTimeStep() % uint_t(20) == uint_t(0)) {
 
                     relativePressureDifference = fabs(PressureDropper->getPressureDrop() - previousPressure) / previousPressure;
 

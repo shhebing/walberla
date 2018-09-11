@@ -1124,7 +1124,7 @@ namespace FBfunc {
                 mpi::reduceInplace(currentMax, mpi::MAX);
             }
             WALBERLA_ROOT_SECTION() {
-                std::cout << "Maximal LBM Velocity: " << sqrt(currentMax) << std::endl;
+                //std::cout << "Maximal LBM Velocity: " << sqrt(currentMax) << std::endl;
                 std::ofstream output;
                 output.open( "MaximalLBMvelocity.txt", std::ofstream::out | std::ofstream::app);
                 output << executionCounter_ << "\t" << sqrt(currentMax) << std::endl;
