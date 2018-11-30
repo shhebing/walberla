@@ -101,18 +101,18 @@ namespace fluidizedBed {
     public:
 
         MyBoundaryHandling(const BlockDataID &flagField, const BlockDataID &pdfField, const BlockDataID &bodyField,
-                           //const shared_ptr<Vector3<real_t>> velocity,
-        		           const bool xPeriodic, const bool zPeriodic,
-						   const bool spotInflow, const real_t spotDiameter, const real_t xCenter, const real_t  zCenter,
-						   const real_t velocityMax, const real_t initialRamping, const real_t rampingTime,
-						   const shared_ptr< lbm::TimeTracker > & timeTracker):
-              flagField_(flagField), pdfField_(pdfField), bodyField_(bodyField)
-			  ,xPeriodic_(xPeriodic), zPeriodic_(zPeriodic), spotInflow_(spotInflow), spotDiameter_(spotDiameter)
-			  ,xCenter_(xCenter), zCenter_(zCenter), velocityMax_(velocityMax), initialRamping_(initialRamping)
-			  ,rampingTime_(rampingTime), timeTracker_(timeTracker)
-    		  ,velocityFunctor_(FBfunc::VelocityFunctor_T (xCenter, zCenter, spotDiameter, velocityMax, initialRamping, rampingTime, spotInflow))
-    {
-    }
+                //const shared_ptr<Vector3<real_t>> velocity,
+                           const bool xPeriodic, const bool zPeriodic,
+                           const bool spotInflow, const real_t spotDiameter, const real_t xCenter, const real_t  zCenter,
+                           const real_t velocityMax, const real_t initialRamping, const real_t rampingTime,
+                           const shared_ptr< lbm::TimeTracker > & timeTracker):
+                flagField_(flagField), pdfField_(pdfField), bodyField_(bodyField)
+                ,xPeriodic_(xPeriodic), zPeriodic_(zPeriodic), spotInflow_(spotInflow), spotDiameter_(spotDiameter)
+                ,xCenter_(xCenter), zCenter_(zCenter), velocityMax_(velocityMax), initialRamping_(initialRamping)
+                ,rampingTime_(rampingTime), timeTracker_(timeTracker)
+                ,velocityFunctor_(FBfunc::VelocityFunctor_T (xCenter, zCenter, spotDiameter, velocityMax, initialRamping, rampingTime, spotInflow))
+        {
+        }
 
         BoundaryHandling_T *operator()(IBlock *const block, const StructuredBlockStorage *const storage) const;
 
@@ -138,26 +138,26 @@ namespace fluidizedBed {
 
     template <typename BoundaryHandling_T, typename FlagField_T, typename PdfField_T, typename NoSlip_T, typename SimplePressure_T, typename UBB_T, typename MO_T>
     BoundaryHandling_T *MyBoundaryHandling<BoundaryHandling_T, FlagField_T, PdfField_T, NoSlip_T, SimplePressure_T, UBB_T, MO_T>::operator()(IBlock *const block, const StructuredBlockStorage *const storage) const {
-       WALBERLA_ASSERT_NOT_NULLPTR(block);
-       WALBERLA_ASSERT_NOT_NULLPTR(storage);
+        WALBERLA_ASSERT_NOT_NULLPTR(block);
+        WALBERLA_ASSERT_NOT_NULLPTR(storage);
 
-       FlagField_T *flagField = block->getData<FlagField_T>(flagField_);
-       PdfField_T *pdfField = block->getData<PdfField_T>(pdfField_);
-       BodyField_T *bodyField = block->getData<BodyField_T>(bodyField_);
+        FlagField_T *flagField = block->getData<FlagField_T>(flagField_);
+        PdfField_T *pdfField = block->getData<PdfField_T>(pdfField_);
+        BodyField_T *bodyField = block->getData<BodyField_T>(bodyField_);
 
-       const auto fluid = flagField->flagExists(FBfunc::Fluid_Flag) ? flagField->getFlag(FBfunc::Fluid_Flag) : flagField->registerFlag(FBfunc::Fluid_Flag);
+        const auto fluid = flagField->flagExists(FBfunc::Fluid_Flag) ? flagField->getFlag(FBfunc::Fluid_Flag) : flagField->registerFlag(FBfunc::Fluid_Flag);
 
-       BoundaryHandling_T *handling = new BoundaryHandling_T("cf boundary handling", flagField, fluid,
-                                                             boost::tuples::make_tuple(NoSlip_T("NoSlip", FBfunc::NoSlip_Flag, pdfField),
-                                                                                       SimplePressure_T("Outlet", FBfunc::Outlet_Flag, pdfField, real_c(1.0)),
-                                                                                       UBB_T("UBB", FBfunc::UBB_Flag, pdfField, timeTracker_, uint_t(0), velocityFunctor_, block->getAABB() ),
-                                                                                       MO_T("MO", FBfunc::MO_Flag, pdfField, flagField, bodyField, fluid, *storage, *block)));
+        BoundaryHandling_T *handling = new BoundaryHandling_T("cf boundary handling", flagField, fluid,
+                                                              boost::tuples::make_tuple(NoSlip_T("NoSlip", FBfunc::NoSlip_Flag, pdfField),
+                                                                                        SimplePressure_T("Outlet", FBfunc::Outlet_Flag, pdfField, real_c(1.0)),
+                                                                                        UBB_T("UBB", FBfunc::UBB_Flag, pdfField, timeTracker_, uint_t(0), velocityFunctor_, block->getAABB() ),
+                                                                                        MO_T("MO", FBfunc::MO_Flag, pdfField, flagField, bodyField, fluid, *storage, *block)));
 
-       const auto ubb = flagField->getFlag(FBfunc::UBB_Flag);
-       const auto noSlip = flagField->getFlag(FBfunc::NoSlip_Flag);
-       const auto outlet = flagField->getFlag(FBfunc::Outlet_Flag);
+        const auto ubb = flagField->getFlag(FBfunc::UBB_Flag);
+        const auto noSlip = flagField->getFlag(FBfunc::NoSlip_Flag);
+        const auto outlet = flagField->getFlag(FBfunc::Outlet_Flag);
 
-       CellInterval domainBB = storage->getDomainCellBB();
+        CellInterval domainBB = storage->getDomainCellBB();
 
         domainBB.xMin() -= cell_idx_c(FieldGhostLayers);
         domainBB.xMax() += cell_idx_c(FieldGhostLayers);
@@ -195,42 +195,42 @@ namespace fluidizedBed {
 
 // BOTTOM
 
-       if (spotInflow_){
+        if (spotInflow_){
 
-           CellInterval bottom(domainBB.xMin(), domainBB.yMin(), domainBB.zMin(), domainBB.xMax(), domainBB.yMin(), domainBB.zMax());
-           storage->transformGlobalToBlockLocalCellInterval(bottom, *block);
-           handling->forceBoundary(noSlip, bottom);
+            CellInterval bottom(domainBB.xMin(), domainBB.yMin(), domainBB.zMin(), domainBB.xMax(), domainBB.yMin(), domainBB.zMax());
+            storage->transformGlobalToBlockLocalCellInterval(bottom, *block);
+            handling->forceBoundary(noSlip, bottom);
 
-    	   for (cell_idx_t xIterator = domainBB.xMin(); xIterator <= domainBB.xMax(); ++xIterator ){
-        	   for (cell_idx_t zIterator = domainBB.zMin(); zIterator <= domainBB.zMax(); ++zIterator ){
-        		   if ( sqrt ( (real_c(xIterator) - xCenter_)*(real_c(xIterator) - xCenter_) + (real_c(zIterator) - zCenter_)*(real_c(zIterator) - zCenter_) ) <= spotDiameter_ * 0.5 ){
-        			   CellInterval inflow (xIterator, domainBB.yMin(), zIterator, xIterator, domainBB.yMin(), zIterator);
-        			   storage->transformGlobalToBlockLocalCellInterval( inflow , *block);
-        			   handling->forceBoundary(ubb, inflow);
-        		   }
-        	   }
+            for (cell_idx_t xIterator = domainBB.xMin(); xIterator <= domainBB.xMax(); ++xIterator ){
+                for (cell_idx_t zIterator = domainBB.zMin(); zIterator <= domainBB.zMax(); ++zIterator ){
+                    if ( sqrt ( (real_c(xIterator) - xCenter_)*(real_c(xIterator) - xCenter_) + (real_c(zIterator) - zCenter_)*(real_c(zIterator) - zCenter_) ) <= spotDiameter_ * 0.5 ){
+                        CellInterval inflow (xIterator, domainBB.yMin(), zIterator, xIterator, domainBB.yMin(), zIterator);
+                        storage->transformGlobalToBlockLocalCellInterval( inflow , *block);
+                        handling->forceBoundary(ubb, inflow);
+                    }
+                }
 
-    	   }
+            }
 
 
-       } else {
+        } else {
 
-       CellInterval bottom(domainBB.xMin(), domainBB.yMin(), domainBB.zMin(), domainBB.xMax(), domainBB.yMin(), domainBB.zMax());
-       storage->transformGlobalToBlockLocalCellInterval(bottom, *block);
-       handling->forceBoundary(ubb, bottom);
+            CellInterval bottom(domainBB.xMin(), domainBB.yMin(), domainBB.zMin(), domainBB.xMax(), domainBB.yMin(), domainBB.zMax());
+            storage->transformGlobalToBlockLocalCellInterval(bottom, *block);
+            handling->forceBoundary(ubb, bottom);
 
-       }
+        }
 
 
 
 // TOP
-       CellInterval top(domainBB.xMin(), domainBB.yMax(), domainBB.zMin(), domainBB.xMax(), domainBB.yMax(), domainBB.zMax());
-       storage->transformGlobalToBlockLocalCellInterval(top, *block);
-       handling->forceBoundary(outlet, top);
+        CellInterval top(domainBB.xMin(), domainBB.yMax(), domainBB.zMin(), domainBB.xMax(), domainBB.yMax(), domainBB.zMax());
+        storage->transformGlobalToBlockLocalCellInterval(top, *block);
+        handling->forceBoundary(outlet, top);
 
-       handling->fillWithDomain(FieldGhostLayers);
+        handling->fillWithDomain(FieldGhostLayers);
 
-       return handling;
+        return handling;
     }
 
     template <typename CollisionModel_T>
@@ -244,7 +244,7 @@ namespace fluidizedBed {
     {
         static lbm::D3Q19<lbm::collision_model::TRT, false> makeLatticeModel(BlockDataID /*omegaFieldID*/, real_t omega)
         {
-           return lbm::D3Q19<lbm::collision_model::TRT, false> (lbm::collision_model::TRT::constructWithMagicNumber(omega));
+            return lbm::D3Q19<lbm::collision_model::TRT, false> (lbm::collision_model::TRT::constructWithMagicNumber(omega));
         }
     };
 
@@ -254,7 +254,7 @@ namespace fluidizedBed {
     {
         static lbm::D3Q19<lbm::collision_model::SRT, false> makeLatticeModel(BlockDataID /*omegaFieldID*/, real_t omega)
         {
-           return lbm::D3Q19<lbm::collision_model::SRT, false> (lbm::collision_model::SRT(omega));
+            return lbm::D3Q19<lbm::collision_model::SRT, false> (lbm::collision_model::SRT(omega));
         }
     };
 
@@ -785,6 +785,28 @@ namespace fluidizedBed {
         uint_t numberCreatedParticlesA = uint_c(0);
         uint_t numberCreatedParticlesB = uint_c(0);
 
+        auto ccdID = blocks->addBlockData(pe::ccd::createHashGridsDataHandling(globalBodyStorage, bodyStorageID), "CCD");
+
+        // set up collision response, here DEM solver
+        auto fcdID = blocks->addBlockData(pe::fcd::createGenericFCDDataHandling<BodyTypeTuple, pe::fcd::AnalyticCollideFunctor>(), "FCD");
+
+        std::unique_ptr<pe::cr::ICR> cr;
+        if (useDEM) {
+            cr = std::make_unique<pe::cr::DEM>(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID);
+            WALBERLA_LOG_INFO_ON_ROOT("Using DEM!");
+
+        } else {
+            cr = std::make_unique<pe::cr::HCSITS>(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID);
+            pe::cr::HCSITS *hcsits = static_cast<pe::cr::HCSITS *>(cr.get());
+            hcsits->setMaxIterations(HCSITSMaxIterations);
+            hcsits->setRelaxationParameter(HCSITSRelaxationParameter);
+            WALBERLA_LOG_INFO_ON_ROOT("Using HCSITS!");
+        }
+
+        // set up synchronization procedure
+        std::function<void(void)> syncCall = std::bind(pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID,
+                                                       static_cast<WcTimingTree *>(NULL), overlap, false);
+
         if (initializeFromCheckPointFile) {
 
             WALBERLA_LOG_INFO_ON_ROOT("Initializing data from checkpoint file!");
@@ -865,7 +887,7 @@ namespace fluidizedBed {
                     }
                 }
             } else {
-                for (unsigned int i = 0; i < (config.nrParticlesA + config.nrParticlesB); ++i) {
+                for (unsigned int i = 0; i < (config.nrParticlesA); ++i) {
 
                     sphere = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, i + 1,
                                               Vector3<real_t>(0.5 * xInterval + xInterval * real_c((i % (rows * columns)) / columns),
@@ -890,12 +912,12 @@ namespace fluidizedBed {
                 mpi::allReduceInplace(numberCreatedParticlesA, mpi::SUM);
                 mpi::allReduceInplace(numberCreatedParticlesB, mpi::SUM);
             }
-
+/*
             WALBERLA_ROOT_SECTION() {
                 std::cout << "Number of created particles A is:     " << numberCreatedParticlesA << std::endl;
                 std::cout << "Number of created particles B is:     " << numberCreatedParticlesB << std::endl << std::endl;
             }
-
+*/
             ///////////////////
             // PACKED BED ////
             //////////////////
@@ -908,32 +930,7 @@ namespace fluidizedBed {
 
                 sphereVtkWriterInit->write();
 
-                // set up synchronization procedure
-                std::function<void(void)> syncCall_PE = std::bind(pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()),
-                                                                  bodyStorageID,
-                                                                  static_cast<WcTimingTree *>(NULL),
-                                                                  overlap, false);
-
-                auto ccdID_PE = blocks->addBlockData(pe::ccd::createHashGridsDataHandling(globalBodyStorage, bodyStorageID), "CCD_PE");
-
-                // set up collision response, here DEM solver
-                auto fcdID_PE = blocks->addBlockData(pe::fcd::createGenericFCDDataHandling<BodyTypeTuple, pe::fcd::AnalyticCollideFunctor>(),
-                                                     "FCD_PE");
-
-                std::unique_ptr<pe::cr::ICR> cr_PE;
-                if (useDEM) {
-                    cr_PE = std::make_unique<pe::cr::DEM>(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID_PE, fcdID_PE);
-                    WALBERLA_LOG_INFO_ON_ROOT("Using DEM!");
-                } else {
-                    cr_PE = std::make_unique<pe::cr::HCSITS>(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID_PE,
-                                                             fcdID_PE);
-                    pe::cr::HCSITS *hcsits_PE = static_cast<pe::cr::HCSITS *>(cr_PE.get());
-                    hcsits_PE->setMaxIterations(HCSITSMaxIterations);
-                    hcsits_PE->setRelaxationParameter(HCSITSRelaxationParameter);
-                    WALBERLA_LOG_INFO_ON_ROOT("Using HCSITS!");
-                }
-
-                cr_PE->setGlobalLinearAcceleration(pe::Vec3(0.0, -(config.gravity), 0.0));
+                cr->setGlobalLinearAcceleration(pe::Vec3(0.0, -(config.gravity), 0.0));
 
                 real_t avgVel = real_c(100.0);
                 real_t maxVel = real_c(100.0);
@@ -943,8 +940,8 @@ namespace fluidizedBed {
 
                 while ((currentSettleVelocity > settleVelocity) || (itPE < 4999)) {
 
-                    cr_PE->timestep(peAccelerator / real_c(config.peSubCycles));
-                    syncCall_PE();
+                    cr->timestep(peAccelerator / real_c(config.peSubCycles));
+                    syncCall();
                     ++itPE;
 
                     if (writePackedBed && itPE % frequencyPackedBed == 0) {
@@ -972,7 +969,7 @@ namespace fluidizedBed {
                 }
 
 
-                cr_PE->setGlobalLinearAcceleration(pe::Vec3(0.0, 0.0, 0.0));
+                cr->setGlobalLinearAcceleration(pe::Vec3(0.0, 0.0, 0.0));
                 FBfunc::restSphere(blocks, bodyStorageID);
 
                 avgVel = FBfunc::getAvgVel(blocks, bodyStorageID, (numberCreatedParticlesA + numberCreatedParticlesB)) * velocityConversion;
@@ -1067,10 +1064,6 @@ namespace fluidizedBed {
                                                    uint_t(1), field::fzyx);
         }
 
-        // set up synchronization procedure
-        std::function<void(void)> syncCall = std::bind(pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID,
-                                                       static_cast<WcTimingTree *>(NULL), overlap, false);
-
         syncCall();
 
         // Communication scheme
@@ -1087,51 +1080,36 @@ namespace fluidizedBed {
         // ADD DATA TO BLOCKS //
         ////////////////////////
 
-        auto ccdID = blocks->addBlockData(pe::ccd::createHashGridsDataHandling(globalBodyStorage, bodyStorageID), "CCD");
-
         for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt) {
             pe::ccd::ICCD* ccd = blockIt->getData<pe::ccd::ICCD>(ccdID);
             ccd->reloadBodies();
         }
 
-        // set up collision response, here DEM solver
-        auto fcdID = blocks->addBlockData(pe::fcd::createGenericFCDDataHandling<BodyTypeTuple, pe::fcd::AnalyticCollideFunctor>(), "FCD");
-
-        std::unique_ptr<pe::cr::ICR> cr;
-        if (useDEM) {
-            cr = std::make_unique<pe::cr::DEM>(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID);
-        } else {
-            cr = std::make_unique<pe::cr::HCSITS>(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID);
-            pe::cr::HCSITS *hcsits = static_cast<pe::cr::HCSITS *>(cr.get());
-            hcsits->setMaxIterations(HCSITSMaxIterations);
-            hcsits->setRelaxationParameter(HCSITSRelaxationParameter);
-        }
-
         for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt){
             pe::ccd::ICCD *ccd = blockIt->getData<pe::ccd::ICCD>(ccdID);
-                std::cout << "Bodies: " << ccd->getObservedBodyCount() << std::endl ;
-    }
+            std::cout << "Bodies: " << ccd->getObservedBodyCount() << std::endl ;
+        }
 
-       // add flag field
-       BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>(blocks, "flag field");
+        // add flag field
+        BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>(blocks, "flag field");
 
-       // add body field
-       BlockDataID bodyFieldID = field::addToStorage<BodyField_T>(blocks, "body field", NULL, field::fzyx);
+        // add body field
+        BlockDataID bodyFieldID = field::addToStorage<BodyField_T>(blocks, "body field", NULL, field::fzyx);
 
-       // Object for keeping track of time
-       shared_ptr<lbm::TimeTracker> timeTrack = make_shared<lbm::TimeTracker>();
+        // Object for keeping track of time
+        shared_ptr<lbm::TimeTracker> timeTrack = make_shared<lbm::TimeTracker>();
 
         if(initializeFromCheckPointFile){
             timestepsRamping = uint_t(0);
         }
 
         BlockDataID boundaryHandlingID = blocks->addStructuredBlockData<BoundaryHandling_T>(
-             MyBoundaryHandling_T(flagFieldID, pdfFieldID, bodyFieldID, xPeriodic, zPeriodic, spotInflow, spotDiameter, real_c(config.xlength)*0.5,
-            		 real_c(config.zlength)*0.5, config.velocity, initialRampingVelocityFactor, real_c(timestepsRamping), timeTrack), "boundary handling");
+                MyBoundaryHandling_T(flagFieldID, pdfFieldID, bodyFieldID, xPeriodic, zPeriodic, spotInflow, spotDiameter, real_c(config.xlength)*0.5,
+                                     real_c(config.zlength)*0.5, config.velocity, initialRampingVelocityFactor, real_c(timestepsRamping), timeTrack), "boundary handling");
 
-          // map pe bodies into the LBM simulation
-          // moving bodies are handled by the momentum exchange method
-          pe_coupling::mapMovingBodies<BoundaryHandling_T>(*blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, FBfunc::MO_Flag, pe_coupling::selectRegularBodies);
+        // map pe bodies into the LBM simulation
+        // moving bodies are handled by the momentum exchange method
+        pe_coupling::mapMovingBodies<BoundaryHandling_T>(*blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, FBfunc::MO_Flag, pe_coupling::selectRegularBodies);
 
         /////////////////////
         // PRE TIME LOOP   //
@@ -1157,10 +1135,10 @@ namespace fluidizedBed {
         WcTimingPool timeloopTimingPRE;
 
         ////////////////////
-       // MAIN TIME LOOP //
-       ////////////////////
+        // MAIN TIME LOOP //
+        ////////////////////
 
-       SweepTimeloop timeloop(blocks->getBlockStorage(), timesteps);
+        SweepTimeloop timeloop(blocks->getBlockStorage(), timesteps);
 
         ////////////////
         // VTK OUTPUT //
@@ -1222,22 +1200,22 @@ namespace fluidizedBed {
         typedef pe_coupling::EquilibriumReconstructor<LatticeModel_T, BoundaryHandling_T> Reconstructor_T;
         Reconstructor_T reconstructor(blocks, boundaryHandlingID, pdfFieldID, bodyFieldID);
         timeloop.add() << Sweep(pe_coupling::PDFReconstruction<LatticeModel_T, BoundaryHandling_T, Reconstructor_T>
-                                 (blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, reconstructor,
-                                  FBfunc::FormerMO_Flag, FBfunc::Fluid_Flag), "PDF Restore");
+                                        (blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, reconstructor,
+                                         FBfunc::FormerMO_Flag, FBfunc::Fluid_Flag), "PDF Restore");
 
-       if (turb) {
-          // create flag field filter for turbulence model
-       field::FlagFieldEvaluationFilter<FlagField_T> filter = field::FlagFieldEvaluationFilter<FlagField_T>(flagFieldID, FBfunc::Fluid_Flag);
+        if (turb) {
+            // create flag field filter for turbulence model
+            field::FlagFieldEvaluationFilter<FlagField_T> filter = field::FlagFieldEvaluationFilter<FlagField_T>(flagFieldID, FBfunc::Fluid_Flag);
 
-          // Turbulence model
-          timeloop.addFuncAfterTimeStep(lbm::SmagorinskyLES<LatticeModel_T, field::FlagFieldEvaluationFilter<FlagField_T> >
-                                              (blocks, filter, pdfFieldID, omegaFieldID, config.kinViscosity, smagorinskyConstant), "Turbulence Model");
-       }
+            // Turbulence model
+            timeloop.addFuncAfterTimeStep(lbm::SmagorinskyLES<LatticeModel_T, field::FlagFieldEvaluationFilter<FlagField_T> >
+                                                  (blocks, filter, pdfFieldID, omegaFieldID, config.kinViscosity, smagorinskyConstant), "Turbulence Model");
+        }
 
 
-       if (enableCheckpointing) {
-          timeloop.addFuncAfterTimeStep(FBfunc::CheckpointCreater(blocks->getBlockStorage(), pdfFieldID, bodyStorageID, config), "Checkpointing");
-       }
+        if (enableCheckpointing) {
+            timeloop.addFuncAfterTimeStep(FBfunc::CheckpointCreater(blocks->getBlockStorage(), pdfFieldID, bodyStorageID, config), "Checkpointing");
+        }
 
         shared_ptr<pe_coupling::BodiesForceTorqueContainer> bodiesFTContainer1 = make_shared<pe_coupling::BodiesForceTorqueContainer>(blocks, bodyStorageID);
         std::function<void(void)> storeForceTorqueInCont1 = std::bind(&pe_coupling::BodiesForceTorqueContainer::store, bodiesFTContainer1);
@@ -1277,64 +1255,64 @@ namespace fluidizedBed {
 
         }
 
-       if (useLubrication) {
-          timeloop.addFuncAfterTimeStep(pe_coupling::LubricationCorrection(blocks, globalBodyStorage, bodyStorageID, config.kinViscosity), "Lubrication Force");
-       }
+        if (useLubrication) {
+            timeloop.addFuncAfterTimeStep(pe_coupling::LubricationCorrection(blocks, globalBodyStorage, bodyStorageID, config.kinViscosity), "Lubrication Force");
+        }
 
-       if (calculatePressureDrop) {
-          timeloop.addFuncAfterTimeStep(FBfunc::PressureDropper(blocks, bodyStorageID, config, false), "Calculate Pressure Drop");
-       }
+        if (calculatePressureDrop) {
+            timeloop.addFuncAfterTimeStep(FBfunc::PressureDropper(blocks, bodyStorageID, config, false), "Calculate Pressure Drop");
+        }
 
-       if (calculateParticleFlux) {
-          timeloop.addFuncAfterTimeStep(FBfunc::ParticleFlux(blocks, bodyStorageID, config), "Calculate Particle Flux");
-       }
+        if (calculateParticleFlux) {
+            timeloop.addFuncAfterTimeStep(FBfunc::ParticleFlux(blocks, bodyStorageID, config), "Calculate Particle Flux");
+        }
 
-       if (calculateGranularTempGlobal) {
-          timeloop.addFuncAfterTimeStep(FBfunc::GranularTemperature(blocks, bodyStorageID, config), "Calculate Granular Temperature");
-       }
+        if (calculateGranularTempGlobal) {
+            timeloop.addFuncAfterTimeStep(FBfunc::GranularTemperature(blocks, bodyStorageID, config), "Calculate Granular Temperature");
+        }
 
-       if (calculateGranularTempLocal) {
-          timeloop.addFuncAfterTimeStep(FBfunc::GranularTemperatureLocally(blocks, bodyStorageID, config), "Calculate Granular Temperature Locally");
-       }
+        if (calculateGranularTempLocal) {
+            timeloop.addFuncAfterTimeStep(FBfunc::GranularTemperatureLocally(blocks, bodyStorageID, config), "Calculate Granular Temperature Locally");
+        }
 
-       if (calculatePressureDifference) {
-          timeloop.addFuncAfterTimeStep(FBfunc::PressureByDensity<LatticeModel_T, FlagField_T>(blocks, pdfFieldID, flagFieldID, lowerCellPlane, upperCellPlane, FBfunc::Fluid_Flag, config),
-                                  "Calculate Pressure Drop with Density");
-       }
+        if (calculatePressureDifference) {
+            timeloop.addFuncAfterTimeStep(FBfunc::PressureByDensity<LatticeModel_T, FlagField_T>(blocks, pdfFieldID, flagFieldID, lowerCellPlane, upperCellPlane, FBfunc::Fluid_Flag, config),
+                                          "Calculate Pressure Drop with Density");
+        }
 
-       timeloop.addFuncAfterTimeStep(FBfunc::ExternalForce(blocks, bodyStorageID, config), "Add External Forces");
+        timeloop.addFuncAfterTimeStep(FBfunc::ExternalForce(blocks, bodyStorageID, config), "Add External Forces");
 
-       if (calculateSolidVolumeFraction) {
-          timeloop.addFuncAfterTimeStep(FBfunc::FractionCalculator<FlagField_T>(blocks, flagFieldID, config), "Calculate Solid Volume Fraction");
-       }
+        if (calculateSolidVolumeFraction) {
+            timeloop.addFuncAfterTimeStep(FBfunc::FractionCalculator<FlagField_T>(blocks, flagFieldID, config), "Calculate Solid Volume Fraction");
+        }
 
-       if (calculateCenterOfMass) {
-          timeloop.addFuncAfterTimeStep(FBfunc::CenterOfMass(blocks, bodyStorageID, config, calculateErgunPressure), "Calculate Center of Mass");
-       }
+        if (calculateCenterOfMass) {
+            timeloop.addFuncAfterTimeStep(FBfunc::CenterOfMass(blocks, bodyStorageID, config, calculateErgunPressure), "Calculate Center of Mass");
+        }
 
-       // advance pe rigid body simulation
-       timeloop.addFuncAfterTimeStep( pe_coupling::TimeStep( blocks, bodyStorageID, *cr, syncCall, config.lbmSubCycles, config.peSubCycles ), "pe Time Step" );
+        // advance pe rigid body simulation
+        timeloop.addFuncAfterTimeStep( pe_coupling::TimeStep( blocks, bodyStorageID, *cr, syncCall, config.lbmSubCycles, config.peSubCycles ), "pe Time Step" );
 
-       // Obstacle test
-       timeloop.addFuncAfterTimeStep(FBfunc::ObstacleLocationCheck(blocks, bodyStorageID, blocks->getDomain(),
-                                                                (xPeriodic || zPeriodic) ? radiusA + real_c(2) * overlap : real_c(2) * overlap), "Obstacle Location Check");
+        // Obstacle test
+        timeloop.addFuncAfterTimeStep(FBfunc::ObstacleLocationCheck(blocks, bodyStorageID, blocks->getDomain(),
+                                                                    (xPeriodic || zPeriodic) ? radiusA + real_c(2) * overlap : real_c(2) * overlap), "Obstacle Location Check");
 
-       timeloop.addFuncAfterTimeStep(FBfunc::ObstacleLinearVelocityCheck(blocks, bodyStorageID, config), "Obstacle Velocity Check");
+        timeloop.addFuncAfterTimeStep(FBfunc::ObstacleLinearVelocityCheck(blocks, bodyStorageID, config), "Obstacle Velocity Check");
 
-       WcTimingPool timeloopTiming;
+        WcTimingPool timeloopTiming;
 
-       timeloop.addFuncAfterTimeStep(RemainingTimeLogger(timeloop.getNrOfTimeSteps(), 60), "Remaining Time Logger");
+        timeloop.addFuncAfterTimeStep(RemainingTimeLogger(timeloop.getNrOfTimeSteps(), 60), "Remaining Time Logger");
 
-       timeloop.addFuncAfterTimeStep(FBfunc::TimingPoolLogger(timeloopTiming, timeloop, 1000), "Timing Pool Logger");
+        timeloop.addFuncAfterTimeStep(FBfunc::TimingPoolLogger(timeloopTiming, timeloop, 1000), "Timing Pool Logger");
 
-       timeloop.addFuncAfterTimeStep(lbm::PerformanceLogger<FlagField_T>(blocks, flagFieldID, FBfunc::Fluid_Flag, uint_c(1000)), "Performance Logger");
+        timeloop.addFuncAfterTimeStep(lbm::PerformanceLogger<FlagField_T>(blocks, flagFieldID, FBfunc::Fluid_Flag, uint_c(1000)), "Performance Logger");
 
-       timeloop.addFuncAfterTimeStep(SharedFunctor<lbm::TimeTracker>(timeTrack), "Time Tracker");
+        timeloop.addFuncAfterTimeStep(SharedFunctor<lbm::TimeTracker>(timeTrack), "Time Tracker");
 
 
-       //////////////////////////
-       // EXECUTE SIMULATIONS  //
-       //////////////////////////
+        //////////////////////////
+        // EXECUTE SIMULATIONS  //
+        //////////////////////////
 
         if (runPreliminaryTimeloop && !initializeFromCheckPointFile) {
             WALBERLA_ROOT_SECTION()
@@ -1379,49 +1357,49 @@ namespace fluidizedBed {
         }
 
         WALBERLA_ROOT_SECTION() {
-          std::cout << std::endl << "||||||||||||| MAIN SIM ||||||||||||||" << std::endl;
-       }
+            std::cout << std::endl << "||||||||||||| MAIN SIM ||||||||||||||" << std::endl;
+        }
 
-       timeloop.run(timeloopTiming);
-       timeloopTiming.logResultOnRoot();
+        timeloop.run(timeloopTiming);
+        timeloopTiming.logResultOnRoot();
 
-       return 0;
+        return 0;
     }
 
-    //////////
+//////////
 // MAIN //
 //////////
 
     int main(int argc, char **argv) {
 
-       using namespace walberla;
+        using namespace walberla;
 
-       Environment env(argc, argv);
+        Environment env(argc, argv);
 
-       auto model_parameters = env.config()->getBlock("Model");
+        auto model_parameters = env.config()->getBlock("Model");
 
-       if (argc < 2) {
-          WALBERLA_ROOT_SECTION() {
-             std::cout << "Usage: " << argv[0] << " path-to-configuration-file " << std::endl;
-          }
-          return EXIT_SUCCESS;
-       }
+        if (argc < 2) {
+            WALBERLA_ROOT_SECTION() {
+                std::cout << "Usage: " << argv[0] << " path-to-configuration-file " << std::endl;
+            }
+            return EXIT_SUCCESS;
+        }
 
 
-          if (model_parameters.getParameter<bool>("turbulence_model", false)){
+        if (model_parameters.getParameter<bool>("turbulence_model", false)){
 
-             return runSimulation<lbm::collision_model::SRTField<ScalarField_T>>(env);
+            return runSimulation<lbm::collision_model::SRTField<ScalarField_T>>(env);
 
-          } else {
+        } else {
 
-             return runSimulation<lbm::collision_model::TRT>(env);
-          }
-       }
+            return runSimulation<lbm::collision_model::TRT>(env);
+        }
+    }
 
 }
 
 int main( int argc, char ** argv )
 {
-   return fluidizedBed::main( argc, argv );
+    return fluidizedBed::main( argc, argv );
 }
 
