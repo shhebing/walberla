@@ -52,6 +52,7 @@ if ( WALBERLA_BUILD_WITH_OPENMESH )
    
    waLBerla_compile_test( FILES PeVTKMeshWriterTest.cpp DEPENDS mesh )
    waLBerla_execute_test( NAME  PeVTKMeshWriterTest  COMMAND $<TARGET_FILE:PeVTKMeshWriterTest> )
+   set_property( TEST PeVTKMeshWriterTest PROPERTY TIMEOUT 3000 )
    
    waLBerla_compile_test( FILES MeshPeRaytracing.cpp DEPENDS mesh pe )
    waLBerla_execute_test( NAME  MeshPeRaytracing )
