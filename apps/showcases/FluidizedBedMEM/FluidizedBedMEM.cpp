@@ -811,10 +811,6 @@ namespace fluidizedBed {
 
             WALBERLA_LOG_INFO_ON_ROOT("Initializing data from checkpoint file!");
 
-            WALBERLA_LOG_RESULT_ON_ROOT("Reading body from checkpoint file");
-
-            bodyStorageID = blocks->loadBlockData(checkpointPathBodies, pe::createStorageDataHandling<BodyTypeTuple>());
-
             WALBERLA_LOG_RESULT_ON_ROOT("Reading pdf from checkpoint file");
 
             shared_ptr<lbm::internal::PdfFieldHandling<LatticeModel_T> > pdfDataHandling =
@@ -822,6 +818,10 @@ namespace fluidizedBed {
                                                                                   FieldGhostLayers, field::fzyx);
             // add pdf field
             pdfFieldID = (blocks->getBlockStorage()).loadBlockData(checkpointPathPdf, pdfDataHandling, "pdf field (fzyx)");
+
+            WALBERLA_LOG_RESULT_ON_ROOT("Reading body from checkpoint file");
+
+            bodyStorageID = blocks->loadBlockData(checkpointPathBodies, pe::createStorageDataHandling<BodyTypeTuple>());
 
         } else {
 
@@ -912,12 +912,12 @@ namespace fluidizedBed {
                 mpi::allReduceInplace(numberCreatedParticlesA, mpi::SUM);
                 mpi::allReduceInplace(numberCreatedParticlesB, mpi::SUM);
             }
-/*
+
             WALBERLA_ROOT_SECTION() {
                 std::cout << "Number of created particles A is:     " << numberCreatedParticlesA << std::endl;
                 std::cout << "Number of created particles B is:     " << numberCreatedParticlesB << std::endl << std::endl;
             }
-*/
+
             ///////////////////
             // PACKED BED ////
             //////////////////
@@ -1064,8 +1064,6 @@ namespace fluidizedBed {
                                                    uint_t(1), field::fzyx);
         }
 
-        syncCall();
-
         // Communication scheme
         std::function<void()> commFunction;
 
@@ -1073,28 +1071,35 @@ namespace fluidizedBed {
         scheme.addPackInfo(make_shared<lbm::PdfFieldPackInfo<LatticeModel_T> >(pdfFieldID));
         commFunction = scheme;
 
-        commFunction();
-
-
         ////////////////////////
         // ADD DATA TO BLOCKS //
         ////////////////////////
-
-        for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt) {
-            pe::ccd::ICCD* ccd = blockIt->getData<pe::ccd::ICCD>(ccdID);
-            ccd->reloadBodies();
-        }
-
-        for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt){
-            pe::ccd::ICCD *ccd = blockIt->getData<pe::ccd::ICCD>(ccdID);
-            std::cout << "Bodies: " << ccd->getObservedBodyCount() << std::endl ;
-        }
 
         // add flag field
         BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>(blocks, "flag field");
 
         // add body field
         BlockDataID bodyFieldID = field::addToStorage<BodyField_T>(blocks, "body field", NULL, field::fzyx);
+
+        std::function<void(void)> syncCall2 = std::bind(pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID,
+                                                        static_cast<WcTimingTree *>(NULL), overlap, false);
+        syncCall2();
+
+        for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt) {
+            pe::ccd::ICCD* ccd = blockIt->getData<pe::ccd::ICCD>(ccdID);
+            ccd->reloadBodies();
+        }
+
+        int numberSpheres = 0;
+
+        for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt) {
+            for (auto bodyIt = pe::ShadowBodyIterator::begin(*blockIt, bodyStorageID); bodyIt != pe::ShadowBodyIterator::end(); ++bodyIt) {
+                if (bodyIt->isFixed() || !bodyIt->isFinite())
+                    continue;
+
+                ++numberSpheres;
+            }
+        }
 
         // Object for keeping track of time
         shared_ptr<lbm::TimeTracker> timeTrack = make_shared<lbm::TimeTracker>();
@@ -1189,7 +1194,7 @@ namespace fluidizedBed {
 
         timeloop.addFuncAfterTimeStep(
                 makeSharedFunctor( field::makeStabilityChecker< lbm::PdfField< LatticeModel_T >, FlagField_T >(
-                        blocks, pdfFieldID, flagFieldID, FBfunc::Fluid_Flag, uint_t(1), true, true ) ), "LBM stability check" );
+                        blocks, pdfFieldID, flagFieldID, FBfunc::Fluid_Flag, uint_t(1), false, true ) ), "LBM stability check" );
 
         // sweep for updating the pe body mapping into the LBM simulation
         timeloop.add() << Sweep(
