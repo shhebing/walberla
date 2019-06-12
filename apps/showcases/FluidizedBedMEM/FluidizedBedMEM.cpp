@@ -1090,17 +1090,6 @@ namespace fluidizedBed {
             ccd->reloadBodies();
         }
 
-        int numberSpheres = 0;
-
-        for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt) {
-            for (auto bodyIt = pe::ShadowBodyIterator::begin(*blockIt, bodyStorageID); bodyIt != pe::ShadowBodyIterator::end(); ++bodyIt) {
-                if (bodyIt->isFixed() || !bodyIt->isFinite())
-                    continue;
-
-                ++numberSpheres;
-            }
-        }
-
         // Object for keeping track of time
         shared_ptr<lbm::TimeTracker> timeTrack = make_shared<lbm::TimeTracker>();
 
